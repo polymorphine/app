@@ -1,0 +1,26 @@
+{
+    "name": "shudd3r/http",
+    "description": "PHP Front Controller for HTTP applications",
+    "type": "library",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.0",
+        "psr/http-message": "^1.0",
+        "psr/container": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Shudd3r",
+            "email": "q3.shudder@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Shudd3r\\Http\\": ""
+        }
+    }
+}
