@@ -156,20 +156,18 @@ class Uri implements UriInterface
     }
 
     protected function buildUriString(): string {
-        $uri       = '';
-        $authority = $this->getAuthority();
-
-        if ($this->scheme) { $uri .= $this->scheme . ':'; }
-        if ($authority) { $uri .= '//' . $authority; }
-        if ($this->path) { $uri .= ($authority) ? $this->pathForAuthority() : $this->pathWithoutAuthority(); }
+        $uri = ($this->scheme) ? $this->scheme . ':' : '';
+        $uri .= ($this->host) ? $this->authorityAndPath() : $this->pathWithoutAuthority();
         if ($this->query) { $uri .= '?' . $this->query; }
         if ($this->fragment) { $uri .= '#' . $this->fragment; }
 
         return $uri ?: '/';
     }
 
-    private function pathForAuthority() {
-        return ($this->path[0] !== '/') ? '/' . $this->path : $this->path;
+    private function authorityAndPath() {
+        $authority = '//' . $this->getAuthority();
+        if (!$this->path) { return $authority; }
+        return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
     }
 
     private function pathWithoutAuthority() {
