@@ -130,43 +130,43 @@ class UriTest extends TestCase
 
     public function testWhenHostEmpty_GetAuthorityReturnsEmptyString() {
         $uri = $this->uri('//user@example.com:2560');
-        $this->assertSame($uri->withHost('')->getAuthority(), '');
+        $this->assertSame('', $uri->withHost('')->getAuthority());
     }
 
     public function testBasicSegmentsConcatenationLogic() {
         $uri = $this->uri('https://user:pass@example.com:9001/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withScheme(''), '//user:pass@example.com:9001/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withUserInfo(''), 'https://example.com:9001/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withScheme('')->withUserInfo(''), '//example.com:9001/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withScheme('')->withHost(''), '/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withPath(''), 'https://user:pass@example.com:9001?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withPath('')->withQuery(''), 'https://user:pass@example.com:9001#foo');
-        $this->assertSame((string)$uri->withQuery(''), 'https://user:pass@example.com:9001/foo/bar#foo');
-        $this->assertSame((string)$uri->withFragment(''), 'https://user:pass@example.com:9001/foo/bar?foo=bar&baz=qux');
-        $this->assertSame((string)$uri->withScheme('')->withHost('')->withPath(''), '?foo=bar&baz=qux#foo');
-        $this->assertSame((string)$uri->withScheme('')->withHost('')->withPath('')->withQuery(''), '#foo');
+        $this->assertSame('//user:pass@example.com:9001/foo/bar?foo=bar&baz=qux#foo', (string)$uri->withScheme(''));
+        $this->assertSame('https://example.com:9001/foo/bar?foo=bar&baz=qux#foo', (string)$uri->withUserInfo(''));
+        $this->assertSame('//example.com:9001/foo/bar?foo=bar&baz=qux#foo', (string)$uri->withScheme('')->withUserInfo(''));
+        $this->assertSame('/foo/bar?foo=bar&baz=qux#foo', (string)$uri->withScheme('')->withHost(''));
+        $this->assertSame('https://user:pass@example.com:9001?foo=bar&baz=qux#foo', (string)$uri->withPath(''));
+        $this->assertSame('https://user:pass@example.com:9001#foo', (string)$uri->withPath('')->withQuery(''));
+        $this->assertSame('https://user:pass@example.com:9001/foo/bar#foo', (string)$uri->withQuery(''));
+        $this->assertSame('https://user:pass@example.com:9001/foo/bar?foo=bar&baz=qux', (string)$uri->withFragment(''));
+        $this->assertSame('?foo=bar&baz=qux#foo', (string)$uri->withScheme('')->withHost('')->withPath(''));
+        $this->assertSame('#foo', (string)$uri->withScheme('')->withHost('')->withPath('')->withQuery(''));
 
         //Invalid links, but valid URIs
         //Browsers would ignore 'http' scheme (but not https) and resolve these into valid relative links
-        $this->assertSame((string) $uri->withUserInfo('')->withHost(''), 'https:/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string) $uri->withHost(''), 'https:/foo/bar?foo=bar&baz=qux#foo');
-        $this->assertSame((string) $uri->withHost('')->withPath('')->withQuery(''), 'https:#foo');
+        $this->assertSame('https:/foo/bar?foo=bar&baz=qux#foo', (string) $uri->withUserInfo('')->withHost(''));
+        $this->assertSame('https:/foo/bar?foo=bar&baz=qux#foo', (string) $uri->withHost(''));
+        $this->assertSame('https:#foo', (string) $uri->withHost('')->withPath('')->withQuery(''));
     }
 
     public function testWhenAuthorityIsPresent_SlashDelimiterForRelativePathIsAdded() {
         $uri = $this->uri('relative/path?foo=bar&baz=qux');
-        $this->assertSame((string) $uri, 'relative/path?foo=bar&baz=qux');
-        $this->assertSame((string) $uri->withScheme('http'), 'http:relative/path?foo=bar&baz=qux');
-        $this->assertSame((string) $uri->withHost('example.com'), '//example.com/relative/path?foo=bar&baz=qux');
+        $this->assertSame('relative/path?foo=bar&baz=qux', (string) $uri);
+        $this->assertSame('http:relative/path?foo=bar&baz=qux', (string) $uri->withScheme('http'));
+        $this->assertSame('//example.com/relative/path?foo=bar&baz=qux', (string) $uri->withHost('example.com'));
     }
 
     public function testWhenRemovingHostFromAuthorityOnlyUri_toStringReturnsRootPath() {
         $uri = $this->uri('//user@example.com:2560');
-        $this->assertSame((string) $uri->withHost(''), '/');
+        $this->assertSame('/', (string) $uri->withHost(''));
     }
 
     public function testWhenAuthorityIsRemoved_InitialSlashesFromPathShouldBeReducedToOne() {
-        $this->assertSame((string) $this->uri('http://user@example.com//foo/bar')->withHost(''), 'http:/foo/bar');
-        $this->assertSame((string) $this->uri('http://user@example.com//////foo/bar')->withHost(''), 'http:/foo/bar');
+        $this->assertSame('http:/foo/bar', (string) $this->uri('http://user@example.com//foo/bar')->withHost(''));
+        $this->assertSame('http:/foo/bar', (string) $this->uri('http://user@example.com//////foo/bar')->withHost(''));
     }
 }
