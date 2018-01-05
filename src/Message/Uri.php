@@ -32,7 +32,7 @@ class Uri implements UriInterface
         isset($segments['user']) and $this->userInfo = $segments['user'];
         isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $segments['pass'];
         isset($segments['host']) and $this->host = $segments['host'];
-        isset($segments['port']) and $this->port = $this->validPort($segments['port']);
+        isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
         isset($segments['path']) and $this->path = $segments['path'];
         isset($segments['query']) and $this->query = $segments['query'];
         isset($segments['fragment']) and $this->fragment = $segments['fragment'];
@@ -116,8 +116,12 @@ class Uri implements UriInterface
     }
 
     public function withPort($port): UriInterface {
+        if (!is_int($port) && !is_null($port)) {
+            throw new InvalidArgumentException('Invalid port parameter - expected int<1-65535> or null');
+        }
+
         $clone = clone $this;
-        $clone->port = $clone->validPort($port);
+        $clone->port = is_null($port) ? null : $clone->validPortRange($port);
         return $clone;
     }
 
@@ -157,17 +161,24 @@ class Uri implements UriInterface
 
         if ($this->scheme) { $uri .= $this->scheme . ':'; }
         if ($authority) { $uri .= '//' . $authority; }
-        if ($this->path) {
-            if ($authority && $this->path[0] !== '/') { $uri .= '/'; }
-            $uri .= $this->path;
-        }
+        if ($this->path) { $uri .= ($authority) ? $this->pathForAuthority() : $this->pathWithoutAuthority(); }
         if ($this->query) { $uri .= '?' . $this->query; }
         if ($this->fragment) { $uri .= '#' . $this->fragment; }
 
         return $uri ?: '/';
     }
 
+    private function pathForAuthority() {
+        return ($this->path[0] !== '/') ? '/' . $this->path : $this->path;
+    }
+
+    private function pathWithoutAuthority() {
+        return (substr($this->path, 0, 2) === '//') ? preg_replace('#^\/\/+#', '/', $this->path) : $this->path;
+    }
+
     private function validScheme(string $scheme) {
+        if (empty($scheme)) { return $scheme; }
+
         $scheme = strtolower($scheme);
         if (!isset($this->supportedSchemes[$scheme])) {
             throw new InvalidArgumentException('Unsupported scheme');
@@ -176,19 +187,12 @@ class Uri implements UriInterface
         return $scheme;
     }
 
-    private function validPort($port) {
-        if (is_null($port)) { return null; }
-
-        $valid_type = is_int($port) || (is_string($port) && ctype_digit($port));
-        if (!$valid_type) {
-            throw new InvalidArgumentException('Invalid port type. Expected integer, integer string or null');
-        }
-
+    private function validPortRange(int $port) {
         if ($port < 1 || $port > 65535) {
             throw new InvalidArgumentException('Invalid port range. Expected <1-65535> value');
         }
 
-        return (int) $port;
+        return $port;
     }
 
     public function __clone() {

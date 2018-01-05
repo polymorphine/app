@@ -48,7 +48,6 @@ class UriTest extends TestCase
         $this->assertNotSame($uri->withUserInfo('user', 'password'), $uri->withUserInfo('user', 'password'));
         $this->assertNotSame($uri->withHost('example.com'), $uri->withHost('example.com'));
         $this->assertNotSame($uri->withPort(9001), $uri->withPort(9001));
-        $this->assertNotSame($uri->withPort("9001"), $uri->withPort("9001"));
         $this->assertNotSame($uri->withPort(null), $uri->withPort(null));
         $this->assertNotSame($uri->withPath('/foo/bar'), $uri->withPath('/foo/bar'));
         $this->assertNotSame($uri->withQuery('?foo=bar&baz=qux'), $uri->withQuery('?foo=bar&baz=qux'));
@@ -62,7 +61,6 @@ class UriTest extends TestCase
         $this->assertSame('user:password', $uri->withUserInfo('user', 'password')->getUserInfo());
         $this->assertSame('example.com', $uri->withHost('example.com')->getHost());
         $this->assertSame(9001, $uri->withPort(9001)->getPort());
-        $this->assertSame(9001, $uri->withPort("9001")->getPort());
         $this->assertSame(null, $uri->withPort(9001)->withPort(null)->getPort());
         $this->assertSame('user:pass@example.com:500', $uri->withHost('example.com')->withUserInfo('user', 'pass')->withPort(500)->getAuthority());
         $this->assertSame('/foo/bar', $uri->withPath('/foo/bar')->getPath());
@@ -78,6 +76,11 @@ class UriTest extends TestCase
     public function testModifyingToUnsupportedScheme_ThrowsInvalidArgumentException() {
         $this->expectException(InvalidArgumentException::class);
         $this->uri()->withScheme('httpx');
+    }
+
+    public function testEmptySchemeIsAllowed_ReturnsInstanceWithEmptyScheme() {
+        $uri = $this->uri('http:\\www.example.com');
+        $this->assertSame('', $uri->withScheme('')->getScheme());
     }
 
     public function testSchemeIsNormalizedToLowercase() {
@@ -101,5 +104,69 @@ class UriTest extends TestCase
         $uri = $uri->withHost('example.com'); //SET Host
         $this->assertSame(443, $this->uri((string) $uri)->getPort(), 'Port included in uri string when host became present');
         $this->assertNull($this->uri((string) $uri->withScheme('https'))->getPort(), 'Changed scheme match its default port - not present in uri string');
+    }
+
+    /**
+     * @param $port
+     * @dataProvider invalidPorts
+     */
+    public function testInvalidPort_ThrowsException($port) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withPort($port);
+    }
+
+    public function invalidPorts() {
+        return [
+            'bool' => [true],
+            'literal string' => ['string'],
+            'array' => [[45]],
+            'object' => [(object) ['port' => 113]],
+            'zero' => [0],
+            'negative' => [-20],
+            'out of range' => [65536],
+            'numeric string' => ['65'],
+        ];
+    }
+
+    public function testWhenHostEmpty_GetAuthorityReturnsEmptyString() {
+        $uri = $this->uri('//user@example.com:2560');
+        $this->assertSame($uri->withHost('')->getAuthority(), '');
+    }
+
+    public function testBasicSegmentsConcatenationLogic() {
+        $uri = $this->uri('https://user:pass@example.com:9001/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withScheme(''), '//user:pass@example.com:9001/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withUserInfo(''), 'https://example.com:9001/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withScheme('')->withUserInfo(''), '//example.com:9001/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withScheme('')->withHost(''), '/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withPath(''), 'https://user:pass@example.com:9001?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withPath('')->withQuery(''), 'https://user:pass@example.com:9001#foo');
+        $this->assertSame((string)$uri->withQuery(''), 'https://user:pass@example.com:9001/foo/bar#foo');
+        $this->assertSame((string)$uri->withFragment(''), 'https://user:pass@example.com:9001/foo/bar?foo=bar&baz=qux');
+        $this->assertSame((string)$uri->withScheme('')->withHost('')->withPath(''), '?foo=bar&baz=qux#foo');
+        $this->assertSame((string)$uri->withScheme('')->withHost('')->withPath('')->withQuery(''), '#foo');
+
+        //Invalid links, but valid URIs
+        //Browsers would ignore 'http' scheme (but not https) and resolve these into valid relative links
+        $this->assertSame((string) $uri->withUserInfo('')->withHost(''), 'https:/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string) $uri->withHost(''), 'https:/foo/bar?foo=bar&baz=qux#foo');
+        $this->assertSame((string) $uri->withHost('')->withPath('')->withQuery(''), 'https:#foo');
+    }
+
+    public function testWhenAuthorityIsPresent_SlashDelimiterForRelativePathIsAdded() {
+        $uri = $this->uri('relative/path?foo=bar&baz=qux');
+        $this->assertSame((string) $uri, 'relative/path?foo=bar&baz=qux');
+        $this->assertSame((string) $uri->withScheme('http'), 'http:relative/path?foo=bar&baz=qux');
+        $this->assertSame((string) $uri->withHost('example.com'), '//example.com/relative/path?foo=bar&baz=qux');
+    }
+
+    public function testWhenRemovingHostFromAuthorityOnlyUri_toStringReturnsRootPath() {
+        $uri = $this->uri('//user@example.com:2560');
+        $this->assertSame((string) $uri->withHost(''), '/');
+    }
+
+    public function testWhenAuthorityIsRemoved_InitialSlashesFromPathShouldBeReducedToOne() {
+        $this->assertSame((string) $this->uri('http://user@example.com//foo/bar')->withHost(''), 'http:/foo/bar');
+        $this->assertSame((string) $this->uri('http://user@example.com//////foo/bar')->withHost(''), 'http:/foo/bar');
     }
 }
