@@ -106,28 +106,6 @@ class UriTest extends TestCase
         $this->assertNull($this->uri((string) $uri->withScheme('https'))->getPort(), 'Changed scheme match its default port - not present in uri string');
     }
 
-    /**
-     * @param $port
-     * @dataProvider invalidPorts
-     */
-    public function testInvalidPort_ThrowsException($port) {
-        $this->expectException(InvalidArgumentException::class);
-        $this->uri()->withPort($port);
-    }
-
-    public function invalidPorts() {
-        return [
-            'bool' => [true],
-            'literal string' => ['string'],
-            'array' => [[45]],
-            'object' => [(object) ['port' => 113]],
-            'zero' => [0],
-            'negative' => [-20],
-            'out of range' => [65536],
-            'numeric string' => ['65'],
-        ];
-    }
-
     public function testWhenHostEmpty_GetAuthorityReturnsEmptyString() {
         $uri = $this->uri('//user@example.com:2560');
         $this->assertSame('', $uri->withHost('')->getAuthority());
@@ -169,4 +147,95 @@ class UriTest extends TestCase
         $this->assertSame('http:/foo/bar', (string) $this->uri('http://user@example.com//foo/bar')->withHost(''));
         $this->assertSame('http:/foo/bar', (string) $this->uri('http://user@example.com//////foo/bar')->withHost(''));
     }
+
+    /**
+     * @param $port
+     * @dataProvider invalidPorts
+     */
+    public function testWithPortInvalidArgument_ThrowsException($port) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withPort($port);
+    }
+
+    public function invalidPorts() {
+        return [
+            'bool' => [true],
+            'literal string' => ['string'],
+            'array' => [[45]],
+            'object' => [(object) ['port' => 113]],
+            'zero' => [0],
+            'negative' => [-20],
+            'out of range' => [65536],
+            'numeric string' => ['65'],
+        ];
+    }
+
+    /**
+     * @param $user
+     * @param $pass
+     * @dataProvider invalidUserInfoArgs
+     */
+    public function testWithUserInfoInvalidArgument_ThrowsException($user, $pass) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withUserInfo($user, $pass);
+    }
+
+    public function invalidUserInfoArgs() {
+        return [
+            'bool username' => [true, null],
+            'array username' => [['user', 'password'], null],
+            'object username' => [(object) ['user' => 'foo'], null],
+            'int username' => [65536, null],
+            'bool password' => ['user', false],
+            'array password' => ['user', ['password']],
+            'object password' => ['user', (object) ['password' => 'foo']],
+            'int password' => ['user', 65536]
+        ];
+    }
+
+    /**
+     * @param $host
+     * @dataProvider invalidNonStringArgs
+     */
+    public function testWithHostNonStringArgument_ThrowsException($host) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withHost($host);
+    }
+
+    /**
+     * @param $path
+     * @dataProvider invalidNonStringArgs
+     */
+    public function testWithPathNonStringArgument_ThrowsException($path) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withPath($path);
+    }
+
+    /**
+     * @param $query
+     * @dataProvider invalidNonStringArgs
+     */
+    public function testWithQueryNonStringArgument_ThrowsException($query) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withQuery($query);
+    }
+
+    /**
+     * @param $fragment
+     * @dataProvider invalidNonStringArgs
+     */
+    public function testWithFragmentNonStringArgument_ThrowsException($fragment) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withFragment($fragment);
+    }
+
+    public function invalidNonStringArgs() {
+        return [
+            'bool' => [true],
+            'array' => [['string']],
+            'object' => [(object) ['value' => 'string']],
+            'int' => [65536]
+        ];
+    }
+
 }
