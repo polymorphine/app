@@ -7,6 +7,8 @@ use InvalidArgumentException;
 
 class Uri implements UriInterface
 {
+    const CHARSET_URL = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%\/:@?[\]#';
+
     private $uri;
 
     private $scheme    = '';
@@ -23,7 +25,7 @@ class Uri implements UriInterface
     ];
 
     public function __construct(string $uri = '') {
-        $segments = parse_url($uri);
+        $segments = parse_url($this->encode($uri, self::CHARSET_URL));
         if ($segments === false) {
             throw new InvalidArgumentException("Malformed URI string: '$uri'");
         }
@@ -31,7 +33,7 @@ class Uri implements UriInterface
         isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
         isset($segments['user']) and $this->userInfo = $segments['user'];
         isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $segments['pass'];
-        isset($segments['host']) and $this->host = $segments['host'];
+        isset($segments['host']) and $this->host = $this->normalizeHost($segments['host']);
         isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
         isset($segments['path']) and $this->path = $segments['path'];
         isset($segments['query']) and $this->query = $segments['query'];
@@ -101,7 +103,7 @@ class Uri implements UriInterface
         empty($password) or $password = ':' . $password;
 
         $clone = clone $this;
-        $clone->userInfo = $user . $password;
+        $clone->userInfo = $this->encode($user . $password, self::CHARSET_URL);
         return $clone;
     }
 
@@ -111,7 +113,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->host = $host;
+        $clone->host = $this->normalizeHost($host);
         return $clone;
     }
 
@@ -131,7 +133,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->path = $path;
+        $clone->path = $this->encode($path, self::CHARSET_URL);
         return $clone;
     }
 
@@ -141,7 +143,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->query = $query;
+        $clone->query = $this->encode($query, self::CHARSET_URL);
         return $clone;
     }
 
@@ -151,7 +153,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->fragment = $fragment;
+        $clone->fragment = $this->encode($fragment, self::CHARSET_URL);
         return $clone;
     }
 
@@ -175,7 +177,7 @@ class Uri implements UriInterface
     }
 
     private function validScheme(string $scheme) {
-        if (empty($scheme)) { return $scheme; }
+        if (empty($scheme)) { return ''; }
 
         $scheme = strtolower($scheme);
         if (!isset($this->supportedSchemes[$scheme])) {
@@ -191,6 +193,19 @@ class Uri implements UriInterface
         }
 
         return $port;
+    }
+
+    private function normalizeHost($host) {
+        return $this->encode(mb_strtolower($host), self::CHARSET_URL);
+    }
+
+    private function encode($string, $charset) {
+        $regexp = '/(?:[' . $charset . ']+|(%(?![A-F0-9]{2}).{2}))/u';
+        $encode = function ($matches) {
+            return isset($matches[1]) ? strtoupper($matches[1]) : rawurlencode($matches[0]);
+        };
+
+        return preg_replace_callback($regexp, $encode, $string);
     }
 
     public function __clone() {

@@ -85,7 +85,13 @@ class UriTest extends TestCase
 
     public function testSchemeIsNormalizedToLowercase() {
         $this->assertSame('http', $this->uri()->withScheme('Http')->getScheme());
-        $this->assertSame('http', $this->uri('hTTP:\\www.example.com')->getScheme());
+        $this->assertSame('http', $this->uri('hTTP://www.example.com')->getScheme());
+    }
+
+    public function testHostIsNormalizedToLowercase() {
+        $this->assertSame('example.com', $this->uri()->withHost('eXample.com')->getHost());
+        $this->assertSame('example.com', $this->uri('http://EXAMPLE.COM')->getHost());
+        $this->assertSame('http://example.com/foo/bar?baz=qux', (string) $this->uri('http://EXAMPLE.COM/foo/bar?baz=qux'));
     }
 
     public function testDefaultSchemePortLogic() {
@@ -238,4 +244,23 @@ class UriTest extends TestCase
         ];
     }
 
+    public function testIllegalUriCharactersArePercentEncoded() {
+        $uri = $this->uri('http://➡.ws/䨹?foo=bar baz#qux(✪)');
+        $this->assertSame('http://%E2%9E%A1.ws/%E4%A8%B9?foo=bar%20baz#qux(%E2%9C%AA)', (string) $uri);
+        $this->assertSame('%E2%9E%A1:my%20pass', $uri->withUserInfo('➡:my pass')->getUserInfo());
+        $this->assertSame('%E2%9E%A1.ws', $uri->withHost('➡.ws')->getHost());
+        $this->assertSame('%E2%9E%A1/foo%20bar', $uri->withPath('➡/foo bar')->getPath());
+        $this->assertSame('%E2%9E%A1=foo%20bar&%E4%BE%8B%E5%AD%90=%E6%B5%8B%E8%AF%95', $uri->withQuery('➡=foo bar&例子=测试')->getQuery());
+        $this->assertSame('%D9%85%D8%AB%D8%A7%D9%84', $uri->withFragment('مثال')->getFragment());
+    }
+
+    public function testEncodedStringParametersAreNotDoubleEncoded() {
+        $uri = $this->uri('http://%E2%9E%A1䨹.ws/%E4%A8%B9?foo=bar baz#qux(%E2%9C%AA)');
+        $this->assertSame('http://%E2%9E%A1%E4%A8%B9.ws/%E4%A8%B9?foo=bar%20baz#qux(%E2%9C%AA)', (string) $uri);
+        $this->assertSame('%E2%9E%A1:my%20pass', $uri->withUserInfo('%E2%9E%A1:my pass')->getUserInfo());
+        $this->assertSame('fo%C3%B3%20bar.baz', $uri->withHost('foÓ%20bar.baz')->getHost());
+        $this->assertSame('%E2%9E%A1/foo%20bar', $uri->withPath('%E2%9E%A1/foo bar')->getPath());
+        $this->assertSame('%E2%9E%A1=foo%20bar&%E4%BE%8B%E5%AD%90=%E6%B5%8B%E8%AF%95', $uri->withQuery('%E2%9E%A1=foo%20bar&%E4%BE%8B%E5%AD%90=测试')->getQuery());
+        $this->assertSame('%D9%85%D8%AB%D8%A7%D9%84', $uri->withFragment('مثا%D9%84')->getFragment()); //Right-to-left-literals
+    }
 }
