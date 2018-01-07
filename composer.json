@@ -9,7 +9,8 @@
         "psr/container": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.5"
+        "phpunit/phpunit": "^6.5",
+        "satooshi/php-coveralls": "^1.0"
     },
     "license": "MIT",
     "authors": [
@@ -28,5 +29,8 @@
         "psr-4": {
             "Shudd3r\\Http\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "run-tests": "phpunit"
     }
 }

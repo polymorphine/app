@@ -3,10 +3,20 @@ language: php
 php:
   - 7.0
 
+env:
+  matrix:
+    - STABILITY="--prefer-lowest --prefer-stable"
+    - STABILITY=""
+
 before_install:
   - composer self-update
 
 before_script:
-  - composer install
+  - composer update $STABILITY
 
-script: ./vendor/bin/phpunit --configuration ./phpunit.xml --coverage-text
+script:
+  - mkdir -p build/logs
+  - composer run-tests
+
+after_script:
+   - php vendor/bin/coveralls -v
