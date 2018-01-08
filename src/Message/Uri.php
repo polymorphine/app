@@ -24,20 +24,24 @@ class Uri implements UriInterface
         'https'  => ['port' => 443]
     ];
 
-    public function __construct(string $uri = '') {
-        $segments = parse_url($this->encode($uri, self::CHARSET_URL));
+    public function __construct(array $segments = []) {
+        isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
+        isset($segments['user']) and $this->userInfo = $this->encode($segments['user'], self::CHARSET_URL);
+        isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_URL);
+        isset($segments['host']) and $this->host = $this->normalizeHost($segments['host']);
+        isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
+        isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_URL);
+        isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_URL);
+        isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_URL);
+    }
+
+    public static function fromString($uri = '') {
+        $segments = parse_url($uri);
         if ($segments === false) {
             throw new InvalidArgumentException("Malformed URI string: '$uri'");
         }
 
-        isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
-        isset($segments['user']) and $this->userInfo = $segments['user'];
-        isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $segments['pass'];
-        isset($segments['host']) and $this->host = $this->normalizeHost($segments['host']);
-        isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
-        isset($segments['path']) and $this->path = $segments['path'];
-        isset($segments['query']) and $this->query = $segments['query'];
-        isset($segments['fragment']) and $this->fragment = $segments['fragment'];
+        return new self($segments);
     }
 
     public function __toString(): string {
@@ -200,7 +204,7 @@ class Uri implements UriInterface
     }
 
     private function encode($string, $charset) {
-        $regexp = '/(?:[' . $charset . ']+|(%(?![A-F0-9]{2}).{2}))/u';
+        $regexp = '/(?:[' . $charset . ']+|(%(?=[a-fA-F0-9]{2}).{2}))/u';
         $encode = function ($matches) {
             return isset($matches[1]) ? strtoupper($matches[1]) : rawurlencode($matches[0]);
         };

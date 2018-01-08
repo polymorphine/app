@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class UriTest extends TestCase
 {
     private function uri($uri = '') {
-        return new Uri($uri);
+        return Uri::fromString($uri);
     }
 
     public function testEmptyConstructorUri_ReturnsRootPathUriString() {
