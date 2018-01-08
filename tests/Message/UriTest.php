@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class UriTest extends TestCase
 {
     private function uri($uri = '') {
-        return Uri::fromString($uri);
+        return is_array($uri) ? new Uri($uri) : Uri::fromString($uri);
     }
 
     public function testEmptyConstructorUri_ReturnsRootPathUriString() {
@@ -258,9 +258,21 @@ class UriTest extends TestCase
         $uri = $this->uri('http://%E2%9E%A1䨹.ws/%E4%A8%B9?foo=bar baz#qux(%E2%9C%AA)');
         $this->assertSame('http://%E2%9E%A1%E4%A8%B9.ws/%E4%A8%B9?foo=bar%20baz#qux(%E2%9C%AA)', (string) $uri);
         $this->assertSame('%E2%9E%A1:my%20pass', $uri->withUserInfo('%E2%9E%A1:my pass')->getUserInfo());
-        $this->assertSame('fo%C3%B3%20bar.baz', $uri->withHost('foÓ%20bar.baz')->getHost());
+        $this->assertSame('fo%C3%B3%20bar.baz', $uri->withHost('foó%20bar.baz')->getHost());
         $this->assertSame('%E2%9E%A1/foo%20bar', $uri->withPath('%E2%9E%A1/foo bar')->getPath());
         $this->assertSame('%E2%9E%A1=foo%20bar&%E4%BE%8B%E5%AD%90=%E6%B5%8B%E8%AF%95', $uri->withQuery('%E2%9E%A1=foo%20bar&%E4%BE%8B%E5%AD%90=测试')->getQuery());
         $this->assertSame('%D9%85%D8%AB%D8%A7%D9%84', $uri->withFragment('مثا%D9%84')->getFragment()); //Right-to-left-literals
+    }
+
+    public function testEncodeLiteralPercent() {
+        $this->assertSame('low%25foo', $this->uri()->withPath('low%foo')->getpath());
+    }
+
+    public function testNormalizedHostEncodedFirst() {
+        $this->assertSame('fo%C3%93.bar', $this->uri()->withHost('foÓ.BAR')->getHost());
+    }
+
+    public function testEncodeHostExcludedChars() {
+        $this->assertSame('www%40example.com', $this->uri()->withHost('www@example.com')->getHost());
     }
 }

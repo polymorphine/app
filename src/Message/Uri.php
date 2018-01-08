@@ -7,7 +7,8 @@ use InvalidArgumentException;
 
 class Uri implements UriInterface
 {
-    const CHARSET_URL = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%\/:@?[\]#';
+    const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
+    const CHARSET_URL   = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%\/:@?[\]#';
 
     private $uri;
 
@@ -200,16 +201,22 @@ class Uri implements UriInterface
     }
 
     private function normalizeHost($host) {
-        return $this->encode(mb_strtolower($host), self::CHARSET_URL);
+        return $this->lowercaseLiterals($this->encode($host, self::CHARSET_HOST));
     }
 
     private function encode($string, $charset) {
+        $string = preg_replace('/%(?![0-9a-fA-F]{2})/', '%25', $string);
         $regexp = '/(?:[' . $charset . ']+|(%(?=[a-fA-F0-9]{2}).{2}))/u';
         $encode = function ($matches) {
             return isset($matches[1]) ? strtoupper($matches[1]) : rawurlencode($matches[0]);
         };
 
         return preg_replace_callback($regexp, $encode, $string);
+    }
+
+    private function lowercaseLiterals($string) {
+        $upper_encoded = function ($matches) { return strtoupper($matches[0]); };
+        return preg_replace_callback('/%(?=[a-z0-9]{2}).{2}/', $upper_encoded, strtolower($string));
     }
 
     public function __clone() {
