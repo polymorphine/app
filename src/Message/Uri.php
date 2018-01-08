@@ -105,10 +105,10 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI password must be a string or null');
         }
 
-        empty($password) or $password = ':' . $password;
+        empty($password) or $password = ':' . $this->encode($password, self::CHARSET_HOST . ':');
 
         $clone = clone $this;
-        $clone->userInfo = $this->encode($user . $password, self::CHARSET_URL);
+        $clone->userInfo = $this->encode($user, self::CHARSET_HOST) . $password;
         return $clone;
     }
 
