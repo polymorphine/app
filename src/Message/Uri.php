@@ -201,22 +201,24 @@ class Uri implements UriInterface
     }
 
     private function normalizeHost($host) {
-        return $this->lowercaseLiterals($this->encode($host, self::CHARSET_HOST));
+        $host = $this->encode($host, self::CHARSET_HOST, false);
+        return $this->uppercaseEncoded(strtolower($host));
     }
 
-    private function encode($string, $charset) {
+    private function encode($string, $charset, $normalize = true) {
         $string = preg_replace('/%(?![0-9a-fA-F]{2})/', '%25', $string);
-        $regexp = '/(?:[' . $charset . ']+|(%(?=[a-fA-F0-9]{2}).{2}))/u';
+        $regexp = '/[' . $charset . ']+/u';
         $encode = function ($matches) {
-            return isset($matches[1]) ? strtoupper($matches[1]) : rawurlencode($matches[0]);
+            return rawurlencode($matches[0]);
         };
+        $string = preg_replace_callback($regexp, $encode, $string);
 
-        return preg_replace_callback($regexp, $encode, $string);
+        return $normalize ? $this->uppercaseEncoded($string) : $string;
     }
 
-    private function lowercaseLiterals($string) {
+    private function uppercaseEncoded($string) {
         $upper_encoded = function ($matches) { return strtoupper($matches[0]); };
-        return preg_replace_callback('/%(?=[a-z0-9]{2}).{2}/', $upper_encoded, strtolower($string));
+        return preg_replace_callback('/%(?=[A-Za-z0-9]{2}).{2}/', $upper_encoded, $string);
     }
 
     public function __clone() {

@@ -274,9 +274,20 @@ class UriTest extends TestCase
 
     public function testEncodeHostExcludedChars() {
         $this->assertSame('www%40example.com', $this->uri()->withHost('www@example.com')->getHost());
+        $this->assertSame('www.e%5Bx%5Dample.com', $this->uri('http://www.e[x]ample.com')->getHost());
     }
 
     public function testEncodeUserInfoExcludedChars() {
         $this->assertSame('us%3Aer%40name:pa%40ss:word', $this->uri()->withUserInfo('us:er@name', 'pa@ss:word')->getUserInfo());
+    }
+
+    public function testEncodedNormalizedToUppercase() {
+        $uri = $this->uri('http://us%e3:p%aass@%abcd.com/p%4a/th?qu%e1y=%f0o#fr%a3gment');
+        $this->assertSame('us%E3:p%AAss', $uri->getUserInfo());
+        $this->assertSame('%ABcd.com', $uri->getHost());
+        $this->assertSame('us%E3:p%AAss@%ABcd.com', $uri->getAuthority());
+        $this->assertSame('/p%4A/th', $uri->getPath());
+        $this->assertSame('qu%E1y=%F0o', $uri->getQuery());
+        $this->assertSame('fr%A3gment', $uri->getFragment());
     }
 }
