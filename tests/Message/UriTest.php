@@ -154,6 +154,12 @@ class UriTest extends TestCase
         $this->assertSame('http:/foo/bar', (string) $this->uri('http://user@example.com//////foo/bar')->withHost(''));
     }
 
+    public function testGetPathShouldNotFilterInitialSlashes() {
+        $this->assertSame('//foo/bar', $this->uri('http://user@example.com//foo/bar')->getPath());
+        $this->assertSame('//////foo/bar', $this->uri('http://user@example.com//////foo/bar')->getPath());
+        $this->assertSame('//foo/bar', $this->uri()->withPath('//foo/bar')->getPath());
+    }
+
     /**
      * @param $port
      * @dataProvider invalidPorts
@@ -264,6 +270,16 @@ class UriTest extends TestCase
         $this->assertSame('%D9%85%D8%AB%D8%A7%D9%84', $uri->withFragment('مثا%D9%84')->getFragment()); //Right-to-left-literals
     }
 
+    public function testEncodedNormalizedToUppercase() {
+        $uri = $this->uri('http://us%e3:p%aass@%abcd.com/p%4a/th?qu%e1y=%f0o#fr%a3gment');
+        $this->assertSame('us%E3:p%AAss', $uri->getUserInfo());
+        $this->assertSame('%ABcd.com', $uri->getHost());
+        $this->assertSame('us%E3:p%AAss@%ABcd.com', $uri->getAuthority());
+        $this->assertSame('/p%4A/th', $uri->getPath());
+        $this->assertSame('qu%E1y=%F0o', $uri->getQuery());
+        $this->assertSame('fr%A3gment', $uri->getFragment());
+    }
+
     public function testEncodeLiteralPercent() {
         $this->assertSame('low%25foo', $this->uri()->withPath('low%foo')->getpath());
     }
@@ -281,13 +297,8 @@ class UriTest extends TestCase
         $this->assertSame('us%3Aer%40name:pa%40ss:word', $this->uri()->withUserInfo('us:er@name', 'pa@ss:word')->getUserInfo());
     }
 
-    public function testEncodedNormalizedToUppercase() {
-        $uri = $this->uri('http://us%e3:p%aass@%abcd.com/p%4a/th?qu%e1y=%f0o#fr%a3gment');
-        $this->assertSame('us%E3:p%AAss', $uri->getUserInfo());
-        $this->assertSame('%ABcd.com', $uri->getHost());
-        $this->assertSame('us%E3:p%AAss@%ABcd.com', $uri->getAuthority());
-        $this->assertSame('/p%4A/th', $uri->getPath());
-        $this->assertSame('qu%E1y=%F0o', $uri->getQuery());
-        $this->assertSame('fr%A3gment', $uri->getFragment());
+    public function testEncodePathExcludedChars() {
+        $this->assertSame('foo%3Fbar/baz', $this->uri()->withPath('foo?bar/baz')->getPath());
+        $this->assertSame('/foo%5Bbar%5D/baz', $this->uri('http://www.example.com/foo[bar]/baz?quz=qux')->getPath());
     }
 }

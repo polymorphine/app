@@ -8,7 +8,8 @@ use InvalidArgumentException;
 class Uri implements UriInterface
 {
     const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
-    const CHARSET_URL   = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%\/:@?[\]#';
+    const CHARSET_PATH  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
+    const CHARSET_URL   = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%:\/@?[\]#';
 
     private $uri;
 
@@ -31,7 +32,7 @@ class Uri implements UriInterface
         isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_URL);
         isset($segments['host']) and $this->host = $this->normalizeHost($segments['host']);
         isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
-        isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_URL);
+        isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
         isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_URL);
         isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_URL);
     }
@@ -138,7 +139,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->path = $this->encode($path, self::CHARSET_URL);
+        $clone->path = $this->encode($path, self::CHARSET_PATH);
         return $clone;
     }
 
@@ -164,21 +165,22 @@ class Uri implements UriInterface
 
     protected function buildUriString(): string {
         $uri = ($this->scheme) ? $this->scheme . ':' : '';
-        $uri .= ($this->host) ? $this->authorityAndPath() : $this->pathWithoutAuthority();
+        $uri .= ($this->host) ? $this->authorityPath() : $this->filteredPath();
         if ($this->query) { $uri .= '?' . $this->query; }
         if ($this->fragment) { $uri .= '#' . $this->fragment; }
 
         return $uri ?: '/';
     }
 
-    private function authorityAndPath() {
+    private function authorityPath() {
         $authority = '//' . $this->getAuthority();
         if (!$this->path) { return $authority; }
         return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
     }
 
-    private function pathWithoutAuthority() {
-        return (substr($this->path, 0, 2) === '//') ? preg_replace('#^\/\/+#', '/', $this->path) : $this->path;
+    private function filteredPath() {
+        if (empty($this->path)) { return ''; }
+        return ($this->path[0] === '/') ? '/' . ltrim($this->path, '/') : $this->path;
     }
 
     private function validScheme(string $scheme) {
