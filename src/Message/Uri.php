@@ -9,7 +9,7 @@ class Uri implements UriInterface
 {
     const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
     const CHARSET_PATH  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
-    const CHARSET_URL   = '^a-zA-Z0-9.\-_~&=+;,$!\'()*%:\/@?[\]#';
+    const CHARSET_QUERY = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@?';
 
     private $uri;
 
@@ -28,13 +28,13 @@ class Uri implements UriInterface
 
     public function __construct(array $segments = []) {
         isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
-        isset($segments['user']) and $this->userInfo = $this->encode($segments['user'], self::CHARSET_URL);
-        isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_URL);
-        isset($segments['host']) and $this->host = $this->normalizeHost($segments['host']);
+        isset($segments['user']) and $this->userInfo = $this->encode($segments['user'], self::CHARSET_HOST);
+        isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_HOST . ':');
+        isset($segments['host']) and $this->host = $this->normalizedHost($segments['host']);
         isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
         isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
-        isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_URL);
-        isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_URL);
+        isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_QUERY);
+        isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
     }
 
     public static function fromString($uri = '') {
@@ -119,7 +119,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->host = $this->normalizeHost($host);
+        $clone->host = $this->normalizedHost($host);
         return $clone;
     }
 
@@ -149,7 +149,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->query = $this->encode($query, self::CHARSET_URL);
+        $clone->query = $this->encode($query, self::CHARSET_QUERY);
         return $clone;
     }
 
@@ -159,7 +159,7 @@ class Uri implements UriInterface
         }
 
         $clone = clone $this;
-        $clone->fragment = $this->encode($fragment, self::CHARSET_URL);
+        $clone->fragment = $this->encode($fragment, self::CHARSET_QUERY);
         return $clone;
     }
 
@@ -202,7 +202,7 @@ class Uri implements UriInterface
         return $port;
     }
 
-    private function normalizeHost($host) {
+    private function normalizedHost($host) {
         $host = $this->encode($host, self::CHARSET_HOST, false);
         return $this->uppercaseEncoded(strtolower($host));
     }

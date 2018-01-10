@@ -301,4 +301,23 @@ class UriTest extends TestCase
         $this->assertSame('foo%3Fbar/baz', $this->uri()->withPath('foo?bar/baz')->getPath());
         $this->assertSame('/foo%5Bbar%5D/baz', $this->uri('http://www.example.com/foo[bar]/baz?quz=qux')->getPath());
     }
+
+    public function testEncodeQueryExcludedCharacters() {
+        $this->assertSame('foo%5Bbar%5D=baz', $this->uri('http://www.example.com/path/segment?foo[bar]=baz')->getQuery());
+        $this->assertSame('foo%23bar=baz', $this->uri()->withQuery('foo#bar=baz')->getQuery());
+    }
+
+    public function testQueryMayContainQuestionMarkAndPathSeparators() {
+        $this->assertSame('?foo=bar', $this->uri('http://www.example.com/path??foo=bar')->getQuery());
+        $this->assertSame('??foo=bar', (string) $this->uri()->withQuery('?foo=bar'));
+        $this->assertSame('foo=bar?path/segment', $this->uri('http://www.example.com/path?foo=bar?path/segment')->getQuery());
+        $this->assertSame('??foo=bar/baz', (string) $this->uri()->withQuery('?foo=bar/baz'));
+    }
+
+    public function testEncodeFragmentExcludedCharacters() {
+        $this->assertSame('%23foo-bar', $this->uri()->withFragment('#foo-bar')->getFragment());
+        $uri = $this->uri('http://www.example.com/path/segment?query=segment#foo[bar]');
+        $this->assertSame('foo%5Bbar%5D', $uri->getFragment());
+        $this->assertSame('http://www.example.com/path/segment?query=segment#foo%5Bbar%5D', (string) $uri);
+    }
 }
