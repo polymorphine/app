@@ -4,6 +4,7 @@ namespace Shudd3r\Http\Src\Message;
 
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
+use RuntimeException;
 
 
 class Stream implements StreamInterface
@@ -33,19 +34,51 @@ class Stream implements StreamInterface
     }
 
     public function __toString() {}
-    public function close() {}
-    public function detach() {}
-    public function getSize() {}
-    public function tell() {}
-    public function eof() {}
+
+    public function close() {
+        if ($resource = $this->detach()) { fclose($resource); }
+    }
+
+    public function detach() {
+        $resource = $this->resource;
+        $this->resource = null;
+        $this->readable = false;
+        $this->seekable = false;
+        $this->writable = false;
+
+        return $resource;
+    }
+
+    public function getSize() {
+        if (!$this->resource) { return null; }
+    }
+
+    public function tell() {
+        if (!$this->resource) {
+            throw new RuntimeException('Pointer position not available in detached resource');
+        }
+    }
+
+    public function eof() {
+        if (!$this->resource) { return true; }
+    }
 
     public function isSeekable() {
         if (isset($this->seekable)) { return $this->seekable; }
         return $this->seekable = $this->getMetadata('seekable');
     }
 
-    public function seek($offset, $whence = SEEK_SET) {}
-    public function rewind() {}
+    public function seek($offset, $whence = SEEK_SET) {
+        if (!$this->isSeekable()) {
+            throw new RuntimeException('Stream is not seekable or detached');
+        }
+
+        return true;
+    }
+
+    public function rewind() {
+        return $this->seek(0);
+    }
 
     public function isWritable() {
         if (isset($this->writable)) { return $this->writable; }
@@ -54,7 +87,15 @@ class Stream implements StreamInterface
         return $this->writable = (isset($writable[$mode[0]]) || strstr($mode, '+'));
     }
 
-    public function write($string) {}
+    public function write($string) {
+        if (!$this->resource) {
+            throw new RuntimeException('No resource available; cannot write');
+        }
+
+        if (!$this->isWritable()) {
+            throw new RuntimeException('Stream is not writable');
+        }
+    }
 
     public function isReadable() {
         if (isset($this->readable)) { return $this->readable; }
@@ -62,8 +103,21 @@ class Stream implements StreamInterface
         return $this->readable = ($mode[0] === 'r' || strstr($mode, '+'));
     }
 
-    public function read($length) {}
-    public function getContents() {}
+    public function read($length) {
+        if (!$this->resource) {
+            throw new RuntimeException('No resource available; cannot read');
+        }
+
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable');
+        }
+    }
+
+    public function getContents() {
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable or detached');
+        }
+    }
 
     public function getMetadata($key = null) {
         isset($this->metaData) or $this->metaData = stream_get_meta_data($this->resource);
