@@ -40,6 +40,8 @@ class Stream implements StreamInterface
     }
 
     public function detach() {
+        if (!$this->resource) { return null; }
+
         $resource = $this->resource;
         $this->resource = null;
         $this->readable = false;
@@ -50,17 +52,19 @@ class Stream implements StreamInterface
     }
 
     public function getSize() {
-        if (!$this->resource) { return null; }
+        return $this->resource ? fstat($this->resource)['size'] : null;
     }
 
     public function tell() {
         if (!$this->resource) {
             throw new RuntimeException('Pointer position not available in detached resource');
         }
+
+        return ftell($this->resource);
     }
 
     public function eof() {
-        if (!$this->resource) { return true; }
+        return $this->resource ? feof($this->resource) : true;
     }
 
     public function isSeekable() {
@@ -73,11 +77,13 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not seekable or detached');
         }
 
-        return true;
+        if (fseek($this->resource, $offset, $whence) === -1) {
+            throw new RuntimeException('Error: Failed to seek the stream');
+        }
     }
 
     public function rewind() {
-        return $this->seek(0);
+        $this->seek(0);
     }
 
     public function isWritable() {

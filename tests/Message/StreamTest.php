@@ -3,10 +3,10 @@
 namespace Shudd3r\Http\Tests\Message;
 
 
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use Shudd3r\Http\Src\Message\Stream;
 use RuntimeException;
-use PHPUnit\Framework\TestCase;
 
 class StreamTest extends TestCase
 {
@@ -25,8 +25,9 @@ class StreamTest extends TestCase
         return $this->stream = is_resource($resource) ? new Stream($resource) : Stream::fromResourceUri($resource, $mode);
     }
 
-    private function fileStream($mode = null) {
+    private function fileStream($mode = null, string $contents = '') {
         $this->testFilename = tempnam(sys_get_temp_dir(), 'test');
+        if ($contents) { file_put_contents($this->testFilename, $contents); }
         return $this->stream($this->testFilename, $mode);
     }
 
@@ -86,7 +87,7 @@ class StreamTest extends TestCase
         $stream->read(1);
     }
 
-    public function testReadDatechedStream_ThrowsException() {
+    public function testReadDetachedStream_ThrowsException() {
         $stream = $this->stream();
         $stream->detach();
         $this->expectException(RuntimeException::class);
@@ -100,7 +101,7 @@ class StreamTest extends TestCase
         $stream->getContents();
     }
 
-    public function testGetContentsFromDatechedStream_ThrowsException() {
+    public function testGetContentsFromDetachedStream_ThrowsException() {
         $stream = $this->stream();
         $stream->detach();
         $this->expectException(RuntimeException::class);
@@ -114,7 +115,7 @@ class StreamTest extends TestCase
         $stream->seek(1);
     }
 
-    public function testSeekDetatchedStream_ThrowsException() {
+    public function testSeekDetachedStream_ThrowsException() {
         $stream = $this->stream();
         $stream->detach();
         $this->expectException(RuntimeException::class);
@@ -128,7 +129,7 @@ class StreamTest extends TestCase
         $stream->rewind();
     }
 
-    public function testRewindDetatchedStream_ThrowsException() {
+    public function testRewindDetachedStream_ThrowsException() {
         $stream = $this->stream();
         $stream->detach();
         $this->expectException(RuntimeException::class);
@@ -142,7 +143,7 @@ class StreamTest extends TestCase
         $stream->write('hello world!');
     }
 
-    public function testWriteIntoDatachedStream_ThrowsException() {
+    public function testWriteIntoDetachedStream_ThrowsException() {
         $stream = $this->stream();
         $stream->detach();
         $this->expectException(RuntimeException::class);
@@ -158,6 +159,30 @@ class StreamTest extends TestCase
     public function testEofOnDetachedStreamReturnsTrue() {
         $stream = $this->stream();
         $stream->detach();
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testGetSize_ReturnsSizeOfStream() {
+        $this->assertSame(11, $this->fileStream('r+', 'hello world')->getSize());
+        $this->assertSame(0, $this->fileStream('w+', 'hello world')->getSize());
+    }
+
+    public function testTellOnCreatedStream_ReturnsInitialPointerPosition() {
+        $this->assertSame(0, $this->fileStream('r', 'hello world')->tell());
+    }
+
+    public function testSeekMovesPointerPosition() {
+        $stream = $this->fileStream('r', 'hello world');
+        $stream->seek(5);
+        $this->assertSame(5, $stream->tell());
+        $this->expectExceptionMessage('Error:');
+        $stream->seek(-1);
+    }
+
+    public function testWhenStreamWasReadToItsEnd_EofReturnsTrue() {
+        $stream = $this->fileStream('r', 'hello world!')->detach();
+        while (!feof($stream)) { fread($stream, 12); }
+        $stream = $this->stream($stream);
         $this->assertTrue($stream->eof());
     }
 }
