@@ -33,10 +33,20 @@ class Stream implements StreamInterface
         return new self($resource);
     }
 
-    public function __toString() {}
+    public function __toString() {
+        if (!$this->isReadable()) { return ''; }
+
+        try {
+            $this->rewind();
+            return $this->getContents();
+        } catch (RuntimeException $e) {
+            return '';
+        }
+    }
 
     public function close() {
-        if ($resource = $this->detach()) { fclose($resource); }
+        $resource = $this->detach();
+        if ($resource) { fclose($resource); }
     }
 
     public function detach() {
@@ -60,7 +70,13 @@ class Stream implements StreamInterface
             throw new RuntimeException('Pointer position not available in detached resource');
         }
 
-        return ftell($this->resource);
+        $position = ftell($this->resource);
+
+        if ($position === false) {
+            throw new RuntimeException('Error: Failed to tell pointer position');
+        }
+
+        return $position;
     }
 
     public function eof() {
@@ -77,7 +93,9 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not seekable or detached');
         }
 
-        if (fseek($this->resource, $offset, $whence) === -1) {
+        $exitCode = fseek($this->resource, $offset, $whence);
+
+        if ($exitCode === -1) {
             throw new RuntimeException('Error: Failed to seek the stream');
         }
     }
@@ -101,6 +119,14 @@ class Stream implements StreamInterface
         if (!$this->isWritable()) {
             throw new RuntimeException('Stream is not writable');
         }
+
+        $bytesWritten = fwrite($this->resource, $string);
+
+        if ($bytesWritten === false) {
+            throw new RuntimeException('Error: Failed writing to stream');
+        }
+
+        return $bytesWritten;
     }
 
     public function isReadable() {
@@ -117,12 +143,28 @@ class Stream implements StreamInterface
         if (!$this->isReadable()) {
             throw new RuntimeException('Stream is not readable');
         }
+
+        $streamData = fread($this->resource, $length);
+
+        if ($streamData === false) {
+            throw new RuntimeException('Error: Failed reading from stream');
+        }
+
+        return $streamData;
     }
 
     public function getContents() {
         if (!$this->isReadable()) {
             throw new RuntimeException('Stream is not readable or detached');
         }
+
+        $streamContents = stream_get_contents($this->resource);
+
+        if ($streamContents === false) {
+            throw new RuntimeException('Error: Failed to retrieve stream contents');
+        }
+
+        return $streamContents;
     }
 
     public function getMetadata($key = null) {

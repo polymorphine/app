@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use Shudd3r\Http\Src\Message\Stream;
 use RuntimeException;
+use Shudd3r\Http\Tests\Doubles\StubStreamWrapper;
 
 class StreamTest extends TestCase
 {
@@ -20,6 +21,11 @@ class StreamTest extends TestCase
      */
     protected $testFilename;
 
+    /**
+     * @var $streamWrapper string
+     */
+    protected $streamWrapper;
+
     private function stream($resource = null, $mode = null) {
         $resource = $resource ?? 'php://memory';
         return $this->stream = is_resource($resource) ? new Stream($resource) : Stream::fromResourceUri($resource, $mode);
@@ -31,10 +37,22 @@ class StreamTest extends TestCase
         return $this->stream($this->testFilename, $mode);
     }
 
+    private function customStream($name, $wrapperClass, $mode = null) {
+        if (in_array($name, stream_get_wrappers())) { stream_wrapper_unregister($name); }
+        stream_wrapper_register($name, $wrapperClass);
+        $this->streamWrapper = $name;
+        return $this->stream($name . '://stream', $mode);
+    }
+
     public function tearDown() {
-        if (!$this->testFilename || !file_exists($this->testFilename)) { return; }
-        $this->stream->close();
-        unlink($this->testFilename);
+        if (isset($this->streamWrapper)) {
+            stream_wrapper_unregister($this->streamWrapper);
+            unset($this->streamWrapper);
+        }
+        if ($this->testFilename) {
+            $this->stream->close();
+            if (file_exists($this->testFilename)) { unlink($this->testFilename); }
+        }
     }
 
     public function testInstantiateWithStreamName() {
@@ -181,8 +199,64 @@ class StreamTest extends TestCase
 
     public function testWhenStreamWasReadToItsEnd_EofReturnsTrue() {
         $stream = $this->fileStream('r', 'hello world!')->detach();
+        //eof is assumed false and modified by reading
         while (!feof($stream)) { fread($stream, 12); }
         $stream = $this->stream($stream);
         $this->assertTrue($stream->eof());
     }
+
+    public function testTellError_ThrowsException() {
+        $stream = $this->customStream('test', StubStreamWrapper::class);
+        StubStreamWrapper::$tellReturns = -1;
+        //cursor position will be assumed 0 until moved
+        $stream->seek(1);
+        $this->expectExceptionMessage('Error:');
+        $stream->tell();
+    }
+
+    public function testWriteSendsDataToStream() {
+        $stream = $this->customStream('test', StubStreamWrapper::class, 'w+b');
+        $data = 'Hello World!';
+        $stream->write($data);
+        $this->assertSame($data, StubStreamWrapper::$writtenData);
+    }
+
+    public function testErrorOnWrite_ThrowsException() {
+        $stream = $this->stream(null, 'w+b');
+        error_reporting(0);
+        $this->expectExceptionMessage('Error:');
+        $stream->write(['invalid type']);
+        error_reporting(E_ALL);
+    }
+
+    public function testReadGetsDataFromStream() {
+        $stream = $this->customStream('test', StubStreamWrapper::class, 'w+b');
+        StubStreamWrapper::$writtenData = 'Hello World!';
+        $this->assertSame('Hello', $stream->read(5));
+    }
+
+    public function testErrorOnRead_ThrowsException() {
+        $stream = $this->stream(null, 'w+b');
+        error_reporting(0);
+        $this->expectExceptionMessage('Error:');
+        $stream->read(['invalid type']);
+        error_reporting(E_ALL);
+    }
+
+    public function testGetContents_ReturnsRemainingStreamContents() {
+        $stream = $this->stream(null, 'w+');
+        $stream->write('Hello World!');
+        $stream->seek(6);
+        $this->assertSame('World!', $stream->getContents());
+    }
+
+    public function testToString_ReturnsFullStreamContents() {
+        $stream = $this->stream(null, 'w+');
+        $stream->write('Hello World!');
+        $stream->seek(6);
+        $this->assertSame('Hello World!', (string) $stream);
+    }
+
+    //TODO: Reproduce getContents() & __toString errors
+    //TODO: seek parameter behavior tests
 }
