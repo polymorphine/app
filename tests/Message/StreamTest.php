@@ -44,6 +44,13 @@ class StreamTest extends TestCase
         return $this->stream($name . '://stream', $mode);
     }
 
+    private function streamWithPredefinedConditions($contents, $position) {
+        $resource = fopen('php://memory', 'w+');
+        fwrite($resource, $contents);
+        fseek($resource, $position);
+        return $this->stream($resource);
+    }
+
     public function tearDown() {
         if (isset($this->streamWrapper)) {
             stream_wrapper_unregister($this->streamWrapper);
@@ -230,9 +237,9 @@ class StreamTest extends TestCase
     }
 
     public function testReadGetsDataFromStream() {
-        $stream = $this->customStream('test', StubStreamWrapper::class, 'w+b');
-        StubStreamWrapper::$writtenData = 'Hello World!';
-        $this->assertSame('Hello', $stream->read(5));
+        $string = 'Hello World!';
+        $stream = $this->streamWithPredefinedConditions($string, 6);
+        $this->assertSame('World', $stream->read(5));
     }
 
     public function testErrorOnRead_ThrowsException() {
@@ -244,19 +251,39 @@ class StreamTest extends TestCase
     }
 
     public function testGetContents_ReturnsRemainingStreamContents() {
-        $stream = $this->stream(null, 'w+');
-        $stream->write('Hello World!');
-        $stream->seek(6);
+        $string = 'Hello World!';
+        $stream = $this->streamWithPredefinedConditions($string, 6);
         $this->assertSame('World!', $stream->getContents());
     }
 
     public function testToString_ReturnsFullStreamContents() {
-        $stream = $this->stream(null, 'w+');
-        $stream->write('Hello World!');
-        $stream->seek(6);
+        $string = 'Hello World!';
+        $stream = $this->streamWithPredefinedConditions($string, 6);
         $this->assertSame('Hello World!', (string) $stream);
     }
 
+    public function testWrittenDataCorrespondsToReadData() {
+        $string = 'Hello World!';
+        $stream = $this->stream(null, 'w+');
+        $stream->write($string);
+        $stream->rewind();
+        $this->assertSame($string, $stream->read(strlen($string)));
+        $stream->rewind();
+        $this->assertSame($string, $stream->getContents());
+        $this->assertSame($string, (string)$stream);
+    }
+
+    public function testSeekWhenceBehavior() {
+        $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
+        $stream->seek(6);
+        $this->assertSame(6, $stream->tell(), 'SEEK_SET offset resolves into absolute position');
+        $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
+        $stream->seek(6, SEEK_CUR);
+        $this->assertSame(9, $stream->tell(), 'SEEK_CUR offset resolves into position relative to current');
+        $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
+        $stream->seek(-3, SEEK_END);
+        $this->assertSame(9, $stream->tell(), 'SEEK_END offset resolves into position relative to end of stream');
+    }
+
     //TODO: Reproduce getContents() & __toString errors
-    //TODO: seek parameter behavior tests
 }
