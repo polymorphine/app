@@ -34,7 +34,7 @@ class Stream implements StreamInterface
     }
 
     public function __toString() {
-        if (!$this->isReadable()) { return ''; }
+        if (!$this->isReadable() || !$this->isSeekable()) { return ''; }
 
         try {
             $this->rewind();

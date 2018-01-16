@@ -189,7 +189,7 @@ class StreamTest extends TestCase
 
     public function testGetSize_ReturnsSizeOfStream() {
         $this->assertSame(11, $this->fileStream('r+', 'hello world')->getSize());
-        $this->assertSame(0, $this->fileStream('w+', 'hello world')->getSize());
+        $this->assertSame(0, $this->fileStream('w+', 'truncated mode')->getSize());
     }
 
     public function testTellOnCreatedStream_ReturnsInitialPointerPosition() {
@@ -283,6 +283,17 @@ class StreamTest extends TestCase
         $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
         $stream->seek(-3, SEEK_END);
         $this->assertSame(9, $stream->tell(), 'SEEK_END offset resolves into position relative to end of stream');
+    }
+
+    public function testToStringOnUnreadableStream_ReturnsEmptyString() {
+        $stream = $this->fileStream('a', 'Hello World');
+        $this->assertSame('', (string) $stream);
+    }
+
+    public function testToStringOnNotSeekableStream_ReturnsEmptyString() {
+        $stream = $this->stream('php://output', 'a');
+        $this->assertFalse($stream->isSeekable());
+        $this->assertSame('', (string) $stream);
     }
 
     //TODO: Reproduce getContents() & __toString errors
