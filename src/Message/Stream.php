@@ -5,6 +5,7 @@ namespace Shudd3r\Http\Src\Message;
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
+use Shudd3r\Http\Src\Message\Exception\StreamResourceCallException;
 
 
 class Stream implements StreamInterface
@@ -17,7 +18,7 @@ class Stream implements StreamInterface
     private $seekable;
 
     public function __construct($resource) {
-        if (!is_resource($resource)) {
+        if (!is_resource($resource) && get_resource_type($resource) !== 'stream') {
             throw new InvalidArgumentException('Invalid stream resource');
         }
 
@@ -34,8 +35,6 @@ class Stream implements StreamInterface
     }
 
     public function __toString() {
-        if (!$this->isReadable() || !$this->isSeekable()) { return ''; }
-
         try {
             $this->rewind();
             return $this->getContents();
@@ -73,7 +72,7 @@ class Stream implements StreamInterface
         $position = ftell($this->resource);
 
         if ($position === false) {
-            throw new RuntimeException('Error: Failed to tell pointer position');
+            throw new StreamResourceCallException('Failed to tell pointer position');
         }
 
         return $position;
@@ -96,7 +95,7 @@ class Stream implements StreamInterface
         $exitCode = fseek($this->resource, $offset, $whence);
 
         if ($exitCode === -1) {
-            throw new RuntimeException('Error: Failed to seek the stream');
+            throw new StreamResourceCallException('Failed to seek the stream');
         }
     }
 
@@ -123,7 +122,7 @@ class Stream implements StreamInterface
         $bytesWritten = fwrite($this->resource, $string);
 
         if ($bytesWritten === false) {
-            throw new RuntimeException('Error: Failed writing to stream');
+            throw new StreamResourceCallException('Failed writing to stream');
         }
 
         return $bytesWritten;
@@ -147,7 +146,7 @@ class Stream implements StreamInterface
         $streamData = fread($this->resource, $length);
 
         if ($streamData === false) {
-            throw new RuntimeException('Error: Failed reading from stream');
+            throw new StreamResourceCallException('Failed reading from stream');
         }
 
         return $streamData;
@@ -161,7 +160,7 @@ class Stream implements StreamInterface
         $streamContents = stream_get_contents($this->resource);
 
         if ($streamContents === false) {
-            throw new RuntimeException('Error: Failed to retrieve stream contents');
+            throw new StreamResourceCallException('Failed to retrieve stream contents');
         }
 
         return $streamContents;
