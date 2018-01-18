@@ -8,6 +8,7 @@ use Psr\Http\Message\StreamInterface;
 use Shudd3r\Http\Src\Message\Exception\StreamResourceCallException;
 use Shudd3r\Http\Src\Message\Stream;
 use RuntimeException;
+use InvalidArgumentException;
 
 class StreamTest extends TestCase
 {
@@ -56,6 +57,20 @@ class StreamTest extends TestCase
     public function testInstantiateWithStreamName() {
         $this->assertInstanceOf(StreamInterface::class, Stream::fromResourceUri('php://memory', 'a+b'));
         $this->assertInstanceOf(StreamInterface::class, Stream::fromResourceUri('php://memory', 'w'));
+    }
+
+    public function testInstantiateWithStreamResource() {
+        $this->assertInstanceOf(StreamInterface::class, (new Stream(fopen('php://input', 'r+b'))));
+    }
+
+    public function testNonResourceConstructorArgument_ThrowsException() {
+        $this->expectException(InvalidArgumentException::class);
+        new Stream('http://example.com');
+    }
+
+    public function testNonStreamResourceConstructorArgument_ThrowsException() {
+        $this->expectException(InvalidArgumentException::class);
+        new Stream(imagecreate(100, 100));
     }
 
     /**

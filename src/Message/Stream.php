@@ -18,7 +18,7 @@ class Stream implements StreamInterface
     private $seekable;
 
     public function __construct($resource) {
-        if (!is_resource($resource) && get_resource_type($resource) !== 'stream') {
+        if (!is_resource($resource) || get_resource_type($resource) !== 'stream') {
             throw new InvalidArgumentException('Invalid stream resource');
         }
 
