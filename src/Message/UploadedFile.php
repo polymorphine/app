@@ -37,6 +37,7 @@ class UploadedFile implements UploadedFileInterface
 
     public function getStream(): StreamInterface {
         $this->checkFileAccess();
+
         return Stream::fromResourceUri($this->fileName, 'r');
     }
 
