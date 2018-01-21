@@ -52,7 +52,7 @@ trait MessageMethods
         if (!$this->hasHeader($name)) { return $this->withHeader($name, $value); }
 
         $name  = $this->headerNames[strtolower($name)];
-        $value = $this->headerValue($value);
+        $value = $this->validHeaderValues($value);
 
         $clone = clone $this;
         $clone->headers[$name] = array_merge($clone->headers[$name], $value);
@@ -83,7 +83,7 @@ trait MessageMethods
 
     private function setHeader($name, $value) {
         $name = $this->indexHeaderName($name);
-        $this->headers[$name] = $this->headerValue($value);
+        $this->headers[$name] = $this->validHeaderValues($value);
     }
 
     private function indexHeaderName($name) {
@@ -108,8 +108,29 @@ trait MessageMethods
         return $token;
     }
 
-    private function headerValue($value) {
-        return is_string($value) ? [$value] : $value;
+    private function validHeaderValues($headerValues) {
+        if (is_string($headerValues)) { $headerValues = [$headerValues]; }
+        if (!is_array($headerValues) || !$this->legalHeaderStrings($headerValues)) {
+            throw new InvalidArgumentException('Invalid HTTP header value argument - expected legal strings[] or string');
+        }
+
+        return array_values($headerValues);
+    }
+
+    private function legalHeaderStrings(array $headerValues) {
+        foreach ($headerValues as $value) {
+            if (!is_string($value) || $this->illegalHeaderChars($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function illegalHeaderChars(string $header) {
+        $illegalCharset   = preg_match("/[^\t\r\n\x20-\x7E\x80-\xFE]/", $header);
+        $invalidLineBreak = preg_match("/(?:[^\r]\n|\r[^\n]|\n[^ \t])/", $header);
+
+        return ($illegalCharset || $invalidLineBreak);
     }
 
     private function removeHeader($headerIndex) {

@@ -162,6 +162,13 @@ class MessageMethodsTest extends TestCase
         $this->assertSame(['testCASE' => ['old value', 'added value']], $message->withAddedHeader('TESTcase', ['added value'])->getHeaders());
     }
 
+    public function testGetHeaders_ReturnsHeaderValuesIgnoringPassedArrayKeys() {
+        $message  = $this->message(['test' => ['one' => 'first']]);
+        $this->assertSame(['test' => ['first']], $message->getHeaders());
+        $this->assertSame(['test' => ['second']], $message->withHeader('test', ['two' => 'second'])->getHeaders());
+        $this->assertSame(['test' => ['first', 'second']], $message->withAddedHeader('test', ['two' => 'second'])->getHeaders());
+    }
+
     /**
      * @dataProvider invalidHeaderNames
      * @param $name
@@ -191,11 +198,34 @@ class MessageMethodsTest extends TestCase
 
     public function invalidHeaderNames() {
         return [
-            'null name' => [null],
-            'empty name' => [''],
-            'not a string name' => [23],
-            'spaced name' => ['header name'],
-            'invalid name char "@"' => ['email@example'],
+            'null name'             => [null],
+            'empty name'            => [''],
+            'not a string name'     => [23],
+            'spaced name'           => ['header name'],
+            'invalid name char "@"' => ['email@example']
+        ];
+    }
+
+    /**
+     * @dataProvider invalidHeaderValues
+     * @param $header
+     */
+    public function testInstantiateWithInvalidHeaderValues_ThrowsException($header) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->message(['test' => $header]);
+    }
+
+    public function invalidHeaderValues() {
+        return [
+            'null value'                    => [null],
+            'bool value'                    => [true],
+            'toString object'               => [new DummyStream()],
+            'int within array'              => [['valid header', 9001]],
+            'illegal char'                  => ["some value\xFF"],
+            'invalid linebreak \n'          => ["some\n value"],
+            'invalid linebreak \r'          => ["some\r value"],
+            'invalid linebreak \n\r'        => ["some\n\r value"],
+            'no whitespace after linebreak' => ["some\r\nvalue"]
         ];
     }
 }
