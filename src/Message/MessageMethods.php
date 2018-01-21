@@ -82,18 +82,23 @@ trait MessageMethods
     }
 
     private function setHeader($name, $value) {
+        $headerIndex = strtolower($name);
+        if (isset($this->headerNames[$headerIndex])) {
+            $name = $this->headerNames[$headerIndex];
+        } else {
+            $this->headerNames[$headerIndex] = $name;
+        }
         $this->headers[$name] = $this->headerValue($value);
-        $this->headerNames[strtolower($name)] = $name;
     }
 
     private function headerValue($value) {
         return is_string($value) ? [$value] : $value;
     }
 
-    private function removeHeader($header_id) {
-        if (!isset($this->headerNames[$header_id])) { return; }
-        unset($this->headers[$this->headerNames[$header_id]]);
-        unset($this->headerNames[$header_id]);
+    private function removeHeader($headerIndex) {
+        if (!isset($this->headerNames[$headerIndex])) { return; }
+        unset($this->headers[$this->headerNames[$headerIndex]]);
+        unset($this->headerNames[$headerIndex]);
     }
 
     private function validProtocolVersion($version) {

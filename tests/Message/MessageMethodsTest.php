@@ -141,7 +141,7 @@ class MessageMethodsTest extends TestCase
 
     public function testWithAddedHeader_HeaderNameIsNotCaseSensitive() {
         $message = $this->message(['TEst' => ['old value']]);
-        $this->assertSame(['old value', 'new value'], $message->withAddedHeader('teST', ['new value'])->getHeader('tESt'));
+        $this->assertSame(['old value', 'added value'], $message->withAddedHeader('teST', ['added value'])->getHeader('tESt'));
     }
 
     public function testWithAddedHeader_OriginalKeysArePreserved() {
@@ -156,7 +156,9 @@ class MessageMethodsTest extends TestCase
     }
 
     public function testGetHeaders_ReturnsHeaderNamesWithOriginalCase() {
-        $this->assertSame(['tEsT' => ['value']], $this->message()->withHeader('tEsT', 'value')->getHeaders());
-        $this->assertSame(['tEsT' => ['value']], $this->message(['tEsT' => 'value'])->getHeaders());
+        $message = $this->message(['testCASE' => ['old value']]);
+        $this->assertSame(['testCASE' => ['old value']], $message->getHeaders());
+        $this->assertSame(['testCASE' => ['new value']], $message->withHeader('TESTcase', 'new value')->getHeaders());
+        $this->assertSame(['testCASE' => ['old value', 'added value']], $message->withAddedHeader('TESTcase', ['added value'])->getHeaders());
     }
 }
