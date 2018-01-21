@@ -19,6 +19,8 @@ class Response implements ResponseInterface
         $this->status  = $this->validStatusCode($statusCode);
         $this->body    = $body;
         $this->reason  = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
+        $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
+        $this->loadHeaders($headers);
     }
 
     public function getStatusCode() {
