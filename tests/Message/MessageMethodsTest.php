@@ -161,4 +161,41 @@ class MessageMethodsTest extends TestCase
         $this->assertSame(['testCASE' => ['new value']], $message->withHeader('TESTcase', 'new value')->getHeaders());
         $this->assertSame(['testCASE' => ['old value', 'added value']], $message->withAddedHeader('TESTcase', ['added value'])->getHeaders());
     }
+
+    /**
+     * @dataProvider invalidHeaderNames
+     * @param $name
+     */
+    public function testInstantiateWithInvalidHeaderName_ThrowsException($name) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->message([$name => 'valid value']);
+    }
+
+    /**
+     * @dataProvider invalidHeaderNames
+     * @param $name
+     */
+    public function testWithHeaderSettingInvalidHeaderName_ThrowsException($name) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->message()->withHeader($name, 'valid value');
+    }
+
+    /**
+     * @dataProvider invalidHeaderNames
+     * @param $name
+     */
+    public function testWithAddedHeaderSettingInvalidHeaderName_ThrowsException($name) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->message()->withAddedHeader($name, 'valid value');
+    }
+
+    public function invalidHeaderNames() {
+        return [
+            'null name' => [null],
+            'empty name' => [''],
+            'not a string name' => [23],
+            'spaced name' => ['header name'],
+            'invalid name char "@"' => ['email@example'],
+        ];
+    }
 }

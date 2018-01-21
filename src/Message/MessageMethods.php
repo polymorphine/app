@@ -82,13 +82,30 @@ trait MessageMethods
     }
 
     private function setHeader($name, $value) {
-        $headerIndex = strtolower($name);
-        if (isset($this->headerNames[$headerIndex])) {
-            $name = $this->headerNames[$headerIndex];
-        } else {
-            $this->headerNames[$headerIndex] = $name;
-        }
+        $name = $this->indexHeaderName($name);
         $this->headers[$name] = $this->headerValue($value);
+    }
+
+    private function indexHeaderName($name) {
+        if (!is_string($name)) {
+            throw new InvalidArgumentException('Invalid header name argument type - expected string token');
+        }
+
+        $headerIndex = strtolower($name);
+
+        if (!isset($this->headerNames[$headerIndex])) {
+            $this->headerNames[$headerIndex] = $this->validTokenChars($name);
+        }
+
+        return $this->headerNames[$headerIndex];
+    }
+
+    private function validTokenChars($token) {
+        if (!preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $token)) {
+            throw new InvalidArgumentException('Invalid characters in header name string');
+        }
+
+        return $token;
     }
 
     private function headerValue($value) {
