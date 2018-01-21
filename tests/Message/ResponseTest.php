@@ -5,6 +5,7 @@ namespace Shudd3r\Http\Tests\Message;
 use Shudd3r\Http\Src\Message\Response;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Tests\Doubles\DummyStream;
+use InvalidArgumentException;
 
 
 class ResponseTest extends TestCase
@@ -51,5 +52,59 @@ class ResponseTest extends TestCase
         $fail = 'withStatus(standard_code, reason) should return specified reason';
         $reason = 'Another reason';
         $this->assertSame($reason, $this->response()->withStatus(201, $reason)->getReasonPhrase(), $fail);
+    }
+
+    /**
+     * @dataProvider invalidStatusCodes
+     * @param $code
+     */
+    public function testConstructorWithInvalidStatusCode_ThrowsException($code) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->response($code);
+    }
+
+    /**
+     * @dataProvider invalidStatusCodes
+     * @param $code
+     */
+    public function testWithStatusWithInvalidStatusCode_ThrowsException($code) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->response()->withStatus($code);
+    }
+
+    public function invalidStatusCodes() {
+        return [
+            'null' => [null],
+            'false' => [false],
+            'string' => ['200'],
+            'below min range' => [99],
+            'above max range' => [600]
+        ];
+    }
+
+    /**
+     * @dataProvider invalidReasonPhrases
+     * @param $reason
+     */
+    public function testConstructorWithInvalidReasonPhrase_ThrowsException($reason) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->response(null, $reason);
+    }
+
+    /**
+     * @dataProvider invalidReasonPhrases
+     * @param $reason
+     */
+    public function testWithStatusWithInvalidReasonPhrase_ThrowsException($reason) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->response()->withStatus(200, $reason);
+    }
+
+    public function invalidReasonPhrases() {
+        return [
+            'null' => [null],
+            'false' => [false],
+            'int' => [20]
+        ];
     }
 }

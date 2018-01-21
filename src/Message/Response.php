@@ -4,6 +4,7 @@ namespace Shudd3r\Http\Src\Message;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use InvalidArgumentException;
 
 
 class Response implements ResponseInterface
@@ -15,9 +16,9 @@ class Response implements ResponseInterface
     private $reason;
 
     public function __construct($statusCode = 200, StreamInterface $body, array $headers = [], array $params = []) {
-        $this->status  = $statusCode;
+        $this->status  = $this->validStatusCode($statusCode);
         $this->body    = $body;
-        $this->reason  = isset($params['reason']) ? $params['reason'] : $this->resolveReasonPhrase();
+        $this->reason  = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
     }
 
     public function getStatusCode() {
@@ -26,13 +27,28 @@ class Response implements ResponseInterface
 
     public function withStatus($code, $reasonPhrase = '') {
         $clone = clone $this;
-        $clone->status = $code;
-        $clone->reason = $clone->resolveReasonPhrase($reasonPhrase);
+        $clone->status = $this->validStatusCode($code);
+        $clone->reason = $clone->validReasonPhrase($reasonPhrase);
         return $clone;
     }
 
     public function getReasonPhrase() {
         return $this->reason;
+    }
+
+    private function validStatusCode($code) {
+        if (!is_int($code) || $code < 100 || $code >= 600) {
+            throw new InvalidArgumentException('Invalid status code argument - integer <100-599> expected');
+        }
+        return $code;
+    }
+
+    private function validReasonPhrase($reason) {
+        if (!is_string($reason)) {
+            throw new InvalidArgumentException('Invalid HTTP Response reason phrase - string expected');
+        }
+
+        return $this->resolveReasonPhrase($reason);
     }
 
     private function resolveReasonPhrase($reason = '') {
