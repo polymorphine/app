@@ -66,13 +66,61 @@ class RequestTest extends TestCase
         $this->request('SPACE INSIDE');
     }
 
-    public function testGetRequestTargetForNotSpecifiedTargetAndUri_ReturnsRootPath() {
-        $this->assertSame('/', $this->request()->getRequestTarget());
+    public function testResolvingRequestTarget() {
+        $fail = 'Empty URIs path+query should produce root path for INVALID target';
+        $this->assertSame('/', $this->request('GET', [], null, '//malformed:uri')->getRequestTarget(), $fail);
+        $this->assertSame('/', $this->request()->withRequestTarget(['not string'])->getRequestTarget(), $fail);
+
+        $fail = 'Empty URIs path+query should produce root path for UNSPECIFIED target';
+        $this->assertSame('/', $this->request()->getRequestTarget(), $fail);
+
+        $request = $this->request('GET', [], new FakeUri('', '/some/path', 'query=param'));
+
+        $fail = 'UNSPECIFIED or INVALID target should be resolved from URIs path+query';
+        $this->assertSame('/some/path?query=param', $request->getRequestTarget(), $fail);
+        $this->assertSame('/fizz/buzz', $request->withUri(new FakeUri('', '/fizz/buzz'))->getRequestTarget(), $fail);
+        $this->assertSame('/fizz/buzz', $request->withUri(new FakeUri('', '/fizz/buzz'))->withRequestTarget(500)->getRequestTarget(), $fail);
+
+        $fail = 'withRequestTarget() with VALID target should change target';
+        $this->assertSame('*', $request->withRequestTarget('*')->getRequestTarget(), $fail);
+
+        $fail = 'withUri() should not change previously SPECIFIED request target';
+        $this->assertSame('*', $request->withRequestTarget('*')->withUri(new FakeUri('', 'fizz/buzz'))->getRequestTarget(), $fail);
+
+        $fail = 'Uri should not affect request target SPECIFIED in constructor';
+        $request = $this->request('GET', [], new FakeUri('', '/foo/bar'), '/fizz/buzz');
+        $this->assertSame('/fizz/buzz', $request->getRequestTarget(), $fail);
     }
 
-    public function testGetRequestTargetForInvalidTargetAndNoUri_ReturnsRootPath() {
-        $this->assertSame('/', $this->request('GET', [], null, '//malformed:uri')->getRequestTarget());
-        $this->assertSame('/', $this->request()->withRequestTarget(['not string'])->getRequestTarget());
+    public function testConstructorResolvesHostHeaderFromUri() {
+        $fail = 'Constructor should not create host header from URI with no host';
+        $request = $this->request();
+        $this->assertFalse($request->hasHeader('host'), $fail);
+
+        $fail = 'Constructor should create missing host header if URI has host info';
+        $request = $this->request('GET', [], new FakeUri('example.com'));
+        $this->assertSame('example.com', $request->getHeaderLine('host'), $fail);
+
+        $fail = 'Constructor should not overwrite host header';
+        $request = $this->request('GET', ['host' => ['foo.com']], new FakeUri('bar.com'));
+        $this->assertSame('foo.com', $request->getHeaderLine('host'), $fail);
+    }
+
+    public function testWithUriResolvesHostHeader() {
+        $fail = 'WithUri() should not create host header from URI with no host';
+        $request = $this->request()->withUri(new FakeUri('', 'path/only'));
+        $this->assertFalse($request->hasHeader('host'), $fail);
+
+        $fail = 'WithUri() should create missing host header if URI has host info';
+        $request = $this->request()->withUri(new FakeUri('example.com'));
+        $this->assertSame('example.com', $request->getHeaderLine('host'), $fail);
+
+        $request = $this->request('GET', ['host' => ['header-example.com']]);
+        $uri     = new FakeUri('uri-example.com');
+        $fail = 'WithUri($uri, true) should not overwrite host header';
+        $this->assertSame('header-example.com', $request->withUri($uri, true)->getHeaderLine('host'), $fail);
+        $fail = 'WithUri($uri, [false]) should overwrite host header';
+        $this->assertSame('uri-example.com', $request->withUri($uri, false)->getHeaderLine('host'), $fail);
     }
 }
 

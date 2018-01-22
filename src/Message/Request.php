@@ -18,5 +18,6 @@ class Request implements RequestInterface
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
         $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
         $this->loadHeaders($headers);
+        $this->resolveHostHeader();
     }
 }

@@ -15,7 +15,7 @@ trait RequestMethods
     private $target;
 
     public function getRequestTarget() {
-        return $this->target ?? '/';
+        return $this->target ?: $this->resolveTargetFromUri();
     }
 
     public function withRequestTarget($requestTarget) {
@@ -41,6 +41,7 @@ trait RequestMethods
     public function withUri(UriInterface $uri, $preserveHost = false) {
         $clone = clone $this;
         $clone->uri = $uri;
+        $clone->resolveHostHeader($preserveHost);
         return $clone;
     }
 
@@ -55,5 +56,20 @@ trait RequestMethods
         }
 
         return $method;
+    }
+
+    private function resolveHostHeader($preserveHost = true) {
+        $uriHost = $this->uri->getHost();
+        if ($preserveHost && $this->hasHeader('host') || !$uriHost) { return; }
+        $this->setHeader('host', [$uriHost]);
+    }
+
+    private function resolveTargetFromUri() {
+        $target = $this->uri->getPath();
+        if ($query  = $this->uri->getQuery()) {
+            $target .= '?' . $query;
+        }
+
+        return $target ?: '/';
     }
 }
