@@ -89,15 +89,15 @@ trait MessageMethods
     }
 
     private function validHeaderName($name) {
-        if (!is_string($name)) {
-            throw new InvalidArgumentException('Invalid header name argument type - expected string token');
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $name)) {
-            throw new InvalidArgumentException('Invalid characters in header name string');
+        if (!is_string($name) || $this->invalidTokenChars($name)) {
+            throw new InvalidArgumentException('Invalid header name argument type - expected valid string token');
         }
 
         return $name;
+    }
+
+    private function invalidTokenChars($token) {
+        return (preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $token) !== 1);
     }
 
     private function validHeaderValues($headerValues) {
