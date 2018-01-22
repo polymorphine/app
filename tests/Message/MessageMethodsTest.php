@@ -78,6 +78,10 @@ class MessageMethodsTest extends TestCase
         $this->assertTrue($this->message(['test' => 'header string'])->hasHeader('test'));
     }
 
+    public function testGetHeaderWhenHeaderNorFound_ReturnsEmptyArray() {
+        $this->assertSame([], $this->message()->getHeader('not exists'));
+    }
+
     public function testGetHeaderForValuePassedAsArray_ReturnsSameArray() {
         $value = ['header value'];
         $this->assertSame($value, $this->message()->withHeader('test', $value)->getHeader('test'));
@@ -156,10 +160,18 @@ class MessageMethodsTest extends TestCase
     }
 
     public function testGetHeaders_ReturnsHeaderNamesWithOriginalCase() {
-        $message = $this->message(['testCASE' => ['old value']]);
-        $this->assertSame(['testCASE' => ['old value']], $message->getHeaders());
-        $this->assertSame(['testCASE' => ['new value']], $message->withHeader('TESTcase', 'new value')->getHeaders());
-        $this->assertSame(['testCASE' => ['old value', 'added value']], $message->withAddedHeader('TESTcase', ['added value'])->getHeaders());
+        $this->assertSame(['testCASE' => ['value']], $this->message(['testCASE' => ['value']])->getHeaders());
+        $this->assertSame(['testCASE' => ['value']], $this->message()->withHeader('testCASE', 'value')->getHeaders());
+    }
+
+    public function testWithHeaderChangeOriginalCaseOnOverwrite() {
+        $message = $this->message(['testCASE' => ['old value']])->withHeader('TESTcase', ['new value']);
+        $this->assertSame(['TESTcase' => ['new value']], $message->getHeaders());
+    }
+
+    public function testWithAddedHeaderDoesNotChangeOriginalHeaderCase() {
+        $message = $this->message(['testCASE' => ['first value']])->withAddedHeader('TESTcase', ['added value']);
+        $this->assertSame(['testCASE' => ['first value', 'added value']], $message->getHeaders());
     }
 
     public function testGetHeaders_ReturnsHeaderValuesIgnoringPassedArrayKeys() {

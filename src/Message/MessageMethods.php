@@ -44,6 +44,7 @@ trait MessageMethods
 
     public function withHeader($name, $value) {
         $clone = clone $this;
+        $clone->removeHeader($name);
         $clone->setHeader($name, $value);
         return $clone;
     }
@@ -61,7 +62,7 @@ trait MessageMethods
 
     public function withoutHeader($name) {
         $clone = clone $this;
-        $clone->removeHeader(strtolower($name));
+        $clone->removeHeader($name);
         return $clone;
     }
 
@@ -82,30 +83,21 @@ trait MessageMethods
     }
 
     private function setHeader($name, $value) {
-        $name = $this->indexHeaderName($name);
+        $name = $this->validHeaderName($name);
         $this->headers[$name] = $this->validHeaderValues($value);
+        $this->headerNames[strtolower($name)] = $name;
     }
 
-    private function indexHeaderName($name) {
+    private function validHeaderName($name) {
         if (!is_string($name)) {
             throw new InvalidArgumentException('Invalid header name argument type - expected string token');
         }
 
-        $headerIndex = strtolower($name);
-
-        if (!isset($this->headerNames[$headerIndex])) {
-            $this->headerNames[$headerIndex] = $this->validTokenChars($name);
-        }
-
-        return $this->headerNames[$headerIndex];
-    }
-
-    private function validTokenChars($token) {
-        if (!preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $token)) {
+        if (!preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $name)) {
             throw new InvalidArgumentException('Invalid characters in header name string');
         }
 
-        return $token;
+        return $name;
     }
 
     private function validHeaderValues($headerValues) {
@@ -133,7 +125,8 @@ trait MessageMethods
         return ($illegalCharset || $invalidLineBreak);
     }
 
-    private function removeHeader($headerIndex) {
+    private function removeHeader($name) {
+        $headerIndex = strtolower($name);
         if (!isset($this->headerNames[$headerIndex])) { return; }
         unset($this->headers[$this->headerNames[$headerIndex]]);
         unset($this->headerNames[$headerIndex]);
