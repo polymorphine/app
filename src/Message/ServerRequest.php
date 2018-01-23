@@ -5,6 +5,8 @@ namespace Shudd3r\Http\Src\Message;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Http\Message\UploadedFileInterface;
+use InvalidArgumentException;
 
 
 class ServerRequest implements ServerRequestInterface
@@ -35,7 +37,7 @@ class ServerRequest implements ServerRequestInterface
         $this->query = isset($params['query']) ? (array) $params['query'] : [];
         $this->attributes = isset($params['attributes']) ? (array) $params['attributes'] : [];
         $this->parsedBody = isset($params['parsedBody']) ? (array) $params['parsedBody'] : [];
-        $this->files = isset($params['files']) ? (array) $params['files'] : [];
+        $this->files = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
         $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }
@@ -69,7 +71,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withUploadedFiles(array $uploadedFiles) {
         $clone = clone $this;
-        $clone->files = $uploadedFiles;
+        $clone->files = $this->validUploadedFiles($uploadedFiles);
         return $clone;
     }
 
@@ -101,5 +103,22 @@ class ServerRequest implements ServerRequestInterface
         $clone = clone $this;
         unset($clone->attributes[$name]);
         return $clone;
+    }
+
+    private function validUploadedFiles(array $files) {
+        if (!$this->validFilesTree($files)) {
+            throw new InvalidArgumentException('Invalid uploaded files argument - expected associative array tree with UploadedFileInterface leafs');
+        }
+
+        return $files;
+    }
+
+    private function validFilesTree(array $files) {
+        foreach ($files as $file) {
+            $uploadedFile = is_array($file) && $this->validFilesTree($file) || $file instanceof UploadedFileInterface;
+            if (!$uploadedFile) { return false; }
+        }
+
+        return true;
     }
 }

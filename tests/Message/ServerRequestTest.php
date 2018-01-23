@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Tests\Doubles\DummyStream;
 use Shudd3r\Http\Tests\Doubles\FakeUploadedFile;
 use Shudd3r\Http\Tests\Doubles\FakeUri;
+use InvalidArgumentException;
 
 
 class ServerRequestTest extends TestCase
@@ -93,5 +94,26 @@ class ServerRequestTest extends TestCase
         $derived2 = $original->withoutAttribute($name);
         $this->assertEquals($derived1, $derived2);
         $this->assertNotSame($derived1, $derived2);
+    }
+
+    public function testUploadedFilesInvalidStructure_ThrowsInvalidArgumentException() {
+        $this->expectException(InvalidArgumentException::class);
+        $files = [
+            'first' => new FakeUploadedFile(),
+            'second' => 'oops im not a file'
+        ];
+        $this->request(['files' => $files]);
+    }
+
+    public function testUploadedFileNestedStructureIsValid() {
+        $files = [
+            'first' => new FakeUploadedFile(),
+            'second' => [
+                'subcategory1' => new FakeUploadedFile(),
+                'subcategory2' => new FakeUploadedFile()
+            ]
+        ];
+        $request = $this->request(['files' => $files]);
+        $this->assertSame($files, $request->getUploadedFiles());
     }
 }
