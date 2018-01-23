@@ -51,16 +51,12 @@ class ResponseTest extends TestCase
 
         $fail = 'withStatus(standard_code, reason) should return specified reason';
         $reason = 'Another reason';
-        $this->assertSame($reason, $this->response()->withStatus(201, $reason)->getReasonPhrase(), $fail);
+        $this->assertSame($reason, $this->response(201)->withStatus(201, $reason)->getReasonPhrase(), $fail);
     }
 
-    /**
-     * @dataProvider invalidStatusCodes
-     * @param $code
-     */
-    public function testConstructorWithInvalidStatusCode_ThrowsException($code) {
+    public function testConstructorWithInvalidStatusCode_ThrowsException() {
         $this->expectException(InvalidArgumentException::class);
-        $this->response($code);
+        $this->response(900);
     }
 
     /**
@@ -88,7 +84,7 @@ class ResponseTest extends TestCase
      */
     public function testConstructorWithInvalidReasonPhrase_ThrowsException($reason) {
         $this->expectException(InvalidArgumentException::class);
-        $this->response(null, $reason);
+        $this->response(200, $reason);
     }
 
     /**
@@ -102,7 +98,7 @@ class ResponseTest extends TestCase
 
     public function invalidReasonPhrases() {
         return [
-            'null' => [null],
+            'array' => [['Reason in array']],
             'false' => [false],
             'int' => [20]
         ];

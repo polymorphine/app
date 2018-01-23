@@ -11,7 +11,13 @@ class Request implements RequestInterface
 {
     use RequestMethods;
 
-    public function __construct($method, UriInterface $uri, StreamInterface $body, array $headers = [], array $params = []) {
+    public function __construct(
+        string $method,
+        UriInterface $uri,
+        StreamInterface $body,
+        array $headers = [],
+        array $params = []
+    ) {
         $this->method = $this->validMethod($method);
         $this->uri = $uri;
         $this->body = $body;

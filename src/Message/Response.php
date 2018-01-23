@@ -15,7 +15,12 @@ class Response implements ResponseInterface
     private $status;
     private $reason;
 
-    public function __construct($statusCode = 200, StreamInterface $body, array $headers = [], array $params = []) {
+    public function __construct(
+        int $statusCode = 200,
+        StreamInterface $body,
+        array $headers = [],
+        array $params = []
+    ) {
         $this->status  = $this->validStatusCode($statusCode);
         $this->body    = $body;
         $this->reason  = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
