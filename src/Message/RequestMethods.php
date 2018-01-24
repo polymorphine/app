@@ -61,7 +61,7 @@ trait RequestMethods
     private function resolveHostHeader($preserveHost = true) {
         $uriHost = $this->uri->getHost();
         if ($preserveHost && $this->hasHeader('host') || !$uriHost) { return; }
-        $this->setHeader('host', [$uriHost]);
+        $this->setHeader('Host', [$uriHost]);
     }
 
     private function resolveTargetFromUri() {

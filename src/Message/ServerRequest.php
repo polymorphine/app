@@ -27,18 +27,18 @@ class ServerRequest implements ServerRequestInterface
         array $headers = [],
         array $params = []
     ) {
-        $this->method = $this->validMethod($method);
-        $this->uri = $uri;
-        $this->body = $body;
-        $this->loadHeaders($headers);
-        $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
-        $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
-        $this->server = isset($params['server']) ? (array) $params['server'] : [];
-        $this->cookie = isset($params['cookie']) ? (array) $params['cookie'] : [];
-        $this->query = isset($params['query']) ? (array) $params['query'] : [];
+        $this->method     = $this->validMethod($method);
+        $this->uri        = $uri;
+        $this->body       = $body;
+        $this->version    = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
+        $this->target     = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
+        $this->server     = isset($params['server']) ? (array) $params['server'] : [];
+        $this->cookie     = isset($params['cookie']) ? (array) $params['cookie'] : [];
+        $this->query      = isset($params['query']) ? (array) $params['query'] : [];
         $this->attributes = isset($params['attributes']) ? (array) $params['attributes'] : [];
-        $this->parsedBody = !empty($params['parsedBody']) ? $params['parsedBody'] : $this->resolveParsedBody();
-        $this->files = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
+        $this->parsedBody = empty($params['parsedBody']) ? null : $params['parsedBody'];
+        $this->files      = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
+        $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }
 
@@ -76,14 +76,12 @@ class ServerRequest implements ServerRequestInterface
     }
 
     public function getParsedBody() {
-        return $this->parsedBody;
+        return $this->parsedBody ?? $this->resolveParsedBody();
     }
 
     public function withParsedBody($data) {
-        if (!$data) { $data = null; }
-
         $clone = clone $this;
-        $clone->parsedBody = $data;
+        $clone->parsedBody = empty($data) ? null : $data;
         return $clone;
     }
 
@@ -125,7 +123,7 @@ class ServerRequest implements ServerRequestInterface
     }
 
     private function resolveParsedBody() {
-        return ($this->method === 'POST' && $this->isFormContentType()) ? $_POST : null;
+        return ($this->method === 'POST' && !empty($_POST) && $this->isFormContentType()) ? $_POST : null;
     }
 
     private function isFormContentType() {
