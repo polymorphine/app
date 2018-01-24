@@ -30,15 +30,15 @@ class ServerRequest implements ServerRequestInterface
         $this->method = $this->validMethod($method);
         $this->uri = $uri;
         $this->body = $body;
+        $this->loadHeaders($headers);
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
         $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
         $this->server = isset($params['server']) ? (array) $params['server'] : [];
         $this->cookie = isset($params['cookie']) ? (array) $params['cookie'] : [];
         $this->query = isset($params['query']) ? (array) $params['query'] : [];
         $this->attributes = isset($params['attributes']) ? (array) $params['attributes'] : [];
-        $this->parsedBody = isset($params['parsedBody']) ? (array) $params['parsedBody'] : [];
+        $this->parsedBody = !empty($params['parsedBody']) ? $params['parsedBody'] : $this->resolveParsedBody();
         $this->files = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
-        $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }
 
@@ -80,6 +80,8 @@ class ServerRequest implements ServerRequestInterface
     }
 
     public function withParsedBody($data) {
+        if (!$data) { $data = null; }
+
         $clone = clone $this;
         $clone->parsedBody = $data;
         return $clone;
@@ -120,5 +122,14 @@ class ServerRequest implements ServerRequestInterface
         }
 
         return true;
+    }
+
+    private function resolveParsedBody() {
+        return ($this->method === 'POST' && $this->isFormContentType()) ? $_POST : null;
+    }
+
+    private function isFormContentType() {
+        $content = $this->getHeaderLine('Content-Type');
+        return (strpos($content, 'application/x-www-form-urlencoded') === 0 || strpos($content, 'multipart/form-data') === 0);
     }
 }

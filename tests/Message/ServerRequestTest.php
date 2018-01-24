@@ -13,8 +13,8 @@ use InvalidArgumentException;
 
 class ServerRequestTest extends TestCase
 {
-    private function request(array $params = []) {
-        return new ServerRequest('GET', new FakeUri(), new DummyStream(), [], $params);
+    private function request(array $params = [], $method = 'GET', $headers = []) {
+        return new ServerRequest($method, new FakeUri(), new DummyStream(), $headers, $params);
     }
 
     public function testInstantiation() {
@@ -96,6 +96,13 @@ class ServerRequestTest extends TestCase
         $this->assertNotSame($derived1, $derived2);
     }
 
+    public function testGetParsedBodyForRequestWithoutBody_returnsNull() {
+        $this->assertNull($this->request()->getParsedBody());
+        $request = $this->request(['body' => ['key' => 'value']]);
+        $this->assertNull($request->withParsedBody(null)->getParsedBody());
+        $this->assertNull($request->withParsedBody([])->getParsedBody());
+    }
+
     public function testUploadedFilesInvalidStructure_ThrowsInvalidArgumentException() {
         $this->expectException(InvalidArgumentException::class);
         $files = [
@@ -103,6 +110,26 @@ class ServerRequestTest extends TestCase
             'second' => 'oops im not a file'
         ];
         $this->request(['files' => $files]);
+    }
+
+    public function testResolveUnspecifiedParsedBodyIntoSuperglobalPOST() {
+        $_POST = ['test' => 'value'];
+
+        $fail = 'POST x-www-form-urlencoded should resolve into $_POST superglobal';
+        $request = $this->request([], 'POST', ['Content-Type' => 'application/x-www-form-urlencoded']);
+        $this->assertSame($_POST, $request->getParsedBody(), $fail);
+
+        $fail = 'POST multipart/form-data should resolve into $_POST superglobal';
+        $request = $this->request([], 'POST', ['Content-Type' => 'multipart/form-data; boundary=...etc']);
+        $this->assertSame($_POST, $request->getParsedBody(), $fail);
+
+        $fail = 'POST method with non-form data type should remain empty';
+        $request = $this->request([], 'POST', ['Content-Type' => 'other-data-type']);
+        $this->assertNull($request->getParsedBody(), $fail);
+
+        $fail = 'GET method is not assumed form content type - should remain empty';
+        $request = $this->request([], 'GET', ['Content-Type' => 'multipart/form-data; boundary=...etc']);
+        $this->assertNull($request->getParsedBody(), $fail);
     }
 
     public function testUploadedFileNestedStructureIsValid() {
