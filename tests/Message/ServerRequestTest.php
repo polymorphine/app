@@ -5,9 +5,9 @@ namespace Shudd3r\Http\Tests\Message;
 use Psr\Http\Message\ServerRequestInterface;
 use Shudd3r\Http\Src\Message\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Tests\Doubles\DummyStream;
-use Shudd3r\Http\Tests\Doubles\FakeUploadedFile;
-use Shudd3r\Http\Tests\Doubles\FakeUri;
+use Shudd3r\Http\Tests\Message\Doubles\DummyStream;
+use Shudd3r\Http\Tests\Message\Doubles\FakeUploadedFile;
+use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
 use InvalidArgumentException;
 
 

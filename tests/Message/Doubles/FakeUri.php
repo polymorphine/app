@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Doubles;
+namespace Shudd3r\Http\Tests\Message\Doubles;
 
 
 use Psr\Http\Message\UriInterface;
