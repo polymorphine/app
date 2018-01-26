@@ -22,23 +22,38 @@ class ServerRequestFactoryTest extends TestCase
         $factory = new ServerRequestFactory($data);
         $this->assertInstanceOf(ServerRequestFactory::class, $factory);
 
-        $request = $factory->create(['attr name' => 'attr value']);
+        $request = $factory->create(['attr' => 'attr value']);
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame($data['server'], $request->getServerParams());
         $this->assertSame($data['get'], $request->getQueryParams());
         $this->assertSame($data['post'], $request->getParsedBody());
         $this->assertSame($data['cookie'], $request->getCookieParams());
-        $this->assertSame(['attr name' => 'attr value'], $request->getAttributes());
+        $this->assertSame(['attr' => 'attr value'], $request->getAttributes());
     }
 
     private function basicData() {
         return [
-            'post' => ['post name' => 'post value'],
-            'get' => ['get name' => 'get value'],
-            'cookie' => ['cookie name' => 'cookie value'],
+            'post' => ['name' => 'post value'],
+            'get' => ['name' => 'get value'],
+            'cookie' => ['cookie' => 'cookie value'],
             'server' => ['SERVER_NAME' => 'server value'],
             'files' => []
         ];
+    }
+
+    public function testOverridingSuperglobals() {
+        $_POST = ['name' => 'overwritten value', 'original' => 'original value'];
+        $_GET = ['name' => 'overwritten value'];
+        $_COOKIE = ['cookie' => 'original cookie'];
+        $data = $this->basicData();
+        $request = ServerRequestFactory::fromGlobals($data);
+
+        $this->assertInstanceOf(ServerRequestInterface::class, $request);
+        $this->assertSame($data['server'] + $_SERVER, $request->getServerParams());
+        $this->assertSame($data['get'], $request->getQueryParams());
+        $this->assertSame($data['post'] + $_POST, $request->getParsedBody());
+        $this->assertSame($data['cookie'], $request->getCookieParams());
+        $this->assertSame([], $request->getAttributes());
     }
 
     //TODO: incomplete tests
