@@ -327,6 +327,12 @@ class StreamTest extends TestCase
         self::$overrideNativeFunctions = true;
         $this->assertSame('', (string) $stream);
     }
+
+    public function testInstantiateWithStringBody() {
+        $stream = Stream::fromBodyString('Hello World!');
+        $this->assertInstanceOf(StreamInterface::class, $stream);
+        $this->assertSame('Hello', $stream->read(5));
+    }
 }
 
 namespace Shudd3r\Http\Src\Message;

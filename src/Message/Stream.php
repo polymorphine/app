@@ -25,13 +25,20 @@ class Stream implements StreamInterface
         $this->resource = $resource;
     }
 
-    public static function fromResourceUri(string $stream, $mode = 'r') {
+    public static function fromResourceUri(string $streamUri, $mode = 'r') {
         $error = function () { throw new InvalidArgumentException('Invalid stream reference'); };
         set_error_handler($error, E_WARNING);
-        $resource = fopen($stream, $mode);
+        $resource = fopen($streamUri, $mode);
         restore_error_handler();
 
         return new self($resource);
+    }
+
+    public static function fromBodyString(string $body) {
+        $stream = self::fromResourceUri('php://temp', 'w+b');
+        $stream->write($body);
+        $stream->rewind();
+        return $stream;
     }
 
     public function __toString() {
