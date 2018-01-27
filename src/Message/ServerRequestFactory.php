@@ -63,8 +63,8 @@ class ServerRequestFactory
     private function resolveHeaders(): array {
         $headers = [];
         foreach ($this->server as $key => $value) {
-            if (!$value || !$header_name = $this->headerName($key)) { continue; }
-            $headers[$header_name] = $value;
+            if (!$value || !$headerName = $this->headerName($key)) { continue; }
+            $headers[$headerName] = $value;
         }
 
         if (!isset($headers['Authorization']) && $value = $this->authorizationHeader()) {
@@ -98,19 +98,19 @@ class ServerRequestFactory
     }
 
     private function normalizeFiles(array $files): array {
-        $normalized_files = [];
+        $normalizedFiles = [];
         foreach ($files as $key => $value) {
-            $normalized_files[$key] = ($value instanceof UploadedFileInterface)
+            $normalizedFiles[$key] = ($value instanceof UploadedFileInterface)
                 ? $value
                 : $this->resolveFileTree($value);
         }
 
-        return $normalized_files;
+        return $normalizedFiles;
     }
 
     private function resolveFileTree($value) {
         if (!is_array($value)) {
-            throw new InvalidArgumentException('Invalid file data structure.');
+            throw new InvalidArgumentException('Invalid file data structure');
         }
 
         return isset($value['tmp_name']) ? $this->createUploadedFile($value) : $this->normalizeFiles($value);
@@ -121,15 +121,15 @@ class ServerRequestFactory
     }
 
     private function transposeFileDataSet(array $files) {
-        $normalized_files = [];
+        $normalizedFiles = [];
         foreach ($files as $spec_key => $values) {
             foreach ($values as $idx => $value) {
-                $normalized_files[$idx][$spec_key] = $value;
+                $normalizedFiles[$idx][$spec_key] = $value;
             }
         }
-        $createFile = function ($file) { return $this->createUploadedFile($file); };
+        $createFile = function ($file) { return new UploadedFile($file); };
 
-        return array_map($createFile, $normalized_files);
+        return array_map($createFile, $normalizedFiles);
     }
 
     protected function parsedBody() {
