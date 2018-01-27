@@ -116,6 +116,13 @@ class StreamTest extends TestCase
         $this->assertSame(5, $this->streamWithPredefinedConditions('Hello World!', 5)->tell());
     }
 
+    public function testTellDetachedStream_ThrowsException() {
+        $stream = $this->stream();
+        fclose($stream->detach());
+        $this->expectException(RuntimeException::class);
+        $stream->tell();
+    }
+
     public function testTellError_ThrowsException() {
         $stream = $this->stream();
         StreamTest::$overrideNativeFunctions = true;

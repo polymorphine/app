@@ -68,6 +68,11 @@ class UriTest extends TestCase
         $this->assertSame('foo', $uri->withFragment('foo')->getFragment());
     }
 
+    public function testInstantiationWithInvalidUriString_ThrowsException() {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri('http:///example.com');
+    }
+
     public function testInstantiationWithUnsupportedScheme_ThrowsInvalidArgumentException() {
         $this->expectException(InvalidArgumentException::class);
         $this->uri('xttp://example.com');
@@ -203,6 +208,15 @@ class UriTest extends TestCase
             'object password' => ['user', (object) ['password' => 'foo']],
             'int password' => ['user', 65536]
         ];
+    }
+
+    /**
+     * @param $scheme
+     * @dataProvider invalidNonStringArgs
+     */
+    public function testWithSchemeNonStringArgument_ThrowsException($scheme) {
+        $this->expectException(InvalidArgumentException::class);
+        $this->uri()->withScheme($scheme);
     }
 
     /**
