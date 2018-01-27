@@ -31,6 +31,6 @@
         }
     },
     "scripts": {
-        "run-tests": "phpunit"
+        "run-tests": "phpunit --configuration phpunit.xml.dist"
     }
 }
