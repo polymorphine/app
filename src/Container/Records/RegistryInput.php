@@ -1,10 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container;
+namespace Shudd3r\Http\Src\Container\Records;
 
+use Shudd3r\Http\Src\Container\Registry;
 use Closure;
-use Shudd3r\Http\Src\Container\Entry\DirectEntry;
-use Shudd3r\Http\Src\Container\Entry\LazyEntry;
 
 
 class RegistryInput
@@ -18,14 +17,14 @@ class RegistryInput
     }
 
     public function value($value) {
-        $this->push(new DirectEntry($value));
+        $this->push(new DirectRecord($value));
     }
 
     public function lazy(Closure $closure) {
-        $this->push(new LazyEntry($closure, $this->registry));
+        $this->push(new LazyRecord($closure, $this->registry->container()));
     }
 
-    private function push(Entry $entry) {
+    private function push(Record $entry) {
         $this->registry->set($this->name, $entry);
     }
 }

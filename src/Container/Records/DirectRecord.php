@@ -1,11 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Entry;
-
-use Shudd3r\Http\Src\Container\Entry;
+namespace Shudd3r\Http\Src\Container\Records;
 
 
-class DirectEntry implements Entry
+class DirectRecord implements Record
 {
     private $value;
 

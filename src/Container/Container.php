@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 
 class Container implements ContainerInterface
 {
-    protected $registry;
+    private $registry;
 
     public function __construct(ContainerInterface $registry) {
         $this->registry = $registry;
