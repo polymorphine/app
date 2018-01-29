@@ -2,7 +2,7 @@
 
 namespace Shudd3r\Http\Src\Container\Records;
 
-use Shudd3r\Http\Src\Container\Container;
+use Psr\Container\ContainerInterface;
 use Closure;
 
 
@@ -12,8 +12,8 @@ class LazyRecord implements Record
     private $callback;
     private $container;
 
-    public function __construct(Closure $callback, Container $container) {
-        $this->callback = $callback;
+    public function __construct(Closure $callback, ContainerInterface $container) {
+        $this->callback  = $callback;
         $this->container = $container;
     }
 
