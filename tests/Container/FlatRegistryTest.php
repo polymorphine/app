@@ -3,15 +3,26 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\Container\FlatRegistry;
 use Shudd3r\Http\Src\Container\Registry;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 
-class RegistryTest extends TestCase
+class FlatRegistryTest extends TestCase
 {
-    private function registry(array $data = []) {
-        return new Registry($data);
+    protected function registry(array $data = []) {
+        return new FlatRegistry($data);
+    }
+
+    private function withBasicSettings() {
+        $registry = $this->registry();
+        $registry->entry('test')->value('Hello World!');
+        $registry->entry('lazy')->lazy(function () {
+            return 'Lazy Foo';
+        });
+
+        return $registry;
     }
 
     public function testInstantiation() {
@@ -19,8 +30,7 @@ class RegistryTest extends TestCase
     }
 
     public function testConfiguredRecordsAreAvailableFromContainer() {
-        $this->basicSettings($registry = $this->registry());
-        $container = $registry->container();
+        $container = $this->withBasicSettings()->container();
 
         $this->assertTrue($container->has('test') && $container->has('lazy'));
         $this->assertSame('Hello World!', $container->get('test'));
@@ -28,20 +38,13 @@ class RegistryTest extends TestCase
     }
 
     public function testClosuresForLazyLoadedValuesCanAccessContaine() {
-        $this->basicSettings($registry = $this->registry());
+        $registry = $this->withBasicSettings();
         $registry->entry('bar')->lazy(function () {
             return substr($this->get('test'), 0, 6) . $this->get('lazy') . '!';
         });
         $container = $registry->container();
 
         $this->assertSame('Hello Lazy Foo!', $container->get('bar'));
-    }
-
-    private function basicSettings(Registry $registry) {
-        $registry->entry('test')->value('Hello World!');
-        $registry->entry('lazy')->lazy(function () {
-            return 'Lazy Foo';
-        });
     }
 
     public function testInvalidContainerIdType_ThrowsException() {
