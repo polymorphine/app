@@ -3,9 +3,9 @@
 namespace Shudd3r\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Tests\Message\Doubles\MessageMethodsShell;
 use Psr\Http\Message\MessageInterface;
 use Shudd3r\Http\Tests\Message\Doubles\DummyStream;
-use Shudd3r\Http\Tests\Message\Doubles\MessageMethodsShell;
 use InvalidArgumentException;
 
 

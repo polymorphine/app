@@ -2,10 +2,10 @@
 
 namespace Shudd3r\Http\Tests\Message;
 
+use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\Message\ServerRequestFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Shudd3r\Http\Src\Message\ServerRequestFactory;
-use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Tests\Message\Doubles\FakeUploadedFile;
 use InvalidArgumentException;
 

@@ -2,9 +2,9 @@
 
 namespace Shudd3r\Http\Tests\Message;
 
+use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Message\Uri;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 
 
 class UriTest extends TestCase

@@ -2,8 +2,8 @@
 
 namespace Shudd3r\Http\Tests;
 
-use Shudd3r\Http\Src\App;
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\App;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\Container\Records\RegistryInput;
 use Shudd3r\Http\Src\Container\Registry;

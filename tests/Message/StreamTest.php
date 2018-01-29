@@ -2,13 +2,13 @@
 
 namespace Shudd3r\Http\Tests\Message;
 
-
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\Message\Stream;
 use Psr\Http\Message\StreamInterface;
 use Shudd3r\Http\Src\Message\Exception\StreamResourceCallException;
-use Shudd3r\Http\Src\Message\Stream;
-use RuntimeException;
 use InvalidArgumentException;
+use RuntimeException;
+
 
 class StreamTest extends TestCase
 {
