@@ -2,19 +2,12 @@
 
 namespace Shudd3r\Http\Tests\Doubles;
 
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 
 class DummyResponse implements ResponseInterface
 {
-    public $container;
-
-    public function __construct(ContainerInterface $container) {
-        $this->container = $container;
-    }
-
     public function getProtocolVersion() {}
     public function withProtocolVersion($version) {}
     public function getHeaders() {}

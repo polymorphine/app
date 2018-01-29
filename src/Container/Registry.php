@@ -33,7 +33,7 @@ class Registry implements ContainerInterface
         $this->entries[$id] = $value;
     }
 
-    public function container() {
+    public function container(): ContainerInterface {
         return $this->container;
     }
 

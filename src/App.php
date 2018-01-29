@@ -18,7 +18,7 @@ class App
     }
 
     public function execute(ServerRequestInterface $request): ResponseInterface {
-        return new DummyResponse($this->registry->container());
+        return new DummyResponse();
     }
 
     public function config(string $id): RegistryInput {
