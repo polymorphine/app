@@ -31,6 +31,16 @@ class TreeRegistryTest extends FlatRegistryTest
         $this->assertSame($expected, $container->get('group'));
     }
 
+    public function testGetPartOfExtractedArray() {
+        $registry = $this->registry();
+        $registry->entry('array')->value(['keyA' => 'value', 'keyB' => ['first' => 10, 'second' => 11]]);
+        $container = $registry->container();
+
+        $this->assertSame('value', $container->get('array.keyA'));
+        $this->assertSame(['first' => 10, 'second' => 11], $container->get('array.keyB'));
+        $this->assertSame(11, $container->get('array.keyB.second'));
+    }
+
     public function testOverridingLeafNode_ThrowsException() {
         $registry = $this->registry();
         $registry->entry('not-group')->value(1);

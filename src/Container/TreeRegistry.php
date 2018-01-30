@@ -24,10 +24,7 @@ class TreeRegistry implements Registry
     public function get($id) {
         $entry = $this->entries;
         foreach ($this->path($id) as $key) {
-            if (!array_key_exists($key, $entry)) {
-                throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
-            }
-            $entry = $entry[$key];
+            $entry = array_key_exists($key, $entry) ? $entry[$key] : $this->extractArrayValue($entry, $key, $id);
         }
 
         return $this->extractLeaves($entry);
@@ -71,15 +68,33 @@ class TreeRegistry implements Registry
         return explode(self::PATH_SEPARATOR, $path);
     }
 
+    private function extractArrayValue($entry, $key, $id) {
+        if (!$entry instanceof Record) {
+            throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
+        }
+
+        $value = $entry->value();
+
+        if (!is_array($value) || !array_key_exists($key, $value)) {
+            throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
+        }
+
+        return $value[$key];
+    }
+
     /**
      * @param $entry array|Record
      * @return mixed
      */
     private function extractLeaves($entry) {
-        if (!is_array($entry)) { return $entry->value(); }
+        if (!is_array($entry)) {
+            return ($entry instanceof Record) ? $entry->value() : $entry;
+        }
+
         foreach ($entry as &$item) {
             $item = $this->extractLeaves($item);
         }
+
         return $entry;
     }
 }
