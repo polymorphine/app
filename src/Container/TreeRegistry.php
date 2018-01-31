@@ -24,15 +24,20 @@ class TreeRegistry implements Registry
     public function get($id) {
         $entry = $this->entries;
         foreach ($this->path($id) as $key) {
-            $entry = array_key_exists($key, $entry) ? $entry[$key] : $this->extractArrayValue($entry, $key, $id);
+            if (!is_array($entry)) { $entry = $this->scanArrayRecord($entry); }
+            if (!array_key_exists($key, $entry)) {
+                throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
+            }
+            $entry = $entry[$key];
         }
 
-        return $this->extractLeaves($entry);
+        return $this->extractLeafNodes($entry);
     }
 
     public function has($id): bool {
         $entry = $this->entries;
         foreach ($this->path($id) as $key) {
+            if (!is_array($entry)) { $entry = $this->scanArrayRecord($entry); }
             if (!array_key_exists($key, $entry)) { return false; }
             $entry = $entry[$key];
         }
@@ -68,31 +73,23 @@ class TreeRegistry implements Registry
         return explode(self::PATH_SEPARATOR, $path);
     }
 
-    private function extractArrayValue($entry, $key, $id) {
-        if (!$entry instanceof Record) {
-            throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
-        }
-
+    private function scanArrayRecord($entry): array {
+        if (!$entry instanceof Record) { return []; }
         $value = $entry->value();
-
-        if (!is_array($value) || !array_key_exists($key, $value)) {
-            throw new EntryNotFoundException(sprintf('Path `%s` not defined', $id));
-        }
-
-        return $value[$key];
+        return is_array($value) ? $value : [];
     }
 
     /**
      * @param $entry array|Record
      * @return mixed
      */
-    private function extractLeaves($entry) {
+    private function extractLeafNodes($entry) {
         if (!is_array($entry)) {
             return ($entry instanceof Record) ? $entry->value() : $entry;
         }
 
         foreach ($entry as &$item) {
-            $item = $this->extractLeaves($item);
+            $item = $this->extractLeafNodes($item);
         }
 
         return $entry;
