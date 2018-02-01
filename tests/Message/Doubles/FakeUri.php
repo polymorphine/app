@@ -33,6 +33,10 @@ class FakeUri implements UriInterface
         return $this->query;
     }
 
+    public function withPath($path) {
+        return new self($this->host, $path, $this->query);
+    }
+
     public function getScheme() {}
     public function getAuthority() {}
     public function getUserInfo() {}
@@ -42,7 +46,6 @@ class FakeUri implements UriInterface
     public function withUserInfo($user, $password = null) {}
     public function withHost($host) {}
     public function withPort($port) {}
-    public function withPath($path) {}
     public function withQuery($query) {}
     public function withFragment($fragment) {}
 }

@@ -11,6 +11,7 @@ use Shudd3r\Http\Src\App;
 class MockedApp extends App
 {
     public $routeFound = false;
+    public $overrideParent = false;
 
     protected function routing(ContainerInterface $c): Route {
         $route = new MockedRoute();
@@ -23,6 +24,6 @@ class MockedApp extends App
     }
 
     protected function notFoundResponse() {
-        return new DummyResponse('Not Found');
+        return $this->overrideParent ? new DummyResponse('Not Found') : parent::notFoundResponse();
     }
 }

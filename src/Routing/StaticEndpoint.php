@@ -11,15 +11,18 @@ use Closure;
 
 class StaticEndpoint implements Route
 {
+    private $method;
     private $path;
     private $callback;
 
-    public function __construct(string $path, Closure $callback) {
+    public function __construct(string $method, string $path, Closure $callback) {
+        $this->method   = $method;
         $this->path     = $path;
         $this->callback = $callback;
     }
 
     public function forward(ServerRequestInterface $request) {
+        if ($this->method !== $request->getMethod()) { return null; }
         if ($this->path !== $request->getUri()->getPath()) { return null; }
         return $this->callback->__invoke($request);
     }
@@ -28,7 +31,15 @@ class StaticEndpoint implements Route
         throw new GatewayCallException();
     }
 
-    public function uri(array $params = [], UriInterface $prototype): UriInterface {
-        return $prototype ? $prototype->withPath($this->path) : new Uri($this->path);
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
+        return $prototype ? $prototype->withPath($this->path) : Uri::fromString($this->path);
+    }
+
+    public static function post(string $path, Closure $callback) {
+        return new self('POST', $path, $callback);
+    }
+
+    public static function get(string $path, Closure $callback) {
+        return new self('GET', $path, $callback);
     }
 }

@@ -20,7 +20,7 @@ class MockedRoute implements Route
         return new self;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface {
+    public function uri(array $params, UriInterface $prototype = null): UriInterface {
         return new FakeUri();
     }
 }

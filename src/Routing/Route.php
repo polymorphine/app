@@ -54,5 +54,5 @@ interface Route
      * @return UriInterface
      * @throws EndpointCallException|InvalidArgumentException
      */
-    public function uri(array $params, UriInterface $prototype): UriInterface;
+    public function uri(array $params, UriInterface $prototype = null): UriInterface;
 }
