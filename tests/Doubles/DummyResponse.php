@@ -8,6 +8,12 @@ use Psr\Http\Message\StreamInterface;
 
 class DummyResponse implements ResponseInterface
 {
+    public $body;
+
+    public function __construct($body = '') {
+        $this->body = $body;
+    }
+
     public function getProtocolVersion() {}
     public function withProtocolVersion($version) {}
     public function getHeaders() {}

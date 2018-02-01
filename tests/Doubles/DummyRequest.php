@@ -5,10 +5,17 @@ namespace Shudd3r\Http\Tests\Doubles;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
 
 
 class DummyRequest implements ServerRequestInterface
 {
+    public $uri;
+    public $method;
+
+    public function getMethod() { return $this->method ?: 'GET'; }
+    public function getUri() { return $this->uri ?: new FakeUri('example.com', '/foo/bar'); }
+
     public function getProtocolVersion() {}
     public function withProtocolVersion($version) {}
     public function getHeaders() {}
@@ -22,9 +29,7 @@ class DummyRequest implements ServerRequestInterface
     public function withBody(StreamInterface $body) {}
     public function getRequestTarget() {}
     public function withRequestTarget($requestTarget) {}
-    public function getMethod() {}
     public function withMethod($method) {}
-    public function getUri() {}
     public function withUri(UriInterface $uri, $preserveHost = false) {}
     public function getServerParams() {}
     public function getCookieParams() {}

@@ -17,6 +17,10 @@ class FakeUri implements UriInterface
         $this->query = $query;
     }
 
+    public function __toString() {
+        return $this->host . $this->path . $this->query;
+    }
+
     public function getHost() {
         return $this->host;
     }
@@ -41,5 +45,4 @@ class FakeUri implements UriInterface
     public function withPath($path) {}
     public function withQuery($query) {}
     public function withFragment($fragment) {}
-    public function __toString() {}
 }
