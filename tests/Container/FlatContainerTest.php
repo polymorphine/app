@@ -102,4 +102,6 @@ class FlatContainerTest extends TestCase
         $this->expectException(InvalidIdException::class);
         $this->registry(['first' => 'ok', 2 => 'not ok']);
     }
+
+    //TODO: test callbacks cannot modify registry
 }

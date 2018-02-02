@@ -133,7 +133,6 @@ class ServerRequestFactory
     }
 
     protected function parsedBody() {
-        //TODO: parsed body use cases
         return $this->post;
     }
 
