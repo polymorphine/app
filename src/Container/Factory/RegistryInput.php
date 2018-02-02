@@ -24,7 +24,7 @@ class RegistryInput
     }
 
     public function lazy(Closure $closure) {
-        $this->push(new LazyRecord($closure, $this->registry->container()));
+        $this->push(new LazyRecord($closure, $this->registry));
     }
 
     private function push(Record $entry) {

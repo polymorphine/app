@@ -3,6 +3,7 @@
 namespace Shudd3r\Http\Src;
 
 use Psr\Container\ContainerInterface;
+use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Container\Registry;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,19 +15,21 @@ use Shudd3r\Http\Src\Message\NotFoundResponse;
 
 abstract class App
 {
-    private $registry;
+    private $containerFactory;
 
     public function __construct(Registry $registry = null) {
-        $this->registry = $registry ?: $this->registry();
+        $this->containerFactory = new ContainerFactory($registry ?: $this->registry());
     }
 
     public function execute(ServerRequestInterface $request): ResponseInterface {
-        $response = $this->routing($this->registry->container())->forward($request);
+        $container = $this->containerFactory->container();
+        $response  = $this->routing($container)->forward($request);
+
         return $response ?: $this->notFoundResponse();
     }
 
     public function config(string $id): RegistryInput {
-        return $this->registry->entry($id);
+        return $this->containerFactory->addRecord($id);
     }
 
     protected function notFoundResponse() {

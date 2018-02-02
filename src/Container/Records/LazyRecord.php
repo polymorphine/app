@@ -23,7 +23,7 @@ class LazyRecord implements Record
     }
 
     private function invoke() {
-        $callback = $this->callback->bindTo($this->container, $this->container);
+        $callback = $this->callback->bindTo($this->container);
         return $callback();
     }
 }

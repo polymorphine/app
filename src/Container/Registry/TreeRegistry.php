@@ -4,9 +4,7 @@ namespace Shudd3r\Http\Src\Container\Registry;
 
 use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Container\Container;
-use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Container\Record;
-use Shudd3r\Http\Src\Container\Factory\RegistryInput;
 use Shudd3r\Http\Src\Container\Exception\EntryNotFoundException;
 use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
 
@@ -57,14 +55,6 @@ class TreeRegistry implements Registry
         }
         if (!empty($entry)) { throw new InvalidIdException(sprintf('Container already defined for `%s` path', $id)); }
         $entry = $value;
-    }
-
-    public function container(): ContainerInterface {
-        return $this->container;
-    }
-
-    public function entry(string $id): RegistryInput {
-        return new RegistryInput($id, $this);
     }
 
     private function path($path): array {

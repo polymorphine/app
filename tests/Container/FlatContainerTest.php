@@ -3,30 +3,35 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
+use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
-use Shudd3r\Http\Src\Container\Registry;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 
-class FlatRegistryTest extends TestCase
+class FlatContainerTest extends TestCase
 {
     protected function registry(array $data = []) {
         return new FlatRegistry($data);
     }
 
-    private function withBasicSettings() {
-        $registry = $this->registry();
-        $registry->entry('test')->value('Hello World!');
-        $registry->entry('lazy')->lazy(function () {
+    protected function factory($registry = null) {
+        return new ContainerFactory($registry ?: $this->registry());
+    }
+
+    protected function withBasicSettings() {
+        $factory = $this->factory();
+        $factory->addRecord('test')->value('Hello World!');
+        $factory->addRecord('lazy')->lazy(function () {
             return 'Lazy Foo';
         });
 
-        return $registry;
+        return $factory;
     }
 
     public function testInstantiation() {
-        $this->assertInstanceOf(Registry::class, $this->registry());
+        $this->assertInstanceOf(ContainerInterface::class, $this->factory()->container());
     }
 
     public function testConfiguredRecordsAreAvailableFromContainer() {
@@ -38,23 +43,23 @@ class FlatRegistryTest extends TestCase
     }
 
     public function testClosuresForLazyLoadedValuesCanAccessContaine() {
-        $registry = $this->withBasicSettings();
-        $registry->entry('bar')->lazy(function () {
+        $factory = $this->withBasicSettings();
+        $factory->addRecord('bar')->lazy(function () {
             return substr($this->get('test'), 0, 6) . $this->get('lazy') . '!';
         });
-        $container = $registry->container();
+        $container = $factory->container();
 
         $this->assertSame('Hello Lazy Foo!', $container->get('bar'));
     }
 
     public function testInvalidContainerIdType_ThrowsException() {
-        $container = $this->registry()->container();
+        $container = $this->factory()->container();
         $this->expectException(ContainerExceptionInterface::class);
         $container->has(23);
     }
 
     public function testAccessingAbsentIdFromContainer_ThrowsException() {
-        $container = $this->registry()->container();
+        $container = $this->factory()->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get('not.set');
     }
