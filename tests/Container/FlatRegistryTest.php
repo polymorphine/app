@@ -3,7 +3,7 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Container\FlatRegistry;
+use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
 use Shudd3r\Http\Src\Container\Registry;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;

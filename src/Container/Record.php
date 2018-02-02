@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Records;
+namespace Shudd3r\Http\Src\Container;
 
 
 interface Record

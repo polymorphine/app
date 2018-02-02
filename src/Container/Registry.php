@@ -3,7 +3,6 @@
 namespace Shudd3r\Http\Src\Container;
 
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Records\Record;
 use Shudd3r\Http\Src\Container\Records\RegistryInput;
 
 

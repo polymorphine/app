@@ -4,7 +4,7 @@ namespace Shudd3r\Http\Tests\Container;
 
 use Shudd3r\Http\Src\Container\Exception\EntryNotFoundException;
 use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
-use Shudd3r\Http\Src\Container\TreeRegistry;
+use Shudd3r\Http\Src\Container\Registry\TreeRegistry;
 
 
 class TreeRegistryTest extends FlatRegistryTest

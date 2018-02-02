@@ -8,7 +8,7 @@ use Shudd3r\Http\Src\Container\Registry;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\Container\Records\RegistryInput;
-use Shudd3r\Http\Src\Container\FlatRegistry;
+use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 
 

@@ -3,6 +3,7 @@
 namespace Shudd3r\Http\Src\Container\Records;
 
 use Shudd3r\Http\Src\Container\Registry;
+use Shudd3r\Http\Src\Container\Record;
 use Closure;
 
 

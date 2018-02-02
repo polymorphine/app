@@ -2,6 +2,7 @@
 
 namespace Shudd3r\Http\Src\Container\Records;
 
+use Shudd3r\Http\Src\Container\Record;
 
 class DirectRecord implements Record
 {
