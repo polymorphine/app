@@ -5,7 +5,7 @@ namespace Shudd3r\Http\Tests;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\App;
-use Shudd3r\Http\Src\Container\Records\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\RegistryInput;
 use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 use Shudd3r\Http\Tests\Doubles\DummyResponse;

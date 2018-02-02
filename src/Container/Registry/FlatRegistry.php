@@ -6,7 +6,7 @@ use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Container\Container;
 use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Container\Record;
-use Shudd3r\Http\Src\Container\Records\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\RegistryInput;
 use Shudd3r\Http\Src\Container\Exception\EntryNotFoundException;
 use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
 

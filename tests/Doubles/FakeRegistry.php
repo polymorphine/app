@@ -5,7 +5,7 @@ namespace Shudd3r\Http\Tests\Doubles;
 
 use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Container\Record;
-use Shudd3r\Http\Src\Container\Records\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\RegistryInput;
 use Shudd3r\Http\Src\Container\Registry;
 
 class FakeRegistry implements Registry

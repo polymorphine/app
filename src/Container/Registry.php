@@ -3,7 +3,7 @@
 namespace Shudd3r\Http\Src\Container;
 
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Records\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\RegistryInput;
 
 
 interface Registry extends ContainerInterface

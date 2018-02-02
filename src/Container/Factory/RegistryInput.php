@@ -1,9 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Records;
+namespace Shudd3r\Http\Src\Container\Factory;
 
 use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Http\Src\Container\Records\DirectRecord;
+use Shudd3r\Http\Src\Container\Records\LazyRecord;
 use Closure;
 
 
