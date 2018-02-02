@@ -15,6 +15,11 @@ class DummyRequest implements ServerRequestInterface
 
     public function getMethod() { return $this->method ?: 'GET'; }
     public function getUri() { return $this->uri ?: new FakeUri('example.com', '/foo/bar'); }
+    public function getRequestTarget() {
+        $query = $this->getUri()->getquery();
+        $path = $this->getUri()->getPath();
+        return $query ? $path . '?' . $query : $path;
+    }
 
     public function getProtocolVersion() {}
     public function withProtocolVersion($version) {}
@@ -27,7 +32,6 @@ class DummyRequest implements ServerRequestInterface
     public function withoutHeader($name) {}
     public function getBody() {}
     public function withBody(StreamInterface $body) {}
-    public function getRequestTarget() {}
     public function withRequestTarget($requestTarget) {}
     public function withMethod($method) {}
     public function withUri(UriInterface $uri, $preserveHost = false) {}

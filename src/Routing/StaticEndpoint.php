@@ -22,9 +22,9 @@ class StaticEndpoint implements Route
     }
 
     public function forward(ServerRequestInterface $request) {
-        if ($this->method !== $request->getMethod()) { return null; }
-        if ($this->path !== $request->getUri()->getPath()) { return null; }
-        return $this->callback->__invoke($request);
+        return ($this->methodMatch($request) && $this->targetMatch($request))
+            ? $this->callback->__invoke($request)
+            : null;
     }
 
     public function gateway(string $path): Route {
@@ -32,7 +32,8 @@ class StaticEndpoint implements Route
     }
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
-        return $prototype ? $prototype->withPath($this->path) : Uri::fromString($this->path);
+        $uri = $prototype ? $prototype->withPath($this->path) : Uri::fromString($this->path);
+        return !empty($params) ? $uri->withQuery($this->buildQueryString($params)) : $uri;
     }
 
     public static function post(string $path, Closure $callback) {
@@ -41,5 +42,24 @@ class StaticEndpoint implements Route
 
     public static function get(string $path, Closure $callback) {
         return new self('GET', $path, $callback);
+    }
+
+    private function methodMatch(ServerRequestInterface $request): bool {
+        return ($this->method === $request->getMethod());
+    }
+
+    private function targetMatch(ServerRequestInterface $request): bool {
+        $target = $request->getRequestTarget();
+        if ($this->path === $target) { return true; }
+        if (!$pos = strpos($target, '?')) { return false; } //0 means empty path anyway
+        return ($this->path === substr($target, 0, $pos));
+    }
+
+    private function buildQueryString(array $params) {
+        foreach ($params as $name => &$param) {
+            $param = $name . '=' . $param;
+        }
+
+        return implode('&', $params);
     }
 }

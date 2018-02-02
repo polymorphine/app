@@ -23,10 +23,10 @@ class StaticEndpointTest extends TestCase
         return function ($request) { return new DummyResponse(); };
     }
 
-    private function request($path, $method) {
+    private function request($path, $method, $query = '') {
         $request = new DummyRequest();
         $request->method = $method;
-        $request->uri = new FakeUri('example.com', $path);
+        $request->uri = new FakeUri('example.com', $path, $query);
         return $request;
     }
 
@@ -74,5 +74,14 @@ class StaticEndpointTest extends TestCase
         $this->assertSame('/home/page', $uri->getPath());
     }
 
-    //TODO: uri produces query string from unnecessary params
+    public function testQueryParamsAreIgnoredInRequestMatch() {
+        $route = $this->route('/home/page');
+        $request = $this->request('/home/page', 'GET', 'query=foo&params=bar');
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
+    }
+
+    public function testUriParamsProduceQueryString() {
+        $uri = $this->route('/hello/world')->uri(['first' => 'one', 'second' => 'two'], new FakeUri());
+        $this->assertSame('first=one&second=two', $uri->getQuery());
+    }
 }
