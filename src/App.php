@@ -2,13 +2,13 @@
 
 namespace Shudd3r\Http\Src;
 
-use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
-use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Container\Registry;
+use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\Container\Factory\RegistryInput;
+use Psr\Container\ContainerInterface;
+use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 

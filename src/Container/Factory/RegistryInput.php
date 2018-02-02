@@ -3,9 +3,9 @@
 namespace Shudd3r\Http\Src\Container\Factory;
 
 use Shudd3r\Http\Src\Container\Registry;
-use Shudd3r\Http\Src\Container\Record;
-use Shudd3r\Http\Src\Container\Records\DirectRecord;
-use Shudd3r\Http\Src\Container\Records\LazyRecord;
+use Shudd3r\Http\Src\Container\Registry\Record;
+use Shudd3r\Http\Src\Container\Registry\Records\DirectRecord;
+use Shudd3r\Http\Src\Container\Registry\Records\LazyRecord;
 use Closure;
 
 

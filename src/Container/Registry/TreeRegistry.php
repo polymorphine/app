@@ -3,8 +3,6 @@
 namespace Shudd3r\Http\Src\Container\Registry;
 
 use Shudd3r\Http\Src\Container\Registry;
-use Shudd3r\Http\Src\Container\Container;
-use Shudd3r\Http\Src\Container\Record;
 use Shudd3r\Http\Src\Container\Exception\EntryNotFoundException;
 use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
 
@@ -14,11 +12,13 @@ class TreeRegistry implements Registry
     const PATH_SEPARATOR = '.';
 
     private $entries = [];
-    private $container;
 
     public function __construct(array $entries = []) {
-        $this->entries = $entries;
-        $this->container = new Container($this);
+        if (!$this->isAssoc($entries)) {
+            throw new InvalidIdException('Registry keys must be string tokens');
+        }
+
+        $this->entries = $this->loadEntries($entries);
     }
 
     public function get($id) {
@@ -85,5 +85,30 @@ class TreeRegistry implements Registry
         }
 
         return $entry;
+    }
+
+    protected function loadEntries(array $entries) {
+        foreach ($entries as $key => &$entry) {
+            if (strpos($key, self::PATH_SEPARATOR) !== false) {
+                $error = 'Constructor cannot resolve path notation for key `%s` - pass nested array instead';
+                throw new InvalidIdException(sprintf($error, $key));
+            }
+
+            if (is_array($entry) && $this->isAssoc($entry)) {
+                $entry = $this->loadEntries($entry);
+                continue;
+            }
+
+            $entry = is_callable($entry)
+                ? new Records\LazyRecord($entry, $this)
+                : $entry;
+        }
+
+        return $entries;
+    }
+
+    private function isAssoc(array $entry) {
+        if (!$entry) { return true; }
+        return (count(array_filter(array_keys($entry), 'is_numeric')) === 0);
     }
 }

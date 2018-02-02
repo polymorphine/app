@@ -1,8 +1,8 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Records;
+namespace Shudd3r\Http\Src\Container\Registry\Records;
 
-use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Http\Src\Container\Registry\Record;
 
 class DirectRecord implements Record
 {

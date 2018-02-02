@@ -4,6 +4,7 @@ namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
 use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
 use Psr\Container\NotFoundExceptionInterface;
@@ -62,5 +63,43 @@ class FlatContainerTest extends TestCase
         $container = $this->factory()->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get('not.set');
+    }
+
+    public function testRegistryConstructorRecordsAreAvailableFromContainer() {
+        $construct = $this->registryConstructorParams();
+
+        $expected = array_merge($construct, [
+            'lazy.hello' => 'Hello World!',
+            'lazy.goodbye' => 'see ya!'
+        ]);
+
+        $registry  = $this->registry($construct);
+        $container = $this->factory($registry)->container();
+
+        foreach ($construct as $key => $value) {
+            $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
+            $this->assertSame($expected[$key], $container->get($key), 'Failed for key: ' . $key);
+        }
+    }
+
+    protected function registryConstructorParams() {
+        return [
+            'test' => 'Hello World!',
+            'category.first' => 'one',
+            'category.second' => 'two',
+            'array' => [1,2,3],
+            'assoc' => ['first' => 1, 'second' => 2],
+            'lazy.hello' => function () { return $this->get('test'); },
+            'lazy.goodbye' => function () { return 'see ya!'; },
+            'callbacks' => [
+                'one' => function () { return 'first'; },
+                'two' => function () { return 'second'; }
+            ]
+        ];
+    }
+
+    public function testRegistryConstructWithNotAssociativeArray_ThrowsException() {
+        $this->expectException(InvalidIdException::class);
+        $this->registry(['first' => 'ok', 2 => 'not ok']);
     }
 }
