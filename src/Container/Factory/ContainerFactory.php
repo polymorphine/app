@@ -5,6 +5,8 @@ namespace Shudd3r\Http\Src\Container\Factory;
 use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Container\Container;
 use Shudd3r\Http\Src\Container\Registry;
+use Shudd3r\Http\Src\Container\Registry\Records;
+use Closure;
 
 
 class ContainerFactory
@@ -21,7 +23,15 @@ class ContainerFactory
         return $this->container;
     }
 
-    public function addRecord(string $name): RegistryInput {
-        return new RegistryInput($name, $this->registry);
+    public function addRecord(string $name): InputProxy {
+        return new InputProxy($name, $this);
+    }
+
+    public function value($name, $value) {
+        $this->registry->set($name, new Records\DirectRecord($value));
+    }
+
+    public function lazy($name, Closure $closure) {
+        $this->registry->set($name, new Records\LazyRecord($closure, $this->container));
     }
 }

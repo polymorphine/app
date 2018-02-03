@@ -103,5 +103,11 @@ class FlatContainerTest extends TestCase
         $this->registry(['first' => 'ok', 2 => 'not ok']);
     }
 
-    //TODO: test callbacks cannot modify registry
+    public function testCallbacksCannotModifyRegistry() {
+        $factory = $this->factory();
+        $factory->addRecord('lazyModifier')->lazy(function () { return method_exists($this, 'set'); });
+        $this->assertFalse($factory->container()->get('lazyModifier'));
+    }
+
+    //TODO: constructor callbacks cannot modify registry
 }

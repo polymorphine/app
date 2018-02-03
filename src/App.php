@@ -6,7 +6,7 @@ use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Src\Container\Factory\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\InputProxy;
 use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
@@ -28,7 +28,7 @@ abstract class App
         return $response ?: $this->notFoundResponse();
     }
 
-    public function config(string $id): RegistryInput {
+    public function config(string $id): InputProxy {
         return $this->containerFactory->addRecord($id);
     }
 

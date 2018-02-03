@@ -5,7 +5,7 @@ namespace Shudd3r\Http\Tests;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\App;
-use Shudd3r\Http\Src\Container\Factory\RegistryInput;
+use Shudd3r\Http\Src\Container\Factory\InputProxy;
 use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 use Shudd3r\Http\Tests\Doubles\DummyResponse;
@@ -27,7 +27,7 @@ class AppTest extends TestCase
 
     public function testConfig_ReturnsRegistryInput() {
         $app = $this->app();
-        $this->assertInstanceOf(RegistryInput::class, $app->config('test'));
+        $this->assertInstanceOf(InputProxy::class, $app->config('test'));
     }
 
     public function testRoutingContainerIntegration() {
