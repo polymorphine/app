@@ -5,19 +5,19 @@ namespace Shudd3r\Http\Tests;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\App;
+use Shudd3r\Http\Src\Container\Factory;
 use Shudd3r\Http\Src\InputProxy;
-use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 use Shudd3r\Http\Tests\Doubles\DummyResponse;
-use Shudd3r\Http\Tests\Doubles\FakeRegistry;
+use Shudd3r\Http\Tests\Doubles\MockedContainerFactory;
 use Shudd3r\Http\Tests\Doubles\MockedApp;
 use Shudd3r\Http\Tests\Doubles\DummyRequest;
 
 
 class AppTest extends TestCase
 {
-    private function app(Registry $registry = null) {
-        return $registry ? new MockedApp($registry) : new MockedApp(new FakeRegistry());
+    private function app(Factory $factory = null) {
+        return $factory ? new MockedApp($factory) : new MockedApp(new MockedContainerFactory());
     }
 
     public function testInstantiation() {
@@ -51,5 +51,15 @@ class AppTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(DummyResponse::class, $response);
         $this->assertSame('Not Found', $response->body);
+    }
+
+    public function testContainerSettingsArePassedToFactory() {
+        $factory = new MockedContainerFactory();
+        $app = $this->app($factory);
+        $app->config('testValue')->value('value');
+        $app->config('testCallback')->lazy(function () { return 'ok'; });
+
+        $this->assertSame('value', $factory->values['testValue']);
+        $this->assertSame('ok', $factory->closures['testCallback']->__invoke());
     }
 }

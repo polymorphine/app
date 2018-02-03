@@ -2,15 +2,15 @@
 
 namespace Shudd3r\Http\Tests\Container;
 
-use Shudd3r\Http\Src\Container\Exception\EntryNotFoundException;
-use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
-use Shudd3r\Http\Src\Container\Registry\TreeRegistry;
+use Shudd3r\Http\Src\Container\Factory\TreeContainerFactory;
+use Shudd3r\Http\Src\Container\TreeContainer;
+use Shudd3r\Http\Src\Container\Exception;
 
 
 class TreeContainerTest extends FlatContainerTest
 {
-    protected function registry(array $data = []) {
-        return new TreeRegistry($data);
+    protected function factory(array $data = []) {
+        return new TreeContainerFactory($data);
     }
 
     private function withTreeSettings() {
@@ -71,44 +71,38 @@ class TreeContainerTest extends FlatContainerTest
         $factory->value('group', ['test' => ['not-used' => 'value']]);
         $container = $factory->container();
 
-        $this->expectException(EntryNotFoundException::class);
+        $this->expectException(Exception\EntryNotFoundException::class);
         $container->get('group.test.used');
     }
 
     public function testOverridingLeafNode_ThrowsException() {
         $factory = $this->factory();
         $factory->value('not-group', 1);
-        $this->expectException(InvalidIdException::class);
+        $this->expectException(Exception\InvalidIdException::class);
         $factory->value('not-group.override', 2);
     }
 
     public function testRegistryConstructorRecordsAreAvailableFromContainer() {
-        $construct = array_merge($this->registryConstructorParams(), [
-            'lazy' => [
-                'hello' => function () { return $this->get('test'); },
-                'goodbye' => function () { return 'see ya!'; }
-            ],
-            'category' => [
-                'first' => 'one',
-                'second' => 'two'
-            ],
-        ]);
+        $construct = $this->registryConstructorParams();
 
-        unset($construct['lazy.hello'], $construct['lazy.goodbye'], $construct['category.first'], $construct['category.second']);
-
-        $expected = array_merge($construct, [
+        $expected = [
+            'test' => 'Hello World!',
+            'array' => [1,2,3],
+            'assoc' => ['first' => 1, 'second' => 2],
+            'category' => ['first' => 'one', 'second' => 'two'],
+            'category.first' => 'one',
+            'category.second' => 'two',
+            'lazy' => ['hello' => 'Hello World!', 'goodbye' => 'see ya!'],
             'lazy.hello' => 'Hello World!',
             'lazy.goodbye' => 'see ya!',
-            'lazy' => ['hello' => 'Hello World!', 'goodbye' => 'see ya!'],
             'assoc.first' => 1,
             'assoc.second' => 2,
             'callbacks' => ['one' => 'first', 'two' => 'second'],
             'callbacks.one' => 'first',
             'callbacks.two' => 'second'
-        ]);
+        ];
 
-        $registry  = $this->registry($construct);
-        $container = $this->factory($registry)->container();
+        $container = $this->factory($construct)->container();
 
         foreach ($expected as $key => $value) {
             $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
@@ -116,9 +110,33 @@ class TreeContainerTest extends FlatContainerTest
         }
     }
 
+    protected function registryConstructorParams() {
+        return [
+            'value' => [
+                'test' => 'Hello World!',
+                'category' => [
+                    'first' => 'one',
+                    'second' => 'two'
+                ],
+                'array' => [1,2,3],
+                'assoc' => ['first' => 1, 'second' => 2]
+            ],
+            'lazy' => [
+                'lazy' => [
+                    'hello' => function () { return $this->get('test'); },
+                    'goodbye' => function () { return 'see ya!'; }
+                ],
+                'callbacks' => [
+                    'one' => function () { return 'first'; },
+                    'two' => function () { return 'second'; }
+                ]
+            ]
+        ];
+    }
+
     public function testRegistryConstructWithPathArrayKeys_ThrowsException() {
-        $invalidKey = 'not' . TreeRegistry::PATH_SEPARATOR . 'ok';
-        $this->expectException(InvalidIdException::class);
-        $this->registry(['first' => 'ok', 'second' => [$invalidKey => 1, 'not-relevant' => 'value']]);
+        $invalidKey = 'not' . TreeContainer::PATH_SEPARATOR . 'ok';
+        $this->expectException(Exception\InvalidStateException::class);
+        $this->factory(['value' => ['first' => 'ok', $invalidKey => [1, 2]]])->container();
     }
 }

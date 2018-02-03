@@ -6,7 +6,7 @@ use Psr\Container\ContainerExceptionInterface;
 use InvalidArgumentException;
 
 
-class InvalidIdException extends InvalidArgumentException implements ContainerExceptionInterface
+class InvalidStateException extends InvalidArgumentException implements ContainerExceptionInterface
 {
 
 }

@@ -3,22 +3,16 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\Container\Factory\FlatContainerFactory;
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
-use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
-use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 
 class FlatContainerTest extends TestCase
 {
-    protected function registry(array $data = []) {
-        return new FlatRegistry($data);
-    }
-
-    protected function factory($registry = null) {
-        return new ContainerFactory($registry ?: $this->registry());
+    protected function factory(array $data = []) {
+        return new FlatContainerFactory($data);
     }
 
     protected function withBasicSettings() {
@@ -66,46 +60,50 @@ class FlatContainerTest extends TestCase
     public function testRegistryConstructorRecordsAreAvailableFromContainer() {
         $construct = $this->registryConstructorParams();
 
-        $expected = array_merge($construct, [
+        $expected = array_merge($construct['value'], $construct['lazy'], [
             'lazy.hello' => 'Hello World!',
             'lazy.goodbye' => 'see ya!'
         ]);
 
-        $registry  = $this->registry($construct);
-        $container = $this->factory($registry)->container();
+        $container = $this->factory($construct)->container();
 
-        foreach ($construct as $key => $value) {
+        foreach ($expected as $key => $value) {
             $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
-            $this->assertSame($expected[$key], $container->get($key), 'Failed for key: ' . $key);
+            $this->assertSame($value, $container->get($key), 'Failed for key: ' . $key);
         }
     }
 
     protected function registryConstructorParams() {
         return [
-            'test' => 'Hello World!',
-            'category.first' => 'one',
-            'category.second' => 'two',
-            'array' => [1,2,3],
-            'assoc' => ['first' => 1, 'second' => 2],
-            'lazy.hello' => function () { return $this->get('test'); },
-            'lazy.goodbye' => function () { return 'see ya!'; },
-            'callbacks' => [
-                'one' => function () { return 'first'; },
-                'two' => function () { return 'second'; }
+            'value' => [
+                'test' => 'Hello World!',
+                'category.first' => 'one',
+                'category.second' => 'two',
+                'array' => [1,2,3],
+                'assoc' => ['first' => 1, 'second' => 2],
+                'callbacks' => [
+                    'one' => function () { return 'first'; },
+                    'two' => function () { return 'second'; }
+                ]
+            ],
+            'lazy' => [
+                'lazy.hello' => function () { return $this->get('test'); },
+                'lazy.goodbye' => function () { return 'see ya!'; }
             ]
         ];
     }
 
-    public function testRegistryConstructWithNotAssociativeArray_ThrowsException() {
-        $this->expectException(InvalidIdException::class);
-        $this->registry(['first' => 'ok', 2 => 'not ok']);
+    public function testConstructWithNotAssociativeArray_ThrowsException() {
+        $this->expectException(ContainerExceptionInterface::class);
+        $this->factory(['value' => ['first' => 'ok', 2 => 'not ok']])->container();
     }
 
     public function testCallbacksCannotModifyRegistry() {
         $factory = $this->factory();
-        $factory->lazy('lazyModifier', function () { return method_exists($this, 'set'); });
+        $factory->lazy('lazyModifier', function () {
+            $vars = get_object_vars($this);
+            return isset($vars['values']) || isset($vars['callbacks']);
+        });
         $this->assertFalse($factory->container()->get('lazyModifier'));
     }
-
-    //TODO: constructor callbacks cannot modify registry
 }

@@ -2,7 +2,7 @@
 
 namespace Shudd3r\Http\Src;
 
-use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
+use Shudd3r\Http\Src\Container\Factory;
 use Closure;
 
 
@@ -11,7 +11,7 @@ class InputProxy
     private $name;
     private $factory;
 
-    public function __construct(string $name, ContainerFactory $factory) {
+    public function __construct(string $name, Factory $factory) {
         $this->name     = $name;
         $this->factory = $factory;
     }

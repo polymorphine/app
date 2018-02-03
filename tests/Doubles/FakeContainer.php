@@ -2,10 +2,10 @@
 
 namespace Shudd3r\Http\Tests\Doubles;
 
-use Shudd3r\Http\Src\Container\Registry;
+use Psr\Container\ContainerInterface;
 
 
-class FakeRegistry implements Registry
+class FakeContainer implements ContainerInterface
 {
     public function get($id) {
         return 'Hello World!';
@@ -13,9 +13,5 @@ class FakeRegistry implements Registry
 
     public function has($id) {
         return true;
-    }
-
-    public function set(string $id, Registry\Record $value) {
-
     }
 }
