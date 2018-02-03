@@ -23,10 +23,8 @@ class FlatContainerTest extends TestCase
 
     protected function withBasicSettings() {
         $factory = $this->factory();
-        $factory->addRecord('test')->value('Hello World!');
-        $factory->addRecord('lazy')->lazy(function () {
-            return 'Lazy Foo';
-        });
+        $factory->value('test', 'Hello World!');
+        $factory->lazy('lazy', function () { return 'Lazy Foo'; });
 
         return $factory;
     }
@@ -45,7 +43,7 @@ class FlatContainerTest extends TestCase
 
     public function testClosuresForLazyLoadedValuesCanAccessContaine() {
         $factory = $this->withBasicSettings();
-        $factory->addRecord('bar')->lazy(function () {
+        $factory->lazy('bar', function () {
             return substr($this->get('test'), 0, 6) . $this->get('lazy') . '!';
         });
         $container = $factory->container();
@@ -105,7 +103,7 @@ class FlatContainerTest extends TestCase
 
     public function testCallbacksCannotModifyRegistry() {
         $factory = $this->factory();
-        $factory->addRecord('lazyModifier')->lazy(function () { return method_exists($this, 'set'); });
+        $factory->lazy('lazyModifier', function () { return method_exists($this, 'set'); });
         $this->assertFalse($factory->container()->get('lazyModifier'));
     }
 

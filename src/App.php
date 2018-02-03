@@ -6,7 +6,6 @@ use Shudd3r\Http\Src\Container\Registry;
 use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Src\Container\Factory\InputProxy;
 use Psr\Container\ContainerInterface;
 use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Container\Registry\FlatRegistry;
@@ -29,7 +28,7 @@ abstract class App
     }
 
     public function config(string $id): InputProxy {
-        return $this->containerFactory->addRecord($id);
+        return new InputProxy($id, $this->containerFactory);
     }
 
     protected function notFoundResponse() {

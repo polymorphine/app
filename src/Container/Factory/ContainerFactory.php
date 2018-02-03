@@ -23,10 +23,6 @@ class ContainerFactory
         return $this->container;
     }
 
-    public function addRecord(string $name): InputProxy {
-        return new InputProxy($name, $this);
-    }
-
     public function value($name, $value) {
         $this->registry->set($name, new Records\DirectRecord($value));
     }

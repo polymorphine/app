@@ -15,11 +15,9 @@ class TreeContainerTest extends FlatContainerTest
 
     private function withTreeSettings() {
         $factory = $this->factory();
-        $factory->addRecord('group.test')->value('Hello World!');
-        $factory->addRecord('group.lazy.foo')->lazy(function () {
-            return 'Lazy Foo';
-        });
-        $factory->addRecord('its.over')->value(9000);
+        $factory->value('group.test', 'Hello World!');
+        $factory->lazy('group.lazy.foo', function () { return 'Lazy Foo'; });
+        $factory->value('its.over', 9000);
         return $factory;
     }
 
@@ -34,7 +32,7 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testHasConfiguredPath_ReturnsTrue() {
         $factory = $this->withTreeSettings();
-        $factory->addRecord('test')->value(['subA' => 'value']);
+        $factory->value('test', ['subA' => 'value']);
         $container = $factory->container();
 
         $this->assertTrue($container->has('group.lazy'));
@@ -43,7 +41,7 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testHasUnreachablePath_ReturnsFalse() {
         $factory = $this->withTreeSettings();
-        $factory->addRecord('test')->value(['subA' => 'value']);
+        $factory->value('test', ['subA' => 'value']);
         $container = $factory->container();
 
         $this->assertFalse($container->has('group.notLazy'));
@@ -52,7 +50,7 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testGetPartOfExtractedArray() {
         $factory = $this->factory();
-        $factory->addRecord('array')->value(['keyA' => 'value', 'keyB' => ['first' => 10, 'second' => 11]]);
+        $factory->value('array', ['keyA' => 'value', 'keyB' => ['first' => 10, 'second' => 11]]);
         $container = $factory->container();
 
         $this->assertSame('value', $container->get('array.keyA'));
@@ -62,7 +60,7 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testHasUnreachableExtractedArrayPath_ReturnsFalse() {
         $factory = $this->factory();
-        $factory->addRecord('group')->value(['test' => ['not-used' => 'value']]);
+        $factory->value('group', ['test' => ['not-used' => 'value']]);
         $container = $factory->container();
 
         $this->assertFalse($container->has('group.test.used'));
@@ -70,7 +68,7 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testGetUnreachableExtractedArrayPath_ThrowsException() {
         $factory = $this->factory();
-        $factory->addRecord('group')->value(['test' => ['not-used' => 'value']]);
+        $factory->value('group', ['test' => ['not-used' => 'value']]);
         $container = $factory->container();
 
         $this->expectException(EntryNotFoundException::class);
@@ -79,9 +77,9 @@ class TreeContainerTest extends FlatContainerTest
 
     public function testOverridingLeafNode_ThrowsException() {
         $factory = $this->factory();
-        $factory->addRecord('not-group')->value(1);
+        $factory->value('not-group', 1);
         $this->expectException(InvalidIdException::class);
-        $factory->addRecord('not-group.override')->value(2);
+        $factory->value('not-group.override', 2);
     }
 
     public function testRegistryConstructorRecordsAreAvailableFromContainer() {
@@ -123,5 +121,4 @@ class TreeContainerTest extends FlatContainerTest
         $this->expectException(InvalidIdException::class);
         $this->registry(['first' => 'ok', 'second' => [$invalidKey => 1, 'not-relevant' => 'value']]);
     }
-
 }
