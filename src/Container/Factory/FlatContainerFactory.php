@@ -34,8 +34,8 @@ class FlatContainerFactory implements Factory
     }
 
     private function checkId($id) {
-        if (is_numeric($id)) {
-            throw new Exception\InvalidIdException('Numeric id tokens are not supported');
+        if (empty($id) || is_numeric($id)) {
+            throw new Exception\InvalidIdException('Only non numeric id tokens are not supported');
         }
 
         if (array_key_exists($id, $this->value) || array_key_exists($id, $this->lazy)) {

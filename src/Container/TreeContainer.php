@@ -76,6 +76,10 @@ class TreeContainer implements ContainerInterface
             $callbacks = &$callbacks[$key];
         }
 
+        if (!is_array($values) || !is_array($callbacks)) {
+            throw new Exception\InvalidStateException('Invoked value overwrite container entry');
+        }
+
         $values = array_merge($values, $this->treeInvoke($callbacks));
         unset($callbacks);
     }

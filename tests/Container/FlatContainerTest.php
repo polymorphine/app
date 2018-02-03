@@ -3,6 +3,8 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
+use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
+use Shudd3r\Http\Src\Container\Exception\InvalidStateException;
 use Shudd3r\Http\Src\Container\Factory\FlatContainerFactory;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -105,5 +107,36 @@ class FlatContainerTest extends TestCase
             return isset($vars['values']) || isset($vars['callbacks']);
         });
         $this->assertFalse($factory->container()->get('lazyModifier'));
+    }
+
+    public function testOverwritingExistingKey_ThrowsException() {
+        $factory = $this->factory(['value' => ['test' => 'foo']]);
+        $this->expectException(InvalidIdException::class);
+        $factory->value('test', 'bar');
+    }
+
+    public function testNumericId_ThrowsException() {
+        $factory = $this->factory();
+        $this->expectException(InvalidIdException::class);
+        $factory->lazy('74', function () { return 'foo'; });
+    }
+
+    public function testEmptyFactoryId_ThrowsException() {
+        $factory = $this->factory();
+        $this->expectException(InvalidIdException::class);
+        $factory->lazy('', function () { return 'foo'; });
+    }
+
+    public function testInvalidTypeForLazyValues_ThrowsException() {
+        $callback = function () { return 'this is valid'; };
+        $factory = $this->factory(['lazy' => ['key' => $callback, 'invalid' => 'not closure']]);
+        $this->expectException(InvalidStateException::class);
+        $factory->container();
+    }
+
+    public function testEmptyIdContainerCall_ThrowsException() {
+        $container = $this->withBasicSettings()->container();
+        $this->expectException(InvalidIdException::class);
+        $container->has('');
     }
 }

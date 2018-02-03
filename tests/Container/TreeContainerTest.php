@@ -139,4 +139,34 @@ class TreeContainerTest extends FlatContainerTest
         $this->expectException(Exception\InvalidStateException::class);
         $this->factory(['value' => ['first' => 'ok', $invalidKey => [1, 2]]])->container();
     }
+
+    public function testInvokedValueOverwritingDirectValueArray_ThrowsException() {
+        $callback = function () { return 'something different'; };
+        $config = [
+            'value' => [
+                'same' => ['structure' => 'value']
+            ],
+            'lazy' => [
+                'same' => $callback
+            ]
+        ];
+        $container = $this->factory($config)->container();
+        $this->expectException(Exception\InvalidStateException::class);
+        $container->get('same');
+    }
+
+    public function testInvokedValueOverwritingDirectValue_ThrowsException() {
+        $callback = function () { return 'something different'; };
+        $config = [
+            'value' => [
+                'same' => 'value'
+            ],
+            'lazy' => [
+                'same' => ['structure' => $callback]
+            ]
+        ];
+        $container = $this->factory($config)->container();
+        $this->expectException(Exception\InvalidStateException::class);
+        $container->get('same.structure');
+    }
 }
