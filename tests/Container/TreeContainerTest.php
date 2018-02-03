@@ -169,4 +169,31 @@ class TreeContainerTest extends FlatContainerTest
         $this->expectException(Exception\InvalidStateException::class);
         $container->get('same.structure');
     }
+
+    //TODO: change that behavior (return to LazyRecord type probably)
+    public function testArrayKeysOrderReflectsLazyInvokedValueCalls() {
+        $factory = $this->factory();
+        $factory->lazy('cat.sub.item1', function () { return ['first' => 1]; });
+        $factory->lazy('cat.sub.item2', function () { return 2; });
+        $factory->value('cat.sub', ['item3' => 3, 'item4' => 4]);
+
+        $container = $factory->container();
+
+        $expected = [
+            'cat' => [
+                'sub' => ['item3' => 3, 'item4' => 4, 'item2' => 2, 'item1' => ['first' => 1]]
+            ]
+        ];
+
+        $this->assertFalse($container->has('cat.sub.item1.first'));
+        $this->assertSame($expected['cat']['sub']['item2'], $container->get('cat.sub.item2'));
+
+        $this->assertFalse($container->has('cat.sub.item1.first'));
+        $this->assertSame($expected['cat']['sub'], $container->get('cat.sub'));
+
+        //side effect of invoking first item
+        $this->assertTrue($container->has('cat.sub.item1.first'));
+
+        $this->assertSame($expected['cat'], $container->get('cat'));
+    }
 }

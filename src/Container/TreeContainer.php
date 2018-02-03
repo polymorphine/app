@@ -24,6 +24,7 @@ class TreeContainer implements ContainerInterface
 
         if ($this->treeSearch($path, $this->callbacks)) {
             $this->saveInvokedValues($path);
+            $this->removeClosures($path, $this->callbacks);
         }
 
         if (!$this->treeSearch($path, $this->values)) {
@@ -44,6 +45,7 @@ class TreeContainer implements ContainerInterface
                 throw new Exception\InvalidIdException('Only non numeric string tokens accepted');
             }
             if (!is_array($value) || !array_key_exists($key, $value)) { return false; }
+
             $value = $value[$key];
         }
 
@@ -51,10 +53,7 @@ class TreeContainer implements ContainerInterface
     }
 
     private function treeValue(array $path, array $value) {
-        foreach ($path as $key) {
-            $value = $value[$key];
-        }
-
+        foreach ($path as $key) { $value = $value[$key]; }
         return $value;
     }
 
@@ -62,26 +61,36 @@ class TreeContainer implements ContainerInterface
         $values    = &$this->values;
         $callbacks = &$this->callbacks;
         foreach ($path as $key) {
-            if (isset($values[$key]) && !is_array($values[$key])) {
-                throw new Exception\InvalidStateException('Invoked value overwrite container entry');
-            }
-
             if (!isset($values[$key])) {
                 $values[$key] = $this->treeInvoke($callbacks[$key]);
-                unset($callbacks[$key]);
                 return;
             }
 
             $values    = &$values[$key];
             $callbacks = &$callbacks[$key];
+
+            if (!is_array($values)) {
+                throw new Exception\InvalidStateException('Invoked value overwrite container entry');
+            }
         }
 
-        if (!is_array($values) || !is_array($callbacks)) {
+        if (!is_array($callbacks)) {
             throw new Exception\InvalidStateException('Invoked value overwrite container entry');
         }
 
         $values = array_merge($values, $this->treeInvoke($callbacks));
-        unset($callbacks);
+    }
+
+    private function removeClosures(array $path, &$callbacks) {
+        $key = array_shift($path);
+
+        if (!$path) {
+            unset($callbacks[$key]);
+            return;
+        }
+
+        $this->removeClosures($path, $callbacks[$key]);
+        if (!$callbacks[$key]) { unset($callbacks[$key]); }
     }
 
     private function typeCheck(array $callbacks): array {
