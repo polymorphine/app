@@ -3,18 +3,19 @@
 namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Container\Exception\InvalidIdException;
-use Shudd3r\Http\Src\Container\Exception\InvalidStateException;
-use Shudd3r\Http\Src\Container\Factory\FlatContainerFactory;
+use Shudd3r\Http\Src\Container\Container;
+use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Http\Src\Container\Exception;
+use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 
-class FlatContainerTest extends TestCase
+class ContainerTest extends TestCase
 {
     protected function factory(array $data = []) {
-        return new FlatContainerFactory($data);
+        return new ContainerFactory($data);
     }
 
     protected function withBasicSettings() {
@@ -39,8 +40,8 @@ class FlatContainerTest extends TestCase
 
     public function testClosuresForLazyLoadedValuesCanAccessContaine() {
         $factory = $this->withBasicSettings();
-        $factory->lazy('bar', function () {
-            return substr($this->get('test'), 0, 6) . $this->get('lazy') . '!';
+        $factory->lazy('bar', function (ContainerInterface $c) {
+            return substr($c->get('test'), 0, 6) . $c->get('lazy') . '!';
         });
         $container = $factory->container();
 
@@ -62,7 +63,8 @@ class FlatContainerTest extends TestCase
     public function testRegistryConstructorRecordsAreAvailableFromContainer() {
         $construct = $this->registryConstructorParams();
 
-        $expected = array_merge($construct['value'], $construct['lazy'], [
+        $expected = array_merge($construct, [
+            'test' => 'Hello World!',
             'lazy.hello' => 'Hello World!',
             'lazy.goodbye' => 'see ya!'
         ]);
@@ -77,66 +79,60 @@ class FlatContainerTest extends TestCase
 
     protected function registryConstructorParams() {
         return [
-            'value' => [
-                'test' => 'Hello World!',
-                'category.first' => 'one',
-                'category.second' => 'two',
-                'array' => [1,2,3],
-                'assoc' => ['first' => 1, 'second' => 2],
-                'callbacks' => [
-                    'one' => function () { return 'first'; },
-                    'two' => function () { return 'second'; }
-                ]
+            'test' => new Record\DirectRecord('Hello World!'),
+            'category.first' => 'one',
+            'category.second' => 'two',
+            'array' => [1,2,3],
+            'assoc' => ['first' => 1, 'second' => 2],
+            'callbacks' => [
+                'one' => function () { return 'first'; },
+                'two' => function () { return 'second'; }
             ],
-            'lazy' => [
-                'lazy.hello' => function () { return $this->get('test'); },
-                'lazy.goodbye' => function () { return 'see ya!'; }
-            ]
+            'lazy.hello' => new Record\LazyRecord(function ($c) { return $c->get('test'); }),
+            'lazy.goodbye' => new Record\LazyRecord(function () { return 'see ya!'; })
         ];
     }
 
     public function testConstructWithNotAssociativeArray_ThrowsException() {
         $this->expectException(ContainerExceptionInterface::class);
-        $this->factory(['value' => ['first' => 'ok', 2 => 'not ok']])->container();
+        $this->factory(['first' => 'ok', 2 => 'not ok'])->container();
     }
 
     public function testCallbacksCannotModifyRegistry() {
         $factory = $this->factory();
-        $factory->lazy('lazyModifier', function () {
-            $vars = get_object_vars($this);
-            return isset($vars['values']) || isset($vars['callbacks']);
+        $factory->lazy('lazyModifier', function ($c) {
+            $vars = get_object_vars($c);
+            return isset($vars['records']);
         });
         $this->assertFalse($factory->container()->get('lazyModifier'));
     }
 
     public function testOverwritingExistingKey_ThrowsException() {
-        $factory = $this->factory(['value' => ['test' => 'foo']]);
-        $this->expectException(InvalidIdException::class);
+        $factory = $this->factory(['test' => 'foo']);
+        $this->expectException(Exception\InvalidIdException::class);
         $factory->value('test', 'bar');
     }
 
     public function testNumericId_ThrowsException() {
         $factory = $this->factory();
-        $this->expectException(InvalidIdException::class);
+        $this->expectException(Exception\InvalidIdException::class);
         $factory->lazy('74', function () { return 'foo'; });
     }
 
     public function testEmptyFactoryId_ThrowsException() {
         $factory = $this->factory();
-        $this->expectException(InvalidIdException::class);
+        $this->expectException(Exception\InvalidIdException::class);
         $factory->lazy('', function () { return 'foo'; });
-    }
-
-    public function testInvalidTypeForLazyValues_ThrowsException() {
-        $callback = function () { return 'this is valid'; };
-        $factory = $this->factory(['lazy' => ['key' => $callback, 'invalid' => 'not closure']]);
-        $this->expectException(InvalidStateException::class);
-        $factory->container();
     }
 
     public function testEmptyIdContainerCall_ThrowsException() {
         $container = $this->withBasicSettings()->container();
-        $this->expectException(InvalidIdException::class);
+        $this->expectException(Exception\InvalidIdException::class);
         $container->has('');
+    }
+
+    public function testInvalidCostructorType_ThrowsException() {
+        $this->expectException(Exception\InvalidStateException::class);
+        new Container(['test' => 'value']);
     }
 }
