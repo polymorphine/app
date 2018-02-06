@@ -3,4 +3,3 @@ vendor/
 build/
 temp/
 /composer.lock
-/phpunit.xml
