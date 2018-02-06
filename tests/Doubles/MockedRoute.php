@@ -10,17 +10,21 @@ use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
 
 class MockedRoute implements Route
 {
+    public $id;
     public $callback;
+    public $path;
 
     public function forward(ServerRequestInterface $request) {
-        return $this->callback ? $this->callback->__invoke($request) : null;
+        if ($this->callback) { return $this->callback->__invoke($request); }
+        return $this->id ? new DummyResponse($this->id) : null;
     }
 
     public function gateway(string $path): Route {
-        return new self;
+        $this->path = $path;
+        return $this;
     }
 
-    public function uri(array $params, UriInterface $prototype = null): UriInterface {
-        return new FakeUri();
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
+        return $this->id ? new FakeUri($this->id) : new FakeUri();
     }
 }

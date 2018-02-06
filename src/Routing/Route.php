@@ -12,6 +12,8 @@ use InvalidArgumentException;
 
 interface Route
 {
+    const PATH_SEPARATOR = '.';
+
     /**
      * Forward $request and handle it from matching endpoint Route or Routes
      * Return null if no matching Route is found
@@ -54,5 +56,5 @@ interface Route
      * @return UriInterface
      * @throws EndpointCallException|InvalidArgumentException
      */
-    public function uri(array $params, UriInterface $prototype = null): UriInterface;
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface;
 }

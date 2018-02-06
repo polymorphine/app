@@ -1,12 +1,12 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Routing;
+namespace Shudd3r\Http\Tests\Routing\Route;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
 use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Routing\StaticEndpoint;
+use Shudd3r\Http\Src\Routing\Route\StaticEndpoint;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Tests\Doubles\DummyRequest;
 use Shudd3r\Http\Tests\Doubles\DummyResponse;

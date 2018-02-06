@@ -1,7 +1,8 @@
 <?php
 
-namespace Shudd3r\Http\Src\Routing;
+namespace Shudd3r\Http\Src\Routing\Route;
 
+use Shudd3r\Http\Src\Routing\Route;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Shudd3r\Http\Src\Message\Uri;

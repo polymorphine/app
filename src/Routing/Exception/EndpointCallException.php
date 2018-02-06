@@ -2,9 +2,9 @@
 
 namespace Shudd3r\Http\Src\Routing\Exception;
 
-use HttpRuntimeException;
+use RuntimeException;
 
-class EndpointCallException extends HttpRuntimeException
+class EndpointCallException extends RuntimeException
 {
 
 }
