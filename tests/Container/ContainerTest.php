@@ -4,9 +4,9 @@ namespace Shudd3r\Http\Tests\Container;
 
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Container\Container;
+use Shudd3r\Http\Src\Container\Factory;
 use Shudd3r\Http\Src\Container\Record;
 use Shudd3r\Http\Src\Container\Exception;
-use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -15,7 +15,7 @@ use Psr\Container\ContainerExceptionInterface;
 class ContainerTest extends TestCase
 {
     protected function factory(array $data = []) {
-        return new ContainerFactory($data);
+        return new Factory\ContainerFactory($data);
     }
 
     protected function withBasicSettings() {
@@ -131,8 +131,41 @@ class ContainerTest extends TestCase
         $container->has('');
     }
 
-    public function testInvalidCostructorType_ThrowsException() {
+    public function testInvalidConstructorType_ThrowsException() {
         $this->expectException(Exception\InvalidStateException::class);
         new Container(['test' => 'value']);
+    }
+
+    public function testFactoryCanAddRecordDirectly() {
+        $factory = $this->factory();
+        $factory->record('record.test', new Doubles\FakeRecord('record value'));
+        $container = $factory->container();
+        $this->assertTrue($container->has('record.test'));
+        $this->assertSame('record value', $container->get('record.test'));
+    }
+
+    /**
+     * @dataProvider inputScenarios
+     * @param $method
+     * @param $id
+     * @param $value
+     * @param $result
+     */
+    public function testInputProxyMethods($method, $id, $value, $result) {
+        $factory = $this->factory();
+        $proxy   = new Factory\InputProxy($id, $factory);
+        $proxy->$method($value);
+        $container = $factory->container();
+        $this->assertTrue($container->has($id));
+        $this->assertSame($result ?: $value, $container->get($id));
+    }
+
+    public function inputScenarios() {
+        return [
+            ['value', 'id.direct', 'direct value', 'direct value'],
+            ['lazy', 'id.lazy', function () { return 'lazy value';}, 'lazy value'],
+            ['record', 'id.fakeRecord', new Doubles\FakeRecord('fake record value'), 'fake record value'],
+            ['record', 'id.directRecord', new Record\DirectRecord('direct record value'), 'direct record value']
+        ];
     }
 }
