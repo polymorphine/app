@@ -1,9 +1,10 @@
 <?php
 
-namespace Shudd3r\Http\Src;
+namespace Shudd3r\Http\Src\Container\Factory;
 
 use Shudd3r\Http\Src\Container\Factory;
 use Closure;
+use Shudd3r\Http\Src\Container\Record;
 
 
 class InputProxy
@@ -12,7 +13,7 @@ class InputProxy
     private $factory;
 
     public function __construct(string $name, Factory $factory) {
-        $this->name     = $name;
+        $this->name    = $name;
         $this->factory = $factory;
     }
 
@@ -22,5 +23,9 @@ class InputProxy
 
     public function lazy(Closure $closure) {
         $this->factory->lazy($this->name, $closure);
+    }
+
+    public function record(Record $record) {
+        $this->factory->record($this->name, $record);
     }
 }

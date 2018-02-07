@@ -11,4 +11,5 @@ interface Factory
     public function container(): ContainerInterface;
     public function value($name, $value);
     public function lazy($name, Closure $closure);
+    public function record($name, Record $record);
 }

@@ -32,6 +32,11 @@ class ContainerFactory implements Factory
         $this->records[$id] = new Record\LazyRecord($closure);
     }
 
+    public function record($name, Record $record) {
+        $id = $this->validId($name);
+        $this->records[$id] = $record;
+    }
+
     private function validId($id) {
         if (empty($id) || is_numeric($id)) {
             throw new Exception\InvalidIdException('Numeric id tokens are not supported');

@@ -5,7 +5,7 @@ namespace Shudd3r\Http\Src;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Factory\ContainerFactory;
+use Shudd3r\Http\Src\Container\Factory;
 use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Src\Message\NotFoundResponse;
 
@@ -14,7 +14,7 @@ abstract class App
 {
     private $containerFactory;
 
-    public function __construct(Container\Factory $factory = null) {
+    public function __construct(Factory $factory = null) {
         $this->containerFactory = $factory ?: $this->factory();
     }
 
@@ -25,8 +25,8 @@ abstract class App
         return $response ?: $this->notFoundResponse();
     }
 
-    public function config(string $id): InputProxy {
-        return new InputProxy($id, $this->containerFactory);
+    public function config(string $id): Factory\InputProxy {
+        return new Factory\InputProxy($id, $this->containerFactory);
     }
 
     protected function notFoundResponse() {
@@ -34,7 +34,7 @@ abstract class App
     }
 
     protected function factory() {
-        return new ContainerFactory();
+        return new Factory\ContainerFactory();
     }
 
     protected abstract function routing(ContainerInterface $c): Route;
