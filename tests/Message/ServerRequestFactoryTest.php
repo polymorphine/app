@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Message\ServerRequestFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUploadedFile;
 use InvalidArgumentException;
 
 
@@ -110,8 +109,8 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testUploadedFileNestedStructureParameter() {
         $files = [
-            'first' => new FakeUploadedFile(),
-            'second' => ['subcategory' => new FakeUploadedFile()]
+            'first' => new Doubles\FakeUploadedFile(),
+            'second' => ['subcategory' => new Doubles\FakeUploadedFile()]
         ];
         $request = $this->factory(['files' => $files])->create();
         $this->assertSame($files, $request->getUploadedFiles());
@@ -138,7 +137,7 @@ class ServerRequestFactoryTest extends TestCase
     public function testMixedStructureUploadedFiles() {
         $files = [
             'test' => ['multiple' => $this->fileData(['testA.txt', 'testB.txt'])],
-            'multipleC' => [new FakeUploadedFile(), new FakeUploadedFile()],
+            'multipleC' => [new Doubles\FakeUploadedFile(), new Doubles\FakeUploadedFile()],
             'singleD' => $this->fileData('testD.txt')
         ];
 

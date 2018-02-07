@@ -5,14 +5,13 @@ namespace Shudd3r\Http\Tests\Message;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Message\Response;
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Tests\Message\Doubles\DummyStream;
 use InvalidArgumentException;
 
 
 class ResponseTest extends TestCase
 {
     private function response($status = 200, $reason = null) {
-        return new Response($status, new DummyStream(), [], ['reason' => $reason]);
+        return new Response($status, new Doubles\DummyStream(), [], ['reason' => $reason]);
     }
 
     public function testInstantiation() {

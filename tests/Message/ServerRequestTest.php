@@ -5,16 +5,14 @@ namespace Shudd3r\Http\Tests\Message;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Message\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
-use Shudd3r\Http\Tests\Message\Doubles\DummyStream;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUploadedFile;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
+use Shudd3r\Http\Tests\Message\Doubles;
 use InvalidArgumentException;
 
 
 class ServerRequestTest extends TestCase
 {
     private function request(array $params = [], $method = 'GET', $headers = []) {
-        return new ServerRequest($method, new FakeUri(), new DummyStream(), $headers, $params);
+        return new ServerRequest($method, new Doubles\FakeUri(), new Doubles\DummyStream(), $headers, $params);
     }
 
     public function testInstantiation() {
@@ -42,7 +40,7 @@ class ServerRequestTest extends TestCase
             'query' => ['getQueryParams', ['key' => 'value'], 'query'],
             'attrib' => ['getAttributes', ['key' => 'value'], 'attributes'],
             'pBody' => ['getParsedBody', ['key' => 'value'], 'parsedBody'],
-            'files' => ['getUploadedFiles', ['key' => new FakeUploadedFile()], 'files']
+            'files' => ['getUploadedFiles', ['key' => new Doubles\FakeUploadedFile()], 'files']
         ];
     }
 
@@ -77,7 +75,7 @@ class ServerRequestTest extends TestCase
             'cookie' => ['withCookieParams', ['key' => 'value']],
             'query' => ['withQueryParams', ['key' => 'value']],
             'pBody' => ['withParsedBody', ['key' => 'value']],
-            'files' => ['withUploadedFiles', ['key' => new FakeUploadedFile()]]
+            'files' => ['withUploadedFiles', ['key' => new Doubles\FakeUploadedFile()]]
         ];
     }
 
@@ -106,7 +104,7 @@ class ServerRequestTest extends TestCase
     public function testUploadedFilesInvalidStructure_ThrowsInvalidArgumentException() {
         $this->expectException(InvalidArgumentException::class);
         $files = [
-            'first' => new FakeUploadedFile(),
+            'first' => new Doubles\FakeUploadedFile(),
             'second' => 'oops im not a file'
         ];
         $this->request(['files' => $files]);
@@ -134,10 +132,10 @@ class ServerRequestTest extends TestCase
 
     public function testUploadedFileNestedStructureIsValid() {
         $files = [
-            'first' => new FakeUploadedFile(),
+            'first' => new Doubles\FakeUploadedFile(),
             'second' => [
-                'subcategory1' => new FakeUploadedFile(),
-                'subcategory2' => new FakeUploadedFile()
+                'subcategory1' => new Doubles\FakeUploadedFile(),
+                'subcategory2' => new Doubles\FakeUploadedFile()
             ]
         ];
         $request = $this->request(['files' => $files]);

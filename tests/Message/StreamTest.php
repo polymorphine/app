@@ -5,7 +5,6 @@ namespace Shudd3r\Http\Tests\Message;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Src\Message\Stream;
 use Psr\Http\Message\StreamInterface;
-use Shudd3r\Http\Src\Message\Exception\StreamResourceCallException;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -127,7 +126,6 @@ class StreamTest extends TestCase
         $stream = $this->stream();
         StreamTest::$overrideNativeFunctions = true;
         $this->expectException(RuntimeException::class);
-        $this->expectException(StreamResourceCallException::class);
         $stream->tell();
     }
 
@@ -166,7 +164,7 @@ class StreamTest extends TestCase
 
     public function testSeekError_ThrowsException() {
         $stream = $this->stream();
-        $this->expectException(StreamResourceCallException::class);
+        $this->expectException(RuntimeException::class);
         $stream->seek(-1);
     }
 
@@ -224,7 +222,7 @@ class StreamTest extends TestCase
     public function testReadError_ThrowsException() {
         self::$overrideNativeFunctions = true;
         $stream = $this->stream(null, 'w+b');
-        $this->expectException(StreamResourceCallException::class);
+        $this->expectException(RuntimeException::class);
         $stream->read(1);
     }
 
@@ -251,7 +249,7 @@ class StreamTest extends TestCase
     public function testGetContentsError_ThrowsException() {
         $stream = $this->streamWithPredefinedConditions('Hello World!', 0);
         self::$overrideNativeFunctions = true;
-        $this->expectException(StreamResourceCallException::class);
+        $this->expectException(RuntimeException::class);
         $stream->getContents();
     }
 
@@ -297,7 +295,7 @@ class StreamTest extends TestCase
     public function testErrorOnWrite_ThrowsException() {
         StreamTest::$overrideNativeFunctions = true;
         $stream = $this->stream(null, 'w+b');
-        $this->expectException(StreamResourceCallException::class);
+        $this->expectException(RuntimeException::class);
         $stream->write('Hello World!');
     }
 

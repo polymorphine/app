@@ -3,17 +3,15 @@
 namespace Shudd3r\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Tests\Message\Doubles\MessageMethodsShell;
 use Psr\Http\Message\MessageInterface;
-use Shudd3r\Http\Tests\Message\Doubles\DummyStream;
 use InvalidArgumentException;
 
 
 class MessageMethodsTest extends TestCase
 {
     private function message(array $headers = [], $version = null) {
-        if (!$version) { return new MessageMethodsShell(new DummyStream(), $headers); }
-        return new MessageMethodsShell(new DummyStream(), $headers, $version);
+        if (!$version) { return new Doubles\MessageMethodsShell(new Doubles\DummyStream(), $headers); }
+        return new Doubles\MessageMethodsShell(new Doubles\DummyStream(), $headers, $version);
     }
 
     public function testInstantiatingMessage() {
@@ -57,15 +55,15 @@ class MessageMethodsTest extends TestCase
     }
 
     public function testGetBody_ReturnsPassedStream() {
-        $body = new DummyStream();
+        $body = new Doubles\DummyStream();
         $this->assertSame($body, $this->message()->withBody($body)->getBody());
-        $message = new MessageMethodsShell($body, []);
+        $message = new Doubles\MessageMethodsShell($body, []);
         $this->assertSame($body, $message->getBody());
     }
 
     public function testWithBody_ReturnsNewObject() {
         $original = $this->message();
-        $modified = $original->withBody(new DummyStream());
+        $modified = $original->withBody(new Doubles\DummyStream());
         $this->assertEquals($original, $modified);
         $this->assertNotSame($original, $modified);
     }
@@ -231,7 +229,7 @@ class MessageMethodsTest extends TestCase
         return [
             'null value'                    => [null],
             'bool value'                    => [true],
-            'toString object'               => [new DummyStream()],
+            'toString object'               => [new Doubles\DummyStream()],
             'int within array'              => [['valid header', 9001]],
             'illegal char'                  => ["some value\xFF"],
             'invalid linebreak \n'          => ["some\n value"],
