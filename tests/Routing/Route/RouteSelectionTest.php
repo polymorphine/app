@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Shudd3r\Http\Src\Routing\Exception\EndpointCallException;
 use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
 use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Routing\Route\RouteSelection;
+use Shudd3r\Http\Src\Routing\Route\FirstMatchForwardGateway;
 use PHPUnit\Framework\TestCase;
 use Shudd3r\Http\Tests\Doubles\DummyRequest;
 use Shudd3r\Http\Tests\Doubles\DummyResponse;
@@ -19,7 +19,7 @@ class RouteSelectionTest extends TestCase
         $dummy = new MockedRoute();
         $dummy->callback = function () { return null; };
         $dummy->id = 'DUMMY';
-        return new RouteSelection(['example' => $dummy] + $routes);
+        return new FirstMatchForwardGateway(['example' => $dummy] + $routes);
     }
 
     public function testInstantiation() {

@@ -6,11 +6,10 @@ use Shudd3r\Http\Src\Routing\Route;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Shudd3r\Http\Src\Message\Uri;
-use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
 use Closure;
 
 
-class StaticEndpoint implements Route
+class StaticEndpoint extends Route
 {
     private $method;
     private $path;
@@ -22,27 +21,23 @@ class StaticEndpoint implements Route
         $this->callback = $callback;
     }
 
-    public function forward(ServerRequestInterface $request) {
-        return ($this->methodMatch($request) && $this->targetMatch($request))
-            ? $this->callback->__invoke($request)
-            : null;
-    }
-
-    public function gateway(string $path): Route {
-        throw new GatewayCallException();
-    }
-
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
-        $uri = $prototype ? $prototype->withPath($this->path) : Uri::fromString($this->path);
-        return !empty($params) ? $uri->withQuery($this->buildQueryString($params)) : $uri;
-    }
-
     public static function post(string $path, Closure $callback) {
         return new self('POST', $path, $callback);
     }
 
     public static function get(string $path, Closure $callback) {
         return new self('GET', $path, $callback);
+    }
+
+    public function forward(ServerRequestInterface $request) {
+        return ($this->methodMatch($request) && $this->targetMatch($request))
+            ? $this->callback->__invoke($request)
+            : null;
+    }
+
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
+        $uri = $prototype ? $prototype->withPath($this->path) : Uri::fromString($this->path);
+        return !empty($params) ? $uri->withQuery($this->buildQueryString($params)) : $uri;
     }
 
     private function methodMatch(ServerRequestInterface $request): bool {

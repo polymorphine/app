@@ -5,12 +5,10 @@ namespace Shudd3r\Http\Src\Routing;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
-use Shudd3r\Http\Src\Routing\Exception\EndpointCallException;
 use InvalidArgumentException;
 
 
-interface Route
+abstract class Route
 {
     const PATH_SEPARATOR = '.';
 
@@ -21,7 +19,7 @@ interface Route
      * @param ServerRequestInterface $request
      * @return ResponseInterface|null
      */
-    public function forward(ServerRequestInterface $request);
+    public abstract function forward(ServerRequestInterface $request);
 
     /**
      * Get subsequent Route by its $path
@@ -34,9 +32,11 @@ interface Route
      *
      * @param string $path
      * @return Route
-     * @throws GatewayCallException
+     * @throws Exception\GatewayCallException
      */
-    public function gateway(string $path): Route;
+    public function gateway(string $path): Route {
+        throw new Exception\GatewayCallException(sprintf('Gateway not found for path `%s`', $path));
+    }
 
     /**
      * Get endpoint call Uri
@@ -54,7 +54,9 @@ interface Route
      * @param array $params
      * @param UriInterface $prototype
      * @return UriInterface
-     * @throws EndpointCallException|InvalidArgumentException
+     * @throws Exception\EndpointCallException|InvalidArgumentException
      */
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface;
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
+        throw new Exception\EndpointCallException('Uri not defined in gateway route');
+    }
 }

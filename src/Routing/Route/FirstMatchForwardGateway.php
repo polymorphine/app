@@ -3,13 +3,11 @@
 namespace Shudd3r\Http\Src\Routing\Route;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Shudd3r\Http\Src\Routing\Exception\EndpointCallException;
-use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
+use Shudd3r\Http\Src\Routing\Exception;
 use Shudd3r\Http\Src\Routing\Route;
 
 
-class RouteSelection implements Route
+class FirstMatchForwardGateway extends Route
 {
     private $routes = [];
 
@@ -31,18 +29,14 @@ class RouteSelection implements Route
         list($id, $path) = explode(self::PATH_SEPARATOR, $path, 2) + [false, false];
 
         if (!$id) {
-            throw new GatewayCallException('Invalid gateway path - non empty string required');
+            throw new Exception\GatewayCallException('Invalid gateway path - non empty string required');
         }
 
         if (!isset($this->routes[$id])) {
-            throw new GatewayCallException(sprintf('Gateway `%s` not found', $id));
+            throw new Exception\GatewayCallException(sprintf('Gateway `%s` not found', $id));
         }
 
-        return (!$path) ? $this->routes[$id] : $this->route($this->routes[$id], $path);
-    }
-
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface {
-        throw new EndpointCallException('Cannot get Uri from gateway route');
+        return $path ? $this->route($this->routes[$id], $path) : $this->routes[$id];
     }
 
     private function response(Route $route, ServerRequestInterface $request) {

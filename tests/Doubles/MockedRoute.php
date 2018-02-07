@@ -8,7 +8,7 @@ use Shudd3r\Http\Src\Routing\Route;
 use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
 
 
-class MockedRoute implements Route
+class MockedRoute extends Route
 {
     public $id;
     public $callback;
