@@ -13,6 +13,11 @@ class DummyRequest implements ServerRequestInterface
     public $uri;
     public $method;
 
+    public function __construct(string $method = 'GET', UriInterface $uri = null) {
+        $this->method = $method;
+        $this->uri    = $uri;
+    }
+
     public function getMethod() { return $this->method ?: 'GET'; }
     public function getUri() { return $this->uri ?: new FakeUri('example.com', '/foo/bar'); }
     public function getRequestTarget() {

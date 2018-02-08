@@ -14,13 +14,12 @@ class MockedApp extends App
     public $overrideParent = false;
 
     protected function routing(ContainerInterface $c): Route {
-        $route = new MockedRoute();
-        $route->callback = $this->routeFound ? function (ServerRequestInterface $request) use ($c) {
-            $body = $request->getUri() . ': ' . $c->get('test');
-            return new DummyResponse($body);
-        } : null;
-
-        return $route;
+        return new MockedRoute('', $this->routeFound
+            ? function (ServerRequestInterface $request) use ($c) {
+                $body = $request->getUri() . ': ' . $c->get('test');
+                return new DummyResponse($body);
+            } : null
+        );
     }
 
     protected function notFoundResponse() {
