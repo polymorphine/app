@@ -12,7 +12,7 @@ use Closure;
 
 class ContainerFactory implements Factory
 {
-    private $records  = [];
+    private $records;
 
     public function __construct(array $records = []) {
         $this->records = $this->validRecords($records);
@@ -49,7 +49,7 @@ class ContainerFactory implements Factory
         return $id;
     }
 
-    private function validRecords(array $records) {
+    private function validRecords(array $records): array {
         foreach ($records as &$record) {
             if (!$record instanceof Record) {
                 $record = new Record\DirectRecord($record);

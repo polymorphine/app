@@ -25,7 +25,7 @@ class AppTest extends TestCase
 
     public function testConfig_ReturnsRegistryInput() {
         $app = $this->app();
-        $this->assertInstanceOf(Factory\InputProxy::class, $app->config('test'));
+        $this->assertInstanceOf(Factory\ContainerRecordEntry::class, $app->config('test'));
     }
 
     public function testRoutingContainerIntegration() {

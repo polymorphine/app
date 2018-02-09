@@ -25,8 +25,8 @@ abstract class App
         return $response ?: $this->notFoundResponse();
     }
 
-    public function config(string $id): Factory\InputProxy {
-        return new Factory\InputProxy($id, $this->containerFactory);
+    public function config(string $id): Factory\ContainerRecordEntry {
+        return new Factory\ContainerRecordEntry($id, $this->containerFactory);
     }
 
     protected function notFoundResponse() {

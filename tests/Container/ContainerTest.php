@@ -153,7 +153,7 @@ class ContainerTest extends TestCase
      */
     public function testInputProxyMethods($method, $id, $value, $result) {
         $factory = $this->factory();
-        $proxy   = new Factory\InputProxy($id, $factory);
+        $proxy   = new Factory\ContainerRecordEntry($id, $factory);
         $proxy->$method($value);
         $container = $factory->container();
         $this->assertTrue($container->has($id));
