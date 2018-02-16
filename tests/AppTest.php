@@ -1,13 +1,13 @@
 <?php
 
-namespace Shudd3r\Http\Tests;
+namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Src\App;
-use Shudd3r\Http\Src\Container\Factory;
-use Shudd3r\Http\Src\Message\NotFoundResponse;
-use Shudd3r\Http\Tests\Doubles;
+use Polymorphine\Http\App;
+use Polymorphine\Http\Message\NotFoundResponse;
+use Polymorphine\Http\Tests\Doubles;
+use Polymorphine\Container\Factory;
 
 
 class AppTest extends TestCase

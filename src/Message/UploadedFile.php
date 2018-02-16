@@ -1,12 +1,12 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message;
-
+namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use InvalidArgumentException;
 use RuntimeException;
+
 
 class UploadedFile implements UploadedFileInterface
 {

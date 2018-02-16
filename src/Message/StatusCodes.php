@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
 
 trait StatusCodes

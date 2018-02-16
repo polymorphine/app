@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
-
+namespace Polymorphine\Http\Tests\Message;
 
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Src\Message\NotFoundResponse;
+use Polymorphine\Http\Message\NotFoundResponse;
 use PHPUnit\Framework\TestCase;
+
 
 class NotFoundResponseTest extends TestCase
 {

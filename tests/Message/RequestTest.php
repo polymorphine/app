@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Message\Request;
+use Polymorphine\Http\Message\Request;
 use Psr\Http\Message\RequestInterface;
 use InvalidArgumentException;
 

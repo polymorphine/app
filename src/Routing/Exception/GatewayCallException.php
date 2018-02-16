@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Src\Routing\Exception;
+namespace Polymorphine\Http\Routing\Exception;
 
 use InvalidArgumentException;
 

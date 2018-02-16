@@ -12,7 +12,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Shudd3r HTTP tests">
+        <testsuite name="Polymorphine HTTP tests">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

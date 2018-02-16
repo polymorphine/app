@@ -1,9 +1,10 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\UriInterface;
 use InvalidArgumentException;
+
 
 class Uri implements UriInterface
 {

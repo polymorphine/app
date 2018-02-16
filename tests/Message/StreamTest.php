@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Message\Stream;
+use Polymorphine\Http\Message\Stream;
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
@@ -340,9 +340,9 @@ class StreamTest extends TestCase
     }
 }
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
-use Shudd3r\Http\Tests\Message\StreamTest;
+use Polymorphine\Http\Tests\Message\StreamTest;
 
 function fread($resource, $count) {
     return StreamTest::$overrideNativeFunctions ? false : \fread($resource, $count);

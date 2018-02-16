@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Message\UploadedFile;
+use Polymorphine\Http\Message\UploadedFile;
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
@@ -120,9 +120,9 @@ class UploadedFileTest extends TestCase
     }
 }
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
-use Shudd3r\Http\Tests\Message\UploadedFileTest as TestConfig;
+use Polymorphine\Http\Tests\Message\UploadedFileTest as TestConfig;
 
 function move_uploaded_file($filename, $destination) {
     if (TestConfig::$forceNativeFunctionErrors) { return false; }

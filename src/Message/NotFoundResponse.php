@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message;
-
+namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
+
 
 class NotFoundResponse extends Response
 {

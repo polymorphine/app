@@ -1,14 +1,13 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Doubles;
+namespace Polymorphine\Http\Tests\Doubles;
 
-use Closure;
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Factory;
-use Shudd3r\Http\Src\Container\Record;
+use Polymorphine\Container;
+use Closure;
 
 
-class MockedContainerFactory implements Factory
+class MockedContainerFactory implements Container\Factory
 {
     public $container = [];
 
@@ -16,15 +15,15 @@ class MockedContainerFactory implements Factory
         return new FakeContainer();
     }
 
-    public function value($name, $value) {
+    public function value($name, $value): void {
         $this->set($name, $value);
     }
 
-    public function lazy($name, Closure $closure) {
+    public function lazy($name, Closure $closure): void {
         $this->set($name, $closure);
     }
 
-    public function record($name, Record $record) {
+    public function record($name, Container\Record $record): void {
         $this->set($name, $record);
     }
 

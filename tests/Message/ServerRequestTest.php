@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Message\ServerRequest;
+use Polymorphine\Http\Message\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
-use Shudd3r\Http\Tests\Message\Doubles;
+use Polymorphine\Http\Tests\Message\Doubles;
 use InvalidArgumentException;
 
 

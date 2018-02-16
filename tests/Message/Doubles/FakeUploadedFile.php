@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message\Doubles;
+namespace Polymorphine\Http\Tests\Message\Doubles;
 
 use Psr\Http\Message\UploadedFileInterface;
 

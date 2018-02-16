@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message\Doubles;
-
+namespace Polymorphine\Http\Tests\Message\Doubles;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
-use Shudd3r\Http\Src\Message\MessageMethods;
+use Polymorphine\Http\Message\MessageMethods;
+
 
 class MessageMethodsShell implements MessageInterface
 {

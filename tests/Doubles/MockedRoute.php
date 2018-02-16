@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Doubles;
+namespace Polymorphine\Http\Tests\Doubles;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Closure;
 
 

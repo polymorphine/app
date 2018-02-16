@@ -1,16 +1,16 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Routing\Route;
+namespace Polymorphine\Http\Tests\Routing\Route;
 
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Routing\Route\StaticEndpoint;
-use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Tests\Doubles\DummyRequest;
-use Shudd3r\Http\Tests\Doubles\DummyResponse;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
+use Polymorphine\Http\Routing\Exception\GatewayCallException;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Routing\Route\StaticEndpoint;
+use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 
 
 class StaticEndpointTest extends TestCase

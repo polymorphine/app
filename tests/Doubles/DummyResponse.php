@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Doubles;
+namespace Polymorphine\Http\Tests\Doubles;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;

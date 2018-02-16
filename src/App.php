@@ -1,13 +1,13 @@
 <?php
 
-namespace Shudd3r\Http\Src;
+namespace Polymorphine\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Factory;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Message\NotFoundResponse;
+use Polymorphine\Container\Factory;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Message\NotFoundResponse;
 
 
 abstract class App

@@ -1,14 +1,14 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Routing\Route;
+namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Shudd3r\Http\Src\Routing\Exception\EndpointCallException;
-use Shudd3r\Http\Src\Routing\Exception\GatewayCallException;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Routing\Route\FirstMatchForwardGateway;
-use Shudd3r\Http\Tests\Doubles;
+use Polymorphine\Http\Routing\Exception\EndpointCallException;
+use Polymorphine\Http\Routing\Exception\GatewayCallException;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Routing\Route\FirstMatchForwardGateway;
+use Polymorphine\Http\Tests\Doubles;
 
 
 class FirstMatchForwardGatewayTest extends TestCase

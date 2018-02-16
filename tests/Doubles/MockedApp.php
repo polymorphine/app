@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Doubles;
+namespace Polymorphine\Http\Tests\Doubles;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\App;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\App;
 
 
 class MockedApp extends App

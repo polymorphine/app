@@ -1,10 +1,10 @@
 <?php
 
-namespace Shudd3r\Http\Src\Routing\Route;
+namespace Polymorphine\Http\Routing\Route;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Shudd3r\Http\Src\Routing\Exception;
-use Shudd3r\Http\Src\Routing\Route;
+use Polymorphine\Http\Routing\Exception;
+use Polymorphine\Http\Routing\Route;
 
 
 class FirstMatchForwardGateway extends Route

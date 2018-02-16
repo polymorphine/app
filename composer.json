@@ -1,16 +1,17 @@
 {
-    "name": "shudd3r/http",
+    "name": "polymorphine/http",
     "description": "PHP Front Controller for HTTP applications",
     "type": "library",
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.0",
-        "psr/http-message": "^1.0",
-        "psr/container": "^1.0"
+        "php": "^7.1",
+        "polymorphine/container": "@dev",
+        "psr/http-message": "^1.0"
     },
     "require-dev": {
+        "polymorphine/cs": "@dev",
         "phpunit/phpunit": "^6.5",
-        "satooshi/php-coveralls": "^1.0"
+        "php-coveralls/php-coveralls": "^2.0"
     },
     "license": "MIT",
     "authors": [
@@ -21,13 +22,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Shudd3r\\Http\\Src\\": "src/",
-            "Shudd3r\\Http\\Inf\\": "inf/"
+            "Polymorphine\\Http\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Shudd3r\\Http\\Tests\\": "tests/"
+            "Polymorphine\\Http\\Tests\\": "tests/"
         }
     },
     "scripts": {

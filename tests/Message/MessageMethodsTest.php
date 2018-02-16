@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\MessageInterface;

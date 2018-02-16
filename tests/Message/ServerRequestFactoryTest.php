@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message;
+namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Message\ServerRequestFactory;
+use Polymorphine\Http\Message\ServerRequestFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use InvalidArgumentException;
@@ -168,9 +168,9 @@ class ServerRequestFactoryTest extends TestCase
     //TODO: parsed body use cases
 }
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
-use Shudd3r\Http\Tests\Message\ServerRequestFactoryTest as Factory;
+use Polymorphine\Http\Tests\Message\ServerRequestFactoryTest as Factory;
 
 
 function apache_request_headers() {

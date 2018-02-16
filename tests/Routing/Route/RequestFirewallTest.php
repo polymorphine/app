@@ -1,14 +1,14 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Routing\Route;
+namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Shudd3r\Http\Src\Routing\Route;
-use Shudd3r\Http\Src\Routing\Route\RequestFirewall;
-use Shudd3r\Http\Tests\Doubles;
-use Shudd3r\Http\Tests\Message\Doubles\FakeUri;
+use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Routing\Route\RequestFirewall;
+use Polymorphine\Http\Tests\Doubles;
+use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 
 
 class RequestFirewallTest extends TestCase

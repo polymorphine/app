@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message\Exception;
+namespace Polymorphine\Http\Message\Exception;
 
 use RuntimeException;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Shudd3r\Http\Src\Message;
+namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
-use Shudd3r\Http\Src\Message\Exception\StreamResourceCallException;
+use Polymorphine\Http\Message\Exception\StreamResourceCallException;
 
 
 class Stream implements StreamInterface

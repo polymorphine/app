@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Message\Doubles;
-
+namespace Polymorphine\Http\Tests\Message\Doubles;
 
 use Psr\Http\Message\StreamInterface;
+
 
 class DummyStream implements StreamInterface
 {
