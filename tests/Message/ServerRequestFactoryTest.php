@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
@@ -13,19 +22,18 @@ class ServerRequestFactoryTest extends TestCase
 {
     public static $nativeCallResult;
 
-    private function factory(array $data = []) {
-        return new ServerRequestFactory($data);
-    }
-
-    public function tearDown() {
+    public function tearDown()
+    {
         self::$nativeCallResult = null;
     }
 
-    public function testInstantiation() {
+    public function testInstantiation()
+    {
         $this->assertInstanceOf(ServerRequestFactory::class, $this->factory());
     }
 
-    public function testBasicIntegration() {
+    public function testBasicIntegration()
+    {
         $data = $this->basicData();
         $factory = $this->factory($data);
         $this->assertInstanceOf(ServerRequestFactory::class, $factory);
@@ -39,17 +47,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame(['attr' => 'attr value'], $request->getAttributes());
     }
 
-    private function basicData() {
-        return [
-            'post' => ['name' => 'post value'],
-            'get' => ['name' => 'get value'],
-            'cookie' => ['cookie' => 'cookie value'],
-            'server' => ['SERVER_NAME' => 'server value'],
-            'files' => []
-        ];
-    }
-
-    public function testOverridingSuperglobals() {
+    public function testOverridingSuperglobals()
+    {
         $_POST = ['name' => 'overwritten value', 'original' => 'original value'];
         $_GET = ['name' => 'overwritten value'];
         $_COOKIE = ['cookie' => 'original cookie'];
@@ -66,15 +65,18 @@ class ServerRequestFactoryTest extends TestCase
 
     /**
      * @dataProvider normalizeHeaderNames
+     *
      * @param $serverKey
      * @param $headerName
      */
-    public function testNormalizedHeadrNamesFromServerArray($serverKey, $headerName) {
+    public function testNormalizedHeadrNamesFromServerArray($serverKey, $headerName)
+    {
         $data['server'] = [$serverKey => 'value'];
         $this->assertTrue($this->factory($data)->create()->hasHeader($headerName));
     }
 
-    public function normalizeHeaderNames() {
+    public function normalizeHeaderNames()
+    {
         return [
             ['HTTP_ACCEPT', 'Accept'],
             ['HTTP_ACCEPT_ENCODING', 'Accept-Encoding'],
@@ -83,7 +85,8 @@ class ServerRequestFactoryTest extends TestCase
         ];
     }
 
-    public function testResolvingAuthorizationHeader() {
+    public function testResolvingAuthorizationHeader()
+    {
         $this->assertFalse($this->factory()->create()->hasHeader('Authorization'));
         $data['server'] = ['HTTP_AUTHORIZATION' => 'value'];
         $this->assertTrue($this->factory($data)->create()->hasHeader('Authorization'));
@@ -95,7 +98,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertFalse($this->factory()->create()->hasHeader('Authorization'));
     }
 
-    public function testUploadedFileSuperglobalParameterStructure() {
+    public function testUploadedFileSuperglobalParameterStructure()
+    {
         $files['test'] = [
             'tmp_name' => 'phpFOOBAR',
             'name' => 'avatar.png',
@@ -107,7 +111,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertInstanceOf(UploadedFileInterface::class, $request->getUploadedFiles()['test']);
     }
 
-    public function testUploadedFileNestedStructureParameter() {
+    public function testUploadedFileNestedStructureParameter()
+    {
         $files = [
             'first' => new Doubles\FakeUploadedFile(),
             'second' => ['subcategory' => new Doubles\FakeUploadedFile()]
@@ -116,7 +121,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame($files, $request->getUploadedFiles());
     }
 
-    public function testSingleUploadedFileSuperglobalStructure() {
+    public function testSingleUploadedFileSuperglobalStructure()
+    {
         $files['test'] = $this->fileData('test.txt');
         $request = $this->factory(['files' => $files])->create();
         $file = $request->getUploadedFiles();
@@ -124,7 +130,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame('test.txt', $file['test']->getClientFilename());
     }
 
-    public function testMultipleUploadedFileSuperglobalStructure() {
+    public function testMultipleUploadedFileSuperglobalStructure()
+    {
         $files['test'] = $this->fileData(['testA.txt', 'testB.txt']);
         //var_dump($files); exit;
 
@@ -134,7 +141,8 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame('testB.txt', $file['test'][1]->getClientFilename());
     }
 
-    public function testMixedStructureUploadedFiles() {
+    public function testMixedStructureUploadedFiles()
+    {
         $files = [
             'test' => ['multiple' => $this->fileData(['testA.txt', 'testB.txt'])],
             'multipleC' => [new Doubles\FakeUploadedFile(), new Doubles\FakeUploadedFile()],
@@ -148,9 +156,33 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame('testD.txt', $file['singleD']->getClientFilename());
     }
 
-    private function fileData($name) {
+    public function testInvalidFileDataStructure_ThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->factory(['files' => ['field' => 'filename.txt']])->create();
+    }
+
+    private function factory(array $data = [])
+    {
+        return new ServerRequestFactory($data);
+    }
+
+    private function basicData()
+    {
+        return [
+            'post' => ['name' => 'post value'],
+            'get' => ['name' => 'get value'],
+            'cookie' => ['cookie' => 'cookie value'],
+            'server' => ['SERVER_NAME' => 'server value'],
+            'files' => []
+        ];
+    }
+
+    private function fileData($name)
+    {
         $multi = is_array($name);
         $fill = function ($value) use ($name) { return array_fill(0, count($name), $value); };
+
         return [
             'tmp_name' => $multi ? $fill('phpFOOBAR') : 'phpFOOBAR',
             'name' => $name,
@@ -160,11 +192,6 @@ class ServerRequestFactoryTest extends TestCase
         ];
     }
 
-    public function testInvalidFileDataStructure_ThrowsException() {
-        $this->expectException(InvalidArgumentException::class);
-        $this->factory(['files' => ['field' => 'filename.txt']])->create();
-    }
-
     //TODO: parsed body use cases
 }
 
@@ -172,12 +199,12 @@ namespace Polymorphine\Http\Message;
 
 use Polymorphine\Http\Tests\Message\ServerRequestFactoryTest as Factory;
 
-
-function apache_request_headers() {
+function apache_request_headers()
+{
     return Factory::$nativeCallResult ?? [];
 }
 
-function function_exists($name) {
+function function_exists($name)
+{
     return Factory::$nativeCallResult ? true : \function_exists($name);
 }
-

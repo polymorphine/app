@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
@@ -10,15 +19,13 @@ use InvalidArgumentException;
 
 class ResponseTest extends TestCase
 {
-    private function response($status = 200, $reason = null) {
-        return new Response($status, new Doubles\DummyStream(), [], ['reason' => $reason]);
-    }
-
-    public function testInstantiation() {
+    public function testInstantiation()
+    {
         $this->assertInstanceOf(ResponseInterface::class, $this->response());
     }
 
-    public function testStatusCodeIsReturned() {
+    public function testStatusCodeIsReturned()
+    {
         $fail = 'Status code should be set by constructor';
         $this->assertSame(201, $this->response(201)->getStatusCode(), $fail);
 
@@ -26,14 +33,16 @@ class ResponseTest extends TestCase
         $this->assertSame(300, $this->response()->withStatus(300)->getStatusCode(), $fail);
     }
 
-    public function testNewStatusCode_ReturnsNewObject() {
+    public function testNewStatusCode_ReturnsNewObject()
+    {
         $original = $this->response(404);
         $clone = $original->withStatus(201);
         $this->assertEquals($clone, $original->withStatus(201));
         $this->assertNotSame($original, $clone);
     }
 
-    public function testReasonPhraseResolve() {
+    public function testReasonPhraseResolve()
+    {
         $fail = 'Default status code (200) should resolve into default "OK" reason phrase if not specified';
         $this->assertSame('OK', $this->response()->getReasonPhrase(), $fail);
 
@@ -58,21 +67,25 @@ class ResponseTest extends TestCase
         $this->assertSame($reason, $this->response(201)->withStatus(201, $reason)->getReasonPhrase(), $fail);
     }
 
-    public function testConstructorWithInvalidStatusCode_ThrowsException() {
+    public function testConstructorWithInvalidStatusCode_ThrowsException()
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->response(900);
     }
 
     /**
      * @dataProvider invalidStatusCodes
+     *
      * @param $code
      */
-    public function testWithStatusWithInvalidStatusCode_ThrowsException($code) {
+    public function testWithStatusWithInvalidStatusCode_ThrowsException($code)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->response()->withStatus($code);
     }
 
-    public function invalidStatusCodes() {
+    public function invalidStatusCodes()
+    {
         return [
             'null' => [null],
             'false' => [false],
@@ -84,27 +97,37 @@ class ResponseTest extends TestCase
 
     /**
      * @dataProvider invalidReasonPhrases
+     *
      * @param $reason
      */
-    public function testConstructorWithInvalidReasonPhrase_ThrowsException($reason) {
+    public function testConstructorWithInvalidReasonPhrase_ThrowsException($reason)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->response(200, $reason);
     }
 
     /**
      * @dataProvider invalidReasonPhrases
+     *
      * @param $reason
      */
-    public function testWithStatusWithInvalidReasonPhrase_ThrowsException($reason) {
+    public function testWithStatusWithInvalidReasonPhrase_ThrowsException($reason)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->response()->withStatus(200, $reason);
     }
 
-    public function invalidReasonPhrases() {
+    public function invalidReasonPhrases()
+    {
         return [
             'array' => [['Reason in array']],
             'false' => [false],
             'int' => [20]
         ];
+    }
+
+    private function response($status = 200, $reason = null)
+    {
+        return new Response($status, new Doubles\DummyStream(), [], ['reason' => $reason]);
     }
 }

@@ -1,41 +1,56 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Factory;
+use Polymorphine\Container\ContainerSetup;
+use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Message\NotFoundResponse;
 
 
 abstract class App
 {
-    private $containerFactory;
+    private $containerSetup;
 
-    public function __construct(Factory $factory = null) {
-        $this->containerFactory = $factory ?: $this->factory();
+    public function __construct(array $records = [])
+    {
+        $this->containerSetup = $this->containerSetup($records);
     }
 
-    public function execute(ServerRequestInterface $request): ResponseInterface {
-        $container = $this->containerFactory->container();
-        $response  = $this->routing($container)->forward($request);
+    public function execute(ServerRequestInterface $request): ResponseInterface
+    {
+        $container = $this->containerSetup->container();
+        $response = $this->routing($container)->forward($request);
 
         return $response ?: $this->notFoundResponse();
     }
 
-    public function config(string $id): Factory\ContainerRecordEntry {
-        return new Factory\ContainerRecordEntry($id, $this->containerFactory);
+    public function config(string $id): RecordSetup
+    {
+        return $this->containerSetup->entry($id);
     }
 
-    protected function notFoundResponse() {
+    protected function notFoundResponse()
+    {
         return new NotFoundResponse();
     }
 
-    protected function factory() {
-        return new Factory\ContainerFactory();
+    protected function containerSetup(array $records)
+    {
+        return new ContainerSetup($records);
     }
 
-    protected abstract function routing(ContainerInterface $c): Route;
+    abstract protected function routing(ContainerInterface $c): Route;
 }

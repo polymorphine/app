@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\RequestInterface;
@@ -18,11 +27,11 @@ class Request implements RequestInterface
         array $headers = [],
         array $params = []
     ) {
-        $this->method  = $this->validMethod($method);
-        $this->uri     = $uri;
-        $this->body    = $body;
+        $this->method = $this->validMethod($method);
+        $this->uri = $uri;
+        $this->body = $body;
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
-        $this->target  = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
+        $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
         $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }

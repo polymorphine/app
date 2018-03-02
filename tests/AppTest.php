@@ -1,41 +1,48 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\App;
+use Polymorphine\Container\Setup;
 use Polymorphine\Http\Message\NotFoundResponse;
-use Polymorphine\Http\Tests\Doubles;
-use Polymorphine\Container\Factory;
 
 
 class AppTest extends TestCase
 {
-    private function app(Factory $factory = null) {
-        return $factory
-            ? new Doubles\MockedApp($factory)
-            : new Doubles\MockedApp(new Doubles\MockedContainerFactory());
-    }
-
-    public function testInstantiation() {
-        $this->assertInstanceOf(App::class, new Doubles\MockedApp());
+    public function testInstantiation()
+    {
         $this->assertInstanceOf(App::class, $this->app());
     }
 
-    public function testConfig_ReturnsRegistryInput() {
+    public function testConfig_ReturnsRegistryInput()
+    {
         $app = $this->app();
-        $this->assertInstanceOf(Factory\ContainerRecordEntry::class, $app->config('test'));
+        $this->assertInstanceOf(Setup\RecordSetup::class, $app->config('test'));
     }
 
-    public function testRoutingContainerIntegration() {
-        $app = $this->app();
+    public function testRoutingContainerIntegration()
+    {
+        $app = $this->app([
+            'test' => new Setup\Record\DirectRecord('Hello World!')
+        ]);
         $app->routeFound = true;
         $response = $app->execute(new Doubles\DummyRequest());
         $this->assertSame('example.com/foo/bar: Hello World!', $response->body);
     }
 
-    public function testFallbackNotFoundRoute() {
+    public function testFallbackNotFoundRoute()
+    {
         $app = $this->app();
         $app->routeFound = false;
 
@@ -51,13 +58,8 @@ class AppTest extends TestCase
         $this->assertSame('Not Found', $response->body);
     }
 
-    public function testContainerSettingsArePassedToFactory() {
-        $factory = new Doubles\MockedContainerFactory();
-        $app = $this->app($factory);
-        $app->config('testValue')->value('value');
-        $app->config('testCallback')->lazy(function () { return 'ok'; });
-
-        $this->assertSame('value', $factory->container['testValue']);
-        $this->assertSame('ok', $factory->container['testCallback']->__invoke());
+    private function app(array $records = [])
+    {
+        return new Doubles\MockedApp($records);
     }
 }

@@ -1,40 +1,49 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\Http\Tests\Message\Doubles;
 use InvalidArgumentException;
 
 
 class ServerRequestTest extends TestCase
 {
-    private function request(array $params = [], $method = 'GET', $headers = []) {
-        return new ServerRequest($method, new Doubles\FakeUri(), new Doubles\DummyStream(), $headers, $params);
-    }
-
-    public function testInstantiation() {
+    public function testInstantiation()
+    {
         $this->assertInstanceOf(ServerRequestInterface::class, $this->request());
     }
 
-    public function testGetServerParams_ReturnsInstanceServerParamsArray() {
+    public function testGetServerParams_ReturnsInstanceServerParamsArray()
+    {
         $params = ['key' => 'value'];
         $this->assertSame($params, $this->request(['server' => $params])->getServerParams());
     }
 
     /**
      * @dataProvider instanceProperties
+     *
      * @param $method
      * @param $key
      * @param $params
      */
-    public function testGetters_ReturnConstructorProperties($method, $params, $key) {
-        $this->assertSame($params, $this->request([$key => $params])->$method());
+    public function testGetters_ReturnConstructorProperties($method, $params, $key)
+    {
+        $this->assertSame($params, $this->request([$key => $params])->{$method}());
     }
 
-    public function instanceProperties() {
+    public function instanceProperties()
+    {
         return [
             'cookie' => ['getCookieParams', ['key' => 'value'], 'cookie'],
             'query' => ['getQueryParams', ['key' => 'value'], 'query'],
@@ -44,14 +53,16 @@ class ServerRequestTest extends TestCase
         ];
     }
 
-    public function testGetAttribute_ReturnsSpecifiedAttributeValue() {
+    public function testGetAttribute_ReturnsSpecifiedAttributeValue()
+    {
         $request = $this->request(['attributes' => ['name' => 'value']]);
         $this->assertSame('value', $request->getAttribute('name', 'default'));
         $request = $this->request(['attributes' => ['name' => null]]);
         $this->assertSame(null, $request->getAttribute('name', 'default'));
     }
 
-    public function testGetAttribute_ReturnsDefaultValueIfAttributeNotPresent() {
+    public function testGetAttribute_ReturnsDefaultValueIfAttributeNotPresent()
+    {
         $request = $this->request(['attributes' => ['unknownName' => 'value']]);
         $this->assertSame('default', $request->getAttribute('name', 'default'));
         $this->assertSame(null, $request->getAttribute('name'));
@@ -59,18 +70,21 @@ class ServerRequestTest extends TestCase
 
     /**
      * @dataProvider mutatorMethods
+     *
      * @param $method
      * @param $params
      */
-    public function testMutatorMethods_ReturnNewInstance($method, $params) {
+    public function testMutatorMethods_ReturnNewInstance($method, $params)
+    {
         $original = $this->request();
-        $derived1 = $original->$method($params);
-        $derived2 = $original->$method($params);
+        $derived1 = $original->{$method}($params);
+        $derived2 = $original->{$method}($params);
         $this->assertEquals($derived1, $derived2);
         $this->assertNotSame($derived1, $derived2);
     }
 
-    public function mutatorMethods() {
+    public function mutatorMethods()
+    {
         return [
             'cookie' => ['withCookieParams', ['key' => 'value']],
             'query' => ['withQueryParams', ['key' => 'value']],
@@ -79,9 +93,10 @@ class ServerRequestTest extends TestCase
         ];
     }
 
-    public function testAttributeMutation_ReturnsNewInstance() {
+    public function testAttributeMutation_ReturnsNewInstance()
+    {
         $original = $this->request();
-        list($name, $value) = ['name', 'value'];
+        [$name, $value] = ['name', 'value'];
         $derived1 = $original->withAttribute($name, $value);
         $derived2 = $original->withAttribute($name, $value);
         $this->assertEquals($derived1, $derived2);
@@ -94,14 +109,16 @@ class ServerRequestTest extends TestCase
         $this->assertNotSame($derived1, $derived2);
     }
 
-    public function testGetParsedBodyForRequestWithoutBody_returnsNull() {
+    public function testGetParsedBodyForRequestWithoutBody_returnsNull()
+    {
         $this->assertNull($this->request()->getParsedBody());
         $request = $this->request(['body' => ['key' => 'value']]);
         $this->assertNull($request->withParsedBody(null)->getParsedBody());
         $this->assertNull($request->withParsedBody([])->getParsedBody());
     }
 
-    public function testUploadedFilesInvalidStructure_ThrowsInvalidArgumentException() {
+    public function testUploadedFilesInvalidStructure_ThrowsInvalidArgumentException()
+    {
         $this->expectException(InvalidArgumentException::class);
         $files = [
             'first' => new Doubles\FakeUploadedFile(),
@@ -110,7 +127,8 @@ class ServerRequestTest extends TestCase
         $this->request(['files' => $files]);
     }
 
-    public function testResolveUnspecifiedParsedBodyIntoSuperglobalPOST() {
+    public function testResolveUnspecifiedParsedBodyIntoSuperglobalPOST()
+    {
         $_POST = ['test' => 'value'];
 
         $fail = 'POST x-www-form-urlencoded should resolve into $_POST superglobal';
@@ -130,7 +148,8 @@ class ServerRequestTest extends TestCase
         $this->assertNull($request->getParsedBody(), $fail);
     }
 
-    public function testUploadedFileNestedStructureIsValid() {
+    public function testUploadedFileNestedStructureIsValid()
+    {
         $files = [
             'first' => new Doubles\FakeUploadedFile(),
             'second' => [
@@ -140,5 +159,10 @@ class ServerRequestTest extends TestCase
         ];
         $request = $this->request(['files' => $files]);
         $this->assertSame($files, $request->getUploadedFiles());
+    }
+
+    private function request(array $params = [], $method = 'GET', $headers = [])
+    {
+        return new ServerRequest($method, new Doubles\FakeUri(), new Doubles\DummyStream(), $headers, $params);
     }
 }
