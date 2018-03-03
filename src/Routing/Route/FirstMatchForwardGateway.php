@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Exception;
 use Polymorphine\Http\Routing\Route;
@@ -25,7 +26,7 @@ class FirstMatchForwardGateway extends Route
         $this->routes = $routes;
     }
 
-    public function forward(ServerRequestInterface $request)
+    public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         $response = null;
         foreach ($this->routes as $route) {

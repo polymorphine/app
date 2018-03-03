@@ -29,7 +29,7 @@ abstract class Route
      *
      * @return null|ResponseInterface
      */
-    abstract public function forward(ServerRequestInterface $request);
+    abstract public function forward(ServerRequestInterface $request): ?ResponseInterface;
 
     /**
      * Get subsequent Route by its $path.

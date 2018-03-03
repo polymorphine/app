@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Routing\Route;
@@ -30,7 +31,7 @@ class MockedRoute extends Route
         $this->callback = $callback;
     }
 
-    public function forward(ServerRequestInterface $request)
+    public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         if ($this->callback) {
             return $this->callback->__invoke($request);

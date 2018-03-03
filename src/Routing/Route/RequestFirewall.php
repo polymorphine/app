@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Route;
 use Closure;
@@ -27,7 +28,7 @@ class RequestFirewall extends Route
         $this->routes = $routes;
     }
 
-    public function forward(ServerRequestInterface $request)
+    public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         $match = $this->condition->__invoke($request);
 

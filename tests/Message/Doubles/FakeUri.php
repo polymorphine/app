@@ -19,6 +19,7 @@ class FakeUri implements UriInterface
     public $host;
     public $path;
     public $query;
+    public $scheme = 'http';
 
     public function __construct($host = '', $path = '', $query = '')
     {
@@ -59,6 +60,7 @@ class FakeUri implements UriInterface
 
     public function getScheme()
     {
+        return $this->scheme;
     }
 
     public function getAuthority()
@@ -79,6 +81,10 @@ class FakeUri implements UriInterface
 
     public function withScheme($scheme)
     {
+        $uri = new self($this->host, $this->path, $this->query);
+        $uri->scheme = $scheme;
+
+        return $uri;
     }
 
     public function withUserInfo($user, $password = null)

@@ -12,6 +12,7 @@
 namespace Polymorphine\Http\Routing\Route;
 
 use Polymorphine\Http\Routing\Route;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Message\Uri;
@@ -41,7 +42,7 @@ class StaticEndpoint extends Route
         return new self('GET', $path, $callback);
     }
 
-    public function forward(ServerRequestInterface $request)
+    public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         return ($this->methodMatch($request) && $this->targetMatch($request))
             ? $this->callback->__invoke($request)
