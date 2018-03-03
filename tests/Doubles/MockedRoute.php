@@ -24,6 +24,7 @@ class MockedRoute extends Route
     public $id;
     public $callback;
     public $path;
+    public $uriScheme;
 
     public function __construct(string $id, Closure $callback = null)
     {
@@ -49,6 +50,12 @@ class MockedRoute extends Route
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
-        return $this->id ? new FakeUri($this->id) : new FakeUri();
+        $uri = $this->id ? new FakeUri($this->id) : new FakeUri();
+
+        if ($this->uriScheme) {
+            $uri->scheme = $this->uriScheme;
+        }
+
+        return $uri;
     }
 }

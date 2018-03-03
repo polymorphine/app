@@ -17,29 +17,31 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class SecureGateway extends Route
+class SchemeGateway extends Route
 {
-    private $routes;
+    private $route;
+    private $scheme;
 
-    public function __construct(Route $routes)
+    public function __construct(Route $route, string $scheme = 'https')
     {
-        $this->routes = $routes;
+        $this->route = $route;
+        $this->scheme = $scheme;
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
-        return ($request->getUri()->getScheme() === 'https')
-            ? $this->routes->forward($request)
+        return ($request->getUri()->getScheme() === $this->scheme)
+            ? $this->route->forward($request)
             : null;
     }
 
     public function gateway(string $path): Route
     {
-        return new self($this->routes->gateway($path));
+        return new self($this->route->gateway($path), $this->scheme);
     }
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
-        return $this->routes->uri($params, $prototype)->withScheme('https');
+        return $this->route->uri($params, $prototype)->withScheme($this->scheme);
     }
 }
