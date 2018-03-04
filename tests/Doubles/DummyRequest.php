@@ -21,6 +21,7 @@ class DummyRequest implements ServerRequestInterface
 {
     public $uri;
     public $method;
+    public $attr;
 
     public function __construct(string $method = 'GET', UriInterface $uri = null)
     {
@@ -140,6 +141,7 @@ class DummyRequest implements ServerRequestInterface
 
     public function getAttributes()
     {
+        return $this->attr;
     }
 
     public function getAttribute($name, $default = null)
@@ -148,6 +150,8 @@ class DummyRequest implements ServerRequestInterface
 
     public function withAttribute($name, $value)
     {
+        $this->attr[$name] = $value;
+        return $this;
     }
 
     public function withoutAttribute($name)
