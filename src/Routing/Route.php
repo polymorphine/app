@@ -14,7 +14,6 @@ namespace Polymorphine\Http\Routing;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use InvalidArgumentException;
 
 
 abstract class Route
@@ -67,7 +66,7 @@ abstract class Route
      * @param array        $params
      * @param UriInterface $prototype
      *
-     * @throws Exception\EndpointCallException|InvalidArgumentException
+     * @throws Exception\EndpointCallException|Exception\UriParamsException
      *
      * @return UriInterface
      */

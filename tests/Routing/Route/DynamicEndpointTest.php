@@ -2,6 +2,7 @@
 
 namespace Polymorphine\Http\Tests\Routing\Route;
 
+use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\DynamicEndpoint;
 use PHPUnit\Framework\TestCase;
@@ -77,8 +78,29 @@ class DynamicEndpointTest extends TestCase
                          ->forward($this->request('/page/3', 'GET'));
         $this->assertSame(['no' => '3'], $response->body);
 
-        $response = $this->route('/page/{#no}/{$title}', 'UPDATE', $callback)
+        $response = $this->route('/page/{#page}/{$title}', 'UPDATE', $callback)
                          ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
-        $this->assertSame(['no' => '576', 'title' => 'foo-bar-45'], $response->body);
+        $this->assertSame(['page' => '576', 'title' => 'foo-bar-45'], $response->body);
+    }
+
+    public function testUriReplacesProvidedValues()
+    {
+        $route = $this->route('/page-{#no}/{%title}');
+        $this->assertSame('/page-12/something', $route->uri([12, 'something'])->getPath());
+        $this->assertSame('/page-852/foobar12', $route->uri([852, 'foobar12'])->getPath());
+    }
+
+    public function testUriInsufficientParams_ThrowsException()
+    {
+        $route = $this->route('/some-{#number}/{$slug}');
+        $this->expectException(UriParamsException::class);
+        $route->uri([22]);
+    }
+
+    public function testUriInvalidTypeParams_ThrowsException()
+    {
+        $route = $this->route('/user/{#country}/');
+        $this->expectException(UriParamsException::class);
+        $route->uri(['Poland']);
     }
 }
