@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use Polymorphine\Http\Routing\Exception\UriParamsException;
@@ -10,30 +19,10 @@ use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
 use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 
 class DynamicEndpointTest extends TestCase
 {
-    private function route($path = '/', $method = 'GET', $callback = null)
-    {
-        return new DynamicEndpoint($method, $path, $callback ?: $this->dummyCallback());
-    }
-
-    private function dummyCallback()
-    {
-        return function ($request) { return new DummyResponse(); };
-    }
-
-    private function request($path, $method, $query = '')
-    {
-        $request = new DummyRequest();
-        $request->method = $method;
-        $request->uri = new FakeUri('example.com', $path, $query);
-
-        return $request;
-    }
-
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $this->route());
@@ -59,28 +48,28 @@ class DynamicEndpointTest extends TestCase
 
     public function testMatchingRequest_ReturnsResponse()
     {
-        $response = $this->route('/page/{#no}', 'GET', $this->dummyCallback())
-                         ->forward($this->request('/page/3', 'GET'));
+        $response = $this
+            ->route('/page/{#no}', 'GET', $this->dummyCallback())
+            ->forward($this->request('/page/3', 'GET'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
-        $response = $this->route('/page/{#no}/{$title}', 'UPDATE', $this->dummyCallback())
-                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
+        $response = $this
+            ->route('/page/{#no}/{$title}', 'UPDATE', $this->dummyCallback())
+            ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 
     public function testRequestIsForwardedWithMatchedAttributes()
     {
-        $callback = function (ServerRequestInterface $request) {
-            return new DummyResponse($request->getAttributes());
-        };
+        $response = $this
+            ->route('/page/{#no}', 'GET')
+            ->forward($this->request('/page/3', 'GET'));
+        $this->assertSame(['no' => '3'], $response->fromRequest->attr);
 
-        $response = $this->route('/page/{#no}', 'GET', $callback)
-                         ->forward($this->request('/page/3', 'GET'));
-        $this->assertSame(['no' => '3'], $response->body);
-
-        $response = $this->route('/page/{#page}/{$title}', 'UPDATE', $callback)
-                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
-        $this->assertSame(['page' => '576', 'title' => 'foo-bar-45'], $response->body);
+        $response = $this
+            ->route('/page/{#page}/{$title}', 'UPDATE')
+            ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
+        $this->assertSame(['page' => '576', 'title' => 'foo-bar-45'], $response->fromRequest->attr);
     }
 
     public function testUriReplacesProvidedValues()
@@ -99,8 +88,47 @@ class DynamicEndpointTest extends TestCase
 
     public function testUriInvalidTypeParams_ThrowsException()
     {
-        $route = $this->route('/user/{#country}/');
+        $route = $this->route('/user/{#countryId}');
         $this->expectException(UriParamsException::class);
         $route->uri(['Poland']);
+    }
+
+    public function testRouteWithoutParametersIsMatched()
+    {
+        $response = $this
+            ->route('/path/only')
+            ->forward($this->request('/path/only', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame([], $response->fromRequest->attr);
+    }
+
+    public function testRouteWithoutParametersReturnsUriWithProvidedPath()
+    {
+        $route = $this->route('/user/name');
+        $this->assertSame('/user/name', (string) $route->uri());
+    }
+
+    private function route($path = '/', $method = 'GET', $callback = null)
+    {
+        return new DynamicEndpoint($method, $path, $callback ?: $this->dummyCallback());
+    }
+
+    private function dummyCallback()
+    {
+        return function ($request) {
+            $response = new DummyResponse();
+            $response->fromRequest = $request;
+
+            return $response;
+        };
+    }
+
+    private function request($path, $method, $query = '')
+    {
+        $request = new DummyRequest();
+        $request->method = $method;
+        $request->uri = new FakeUri('example.com', $path, $query);
+
+        return $request;
     }
 }

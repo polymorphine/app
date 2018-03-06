@@ -21,7 +21,7 @@ class DummyRequest implements ServerRequestInterface
 {
     public $uri;
     public $method;
-    public $attr;
+    public $attr = [];
 
     public function __construct(string $method = 'GET', UriInterface $uri = null)
     {

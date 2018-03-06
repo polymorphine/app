@@ -74,10 +74,6 @@ class DynamicEndpoint extends Route
 
             throw new UriParamsException(sprintf($message, count($this->params), $this->parsedPath, count($params)));
         }
-//TODO: error test
-//        if (empty($this->params)) {
-//            return $responseUri ? $responseUri->withPath($this->parsedPath): Uri::fromString($this->parsedPath);
-//        }
 
         $validParam = function ($name, $type, $value) {
             $value = (string) $value;

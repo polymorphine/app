@@ -12,12 +12,18 @@
 namespace Polymorphine\Http\Tests\Doubles;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 
 class DummyResponse implements ResponseInterface
 {
     public $body;
+
+    /**
+     * @var ServerRequestInterface
+     */
+    public $fromRequest;
 
     public function __construct($body = '')
     {
