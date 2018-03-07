@@ -13,7 +13,6 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
-use Polymorphine\Http\Routing\Route\DynamicEndpoint;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
@@ -27,8 +26,8 @@ class DynamicEndpointTest extends TestCase
     {
         $this->assertInstanceOf(Route::class, $this->route());
 
-        $routeGet = DynamicEndpoint::get('/home/{#id}', $this->dummyCallback());
-        $routePost = DynamicEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
+        $routeGet = Route\DynamicEndpoint::get('/home/{#id}', $this->dummyCallback());
+        $routePost = Route\DynamicEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
 
         $this->assertInstanceOf(Route::class, $routeGet);
         $this->assertEquals($routeGet, $this->route('/home/{#id}', 'GET', $this->dummyCallback()));
@@ -110,7 +109,11 @@ class DynamicEndpointTest extends TestCase
 
     private function route($path = '/', $method = 'GET', $callback = null)
     {
-        return new DynamicEndpoint($method, $path, $callback ?: $this->dummyCallback());
+        return new Route\DynamicEndpoint(
+            $method,
+            new Route\Pattern\TargetPattern($path),
+            $callback ?: $this->dummyCallback()
+        );
     }
 
     private function dummyCallback()
