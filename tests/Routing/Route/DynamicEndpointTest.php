@@ -107,6 +107,56 @@ class DynamicEndpointTest extends TestCase
         $this->assertSame('/user/name', (string) $route->uri());
     }
 
+    public function testQueryStringIsMatched()
+    {
+        $response = $this
+            ->route('/path/and?user={#id}')
+            ->forward($this->request('/path/and?user=938', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(['id' => '938'], $response->fromRequest->attr);
+
+        $response = $this
+            ->route('/path/and?user={#id}&foo={$bar}')
+            ->forward($this->request('/path/and?user=938&foo=bar-BAZ', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $response->fromRequest->attr);
+    }
+
+    public function testQueryStringMatchIgnoresParamOrder()
+    {
+        $response = $this
+            ->route('/path/and?user={#id}&foo={$bar}')
+            ->forward($this->request('/path/and?foo=bar-BAZ&user=938', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $response->fromRequest->attr);
+    }
+
+    public function testQueryStringIsIgnoredWhenNotSpecifiedInRoute()
+    {
+        $response = $this
+            ->route('/path/only')
+            ->forward($this->request('/path/only?foo=bar-BAZ&user=938', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame([], $response->fromRequest->attr);
+    }
+
+    public function testNotSpecifiedQueryParamsAreIgnored()
+    {
+        $response = $this
+            ->route('/path/only?name={$slug}&user=938')
+            ->forward($this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r', 'GET'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(['slug' => 'shudd3r'], $response->fromRequest->attr);
+    }
+
+    public function testMissingQueryParamWontForwardRequest()
+    {
+        $response = $this
+            ->route('/path/only?name={$slug}&user=938')
+            ->forward($this->request('/path/only?foo=bar-BAZ&name=shudd3r', 'GET'));
+        $this->assertNull($response);
+    }
+
     private function route($path = '/', $method = 'GET', $callback = null)
     {
         return new Route\DynamicEndpoint(
