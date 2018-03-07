@@ -157,6 +157,13 @@ class DynamicEndpointTest extends TestCase
         $this->assertNull($response);
     }
 
+    public function testUriQueryParamsAreAssigned()
+    {
+        $route = $this->route('/foo/{%bar}?name={$name}&fizz={%buzz}');
+        $this->assertSame('/foo/something', $route->uri(['something', 'slug-name', 'BUZZER'])->getPath());
+        $this->assertSame('name=slug-name&fizz=BUZZER', $route->uri(['something', 'slug-name', 'BUZZER'])->getQuery());
+    }
+
     private function route($path = '/', $method = 'GET', $callback = null)
     {
         return new Route\DynamicEndpoint(

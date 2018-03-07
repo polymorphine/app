@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Routing\Route\Pattern;
 
 use Polymorphine\Http\Routing\Exception\UriParamsException;
@@ -54,13 +63,19 @@ class TargetPattern implements Pattern
         return $request;
     }
 
-    public function uri(array $params = [], UriInterface $prototype): UriInterface
+    public function uri(array $params, UriInterface $prototype): UriInterface
     {
         $this->parsedPath or $this->parsedPath = $this->parsePattern();
         $placeholders = $this->uriPlaceholders($params);
-        $path = str_replace($placeholders, $params, $this->parsedPath);
+        $target = str_replace($placeholders, $params, $this->parsedPath);
 
-        return $prototype->withPath($path);
+        if (!$this->parsedQuery) {
+            return $prototype->withPath($target);
+        }
+
+        [$path, $query] = explode('?', $target, 2);
+
+        return $prototype->withPath($path)->withQuery($query);
     }
 
     private function pathPattern()
@@ -77,7 +92,7 @@ class TargetPattern implements Pattern
 
     private function parsePattern(): string
     {
-        $types  = array_keys($this->paramTypeRegexp);
+        $types = array_keys($this->paramTypeRegexp);
         $regexp = $this->typeMarkersRegexp($types);
 
         $pos = strpos($this->pattern, '?');
@@ -98,7 +113,7 @@ class TargetPattern implements Pattern
     private function typeMarkersRegexp(array $types): string
     {
         $regexpMarkers = array_map(function ($typeMarker) { return preg_quote($typeMarker, '/'); }, $types);
-        $idPattern     = '(?P<type>' . implode('|', $regexpMarkers) . ')(?P<id>[a-zA-Z]+)';
+        $idPattern = '(?P<type>' . implode('|', $regexpMarkers) . ')(?P<id>[a-zA-Z]+)';
 
         return '/' . self::PARAM_DELIM_LEFT . $idPattern . self::PARAM_DELIM_RIGHT . '/';
     }
@@ -107,6 +122,7 @@ class TargetPattern implements Pattern
     {
         if (count($params) !== count($this->params)) {
             $message = 'Route requires %s params for `%s` path - %s provided';
+
             throw new UriParamsException(sprintf($message, count($this->params), $this->parsedPath, count($params)));
         }
 
