@@ -159,9 +159,36 @@ class DynamicEndpointTest extends TestCase
 
     public function testUriQueryParamsAreAssigned()
     {
-        $route = $this->route('/foo/{%bar}?name={$name}&fizz={%buzz}');
-        $this->assertSame('/foo/something', $route->uri(['something', 'slug-name', 'BUZZER'])->getPath());
-        $this->assertSame('name=slug-name&fizz=BUZZER', $route->uri(['something', 'slug-name', 'BUZZER'])->getQuery());
+        $uri = $this->route('/foo/{%bar}?name={$name}&fizz={%buzz}')->uri(['something', 'slug-name', 'BUZZER']);
+        $this->assertSame('/foo/something', $uri->getPath());
+        $this->assertSame('name=slug-name&fizz=BUZZER', $uri->getQuery());
+    }
+
+    public function testUndefinedQueryParamValueIsIgnoredButKeyIsRequired()
+    {
+        $route = $this->route('/foo/{%bar}?name={$name}&fizz', 'POST');
+        $uri = $route->uri(['something', 'slug-string']);
+        $request = $this->request('/foo/bar?fizz&name=slug-example', 'POST');
+
+        $this->assertSame('name=slug-string&fizz', $uri->getQuery());
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
+
+        $request = $this->request('/foo/bar?fizz=value&name=slug-example', 'POST');
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
+        $this->assertNull($route->forward($this->request('/foo/bar?name=slug-example', 'POST')));
+    }
+
+
+    public function testEmptyQueryParamValueIsRequiredAsSpecified()
+    {
+        $route = $this->route('/foo/{%bar}?name={$name}&fizz=', 'POST');
+        $uri = $route->uri(['something', 'slug-string']);
+        $request_emptyValue = $this->request('/foo/bar?fizz=&name=slug-example', 'POST');
+        $request_noValue = $this->request('/foo/bar?fizz&name=slug-example', 'POST');
+
+        $this->assertSame('name=slug-string&fizz=', $uri->getQuery());
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request_emptyValue));
+        $this->assertNull($route->forward($request_noValue));
     }
 
     private function route($path = '/', $method = 'GET', $callback = null)

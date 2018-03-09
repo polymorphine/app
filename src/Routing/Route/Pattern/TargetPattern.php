@@ -150,7 +150,7 @@ class TargetPattern implements Pattern
     {
         $params = [];
         foreach ($segments as $segment) {
-            [$name, $value] = explode('=', $segment, 2) + [false, false]; //TODO: check in browser
+            [$name, $value] = explode('=', $segment, 2) + [false, null];
             $params[$name] = $value;
         }
 
@@ -183,11 +183,15 @@ class TargetPattern implements Pattern
         $segments = [];
 
         foreach ($this->parsedQuery as $name => $value) {
-            if (!isset($elements[$name])) {
+            if (!array_key_exists($name, $elements)) {
                 return null;
             }
 
-            $segments[] = $name . '=' . $elements[$name];
+            if ($elements[$name] === null && $value !== null) {
+                return null;
+            }
+
+            $segments[] = ($value === null) ? $name : $name . '=' . $elements[$name];
         }
 
         return implode('&', $segments);
