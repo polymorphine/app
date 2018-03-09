@@ -185,10 +185,12 @@ class DynamicEndpointTest extends TestCase
         $uri = $route->uri(['something', 'slug-string']);
         $request_emptyValue = $this->request('/foo/bar?fizz=&name=slug-example', 'POST');
         $request_noValue = $this->request('/foo/bar?fizz&name=slug-example', 'POST');
+        $request_givenValue = $this->request('/foo/bar?fizz=value&name=slug-example', 'POST');
 
         $this->assertSame('name=slug-string&fizz=', $uri->getQuery());
         $this->assertInstanceOf(ResponseInterface::class, $route->forward($request_emptyValue));
-        $this->assertNull($route->forward($request_noValue));
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request_noValue));
+        $this->assertNull($route->forward($request_givenValue));
     }
 
     private function route($path = '/', $method = 'GET', $callback = null)

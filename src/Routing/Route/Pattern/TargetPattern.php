@@ -187,10 +187,6 @@ class TargetPattern implements Pattern
                 return null;
             }
 
-            if ($elements[$name] === null && $value !== null) {
-                return null;
-            }
-
             $segments[] = ($value === null) ? $name : $name . '=' . $elements[$name];
         }
 
