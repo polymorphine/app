@@ -193,6 +193,15 @@ class DynamicEndpointTest extends TestCase
         $this->assertNull($route->forward($request_givenValue));
     }
 
+    public function testNamedUriParamsCanBePassedOutOfOrder()
+    {
+        $route = $this->route('/user/{#id}/{%name}');
+        $uri_ordered = $route->uri([22, 'shudd3r'], new FakeUri());
+        $uri_named = $route->uri(['name' => 'shudd3r', 'id' => 22], new FakeUri());
+
+        $this->assertEquals($uri_ordered, $uri_named);
+    }
+
     private function route($path = '/', $method = 'GET', $callback = null)
     {
         return new Route\DynamicEndpoint(

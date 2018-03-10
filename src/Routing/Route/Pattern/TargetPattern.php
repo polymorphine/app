@@ -66,8 +66,9 @@ class TargetPattern implements Pattern
     public function uri(array $params, UriInterface $prototype): UriInterface
     {
         $this->parsedPath or $this->parsedPath = $this->parsePattern();
-        $placeholders = $this->uriPlaceholders($params);
-        $target = str_replace($placeholders, $params, $this->parsedPath);
+
+        $params = $this->uriPlaceholders($params);
+        $target = str_replace(array_keys($params), $params, $this->parsedPath);
 
         if (!$this->parsedQuery) {
             return $prototype->withPath($target);
@@ -126,10 +127,20 @@ class TargetPattern implements Pattern
             throw new UriParamsException(sprintf($message, count($this->params), $this->parsedPath, count($params)));
         }
 
-        return array_map([$this, 'validPlaceholder'], array_keys($this->params), $this->params, $params);
+        if (isset($this->params[key($params)])) {
+            $params = array_values(array_merge($this->params, $params));
+        }
+
+        $placeholders = [];
+        foreach ($this->params as $name => $type) {
+            $token = self::PARAM_DELIM_LEFT . $name . self::PARAM_DELIM_RIGHT;
+            $placeholders[$token] = $this->validParam($name, $type, array_shift($params));
+        }
+
+        return $placeholders;
     }
 
-    private function validPlaceholder(string $name, string $type, &$value): string
+    private function validParam(string $name, string $type, $value): string
     {
         $value = (string) $value;
         if (!preg_match('/^' . $type . '$/', $value)) {
@@ -138,7 +149,7 @@ class TargetPattern implements Pattern
             throw new UriParamsException(sprintf($message, $name, $this->parsedPath));
         }
 
-        return self::PARAM_DELIM_LEFT . $name . self::PARAM_DELIM_RIGHT;
+        return $value;
     }
 
     private function parseQuery(string $query): void
