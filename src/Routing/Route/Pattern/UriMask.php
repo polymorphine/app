@@ -28,9 +28,25 @@ class UriMask implements Pattern
         return $this->compareUri($request->getUri()) ? $request : null;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface
+    public function uri(array $params, UriInterface $u): UriInterface
     {
-        return $prototype;
+        if ($scheme = $this->uri->getScheme()) {
+            $u = $u->withScheme($scheme);
+        }
+
+        if ($host = $this->uri->getHost()) {
+            $u = $u->withHost($host);
+        }
+
+        if ($path = $this->uri->getPath()) {
+            $u = $u->withPath($path);
+        }
+
+        if ($query = $this->uri->getQuery()) {
+            $u = $u->withQuery($query);
+        }
+
+        return $u;
     }
 
     private function compareUri(UriInterface $uri)
