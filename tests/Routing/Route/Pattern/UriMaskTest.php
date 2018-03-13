@@ -103,6 +103,7 @@ class UriMaskTest extends TestCase
             ['?different=param', 'http://example.com/some/path?different=param'],
             ['https:?foo=bar', 'https://example.com/some/path?foo=bar'],
             ['//localhost/other/path', 'http://localhost/other/path?query=params&foo=bar'],
+            ['//user:pass@example.com', 'http://user:pass@example.com/some/path?query=params&foo=bar']
         ];
     }
 }

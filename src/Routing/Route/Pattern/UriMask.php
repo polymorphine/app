@@ -1,7 +1,15 @@
 <?php
 
-namespace Polymorphine\Http\Routing\Route\Pattern;
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
+namespace Polymorphine\Http\Routing\Route\Pattern;
 
 use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern;
@@ -28,25 +36,30 @@ class UriMask implements Pattern
         return $this->compareUri($request->getUri()) ? $request : null;
     }
 
-    public function uri(array $params, UriInterface $u): UriInterface
+    public function uri(array $params, UriInterface $prototype): UriInterface
     {
         if ($scheme = $this->uri->getScheme()) {
-            $u = $u->withScheme($scheme);
+            $prototype = $prototype->withScheme($scheme);
+        }
+
+        if ($userInfo = $this->uri->getUserInfo()) {
+            [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
+            $prototype = $prototype->withUserInfo($user, $pass);
         }
 
         if ($host = $this->uri->getHost()) {
-            $u = $u->withHost($host);
+            $prototype = $prototype->withHost($host);
         }
 
         if ($path = $this->uri->getPath()) {
-            $u = $u->withPath($path);
+            $prototype = $prototype->withPath($path);
         }
 
         if ($query = $this->uri->getQuery()) {
-            $u = $u->withQuery($query);
+            $prototype = $prototype->withQuery($query);
         }
 
-        return $u;
+        return $prototype;
     }
 
     private function compareUri(UriInterface $uri)
