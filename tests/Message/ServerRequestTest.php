@@ -13,6 +13,7 @@ namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\ServerRequest;
+use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ServerRequestInterface;
 use InvalidArgumentException;
 
@@ -163,6 +164,6 @@ class ServerRequestTest extends TestCase
 
     private function request(array $params = [], $method = 'GET', $headers = [])
     {
-        return new ServerRequest($method, new Doubles\FakeUri(), new Doubles\DummyStream(), $headers, $params);
+        return new ServerRequest($method, Uri::fromString(), new Doubles\DummyStream(), $headers, $params);
     }
 }

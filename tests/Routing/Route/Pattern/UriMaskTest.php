@@ -6,7 +6,6 @@ use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern\UriMask;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 

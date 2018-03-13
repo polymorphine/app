@@ -11,12 +11,12 @@
 
 namespace Polymorphine\Http\Tests\Routing\Route;
 
+use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Psr\Http\Message\ResponseInterface;
 
 
@@ -196,8 +196,8 @@ class DynamicEndpointTest extends TestCase
     public function testNamedUriParamsCanBePassedOutOfOrder()
     {
         $route = $this->route('/user/{#id}/{%name}');
-        $uri_ordered = $route->uri([22, 'shudd3r'], new FakeUri());
-        $uri_named = $route->uri(['name' => 'shudd3r', 'id' => 22], new FakeUri());
+        $uri_ordered = $route->uri([22, 'shudd3r'], Uri::fromString());
+        $uri_named = $route->uri(['name' => 'shudd3r', 'id' => 22], Uri::fromString());
 
         $this->assertEquals($uri_ordered, $uri_named);
     }
@@ -221,11 +221,11 @@ class DynamicEndpointTest extends TestCase
         };
     }
 
-    private function request($path, $method, $query = '')
+    private function request($path, $method)
     {
         $request = new DummyRequest();
         $request->method = $method;
-        $request->uri = new FakeUri('example.com', $path, $query);
+        $request->uri = Uri::fromString('//example.com' . $path);
 
         return $request;
     }

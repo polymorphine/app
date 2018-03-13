@@ -38,7 +38,7 @@ class AppTest extends TestCase
         ]);
         $app->routeFound = true;
         $response = $app->execute(new Doubles\DummyRequest());
-        $this->assertSame('example.com/foo/bar: Hello World!', $response->body);
+        $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
     public function testFallbackNotFoundRoute()

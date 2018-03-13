@@ -12,12 +12,12 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\RequestFirewall;
 use Polymorphine\Http\Tests\Doubles;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 
 
 class RequestFirewallTest extends TestCase
@@ -63,7 +63,7 @@ class RequestFirewallTest extends TestCase
     private function request($path = '/')
     {
         $request = new Doubles\DummyRequest();
-        $request->uri = new FakeUri('example.com', $path);
+        $request->uri = Uri::fromString('//example.com' . $path);
 
         return $request;
     }

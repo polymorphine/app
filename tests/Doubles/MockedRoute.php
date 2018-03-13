@@ -11,11 +11,11 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
+use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Routing\Route;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Closure;
 
 
@@ -50,10 +50,10 @@ class MockedRoute extends Route
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
-        $uri = $this->id ? new FakeUri($this->id) : new FakeUri();
+        $uri = $this->id ? Uri::fromString($this->id) : Uri::fromString();
 
         if ($this->uriScheme) {
-            $uri->scheme = $this->uriScheme;
+            $uri = $uri->withScheme($this->uriScheme);
         }
 
         return $uri;

@@ -12,6 +12,7 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Routing\Exception\GatewayCallException;
@@ -19,7 +20,6 @@ use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\StaticEndpoint;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 
 
 class StaticEndpointTest extends TestCase
@@ -67,9 +67,9 @@ class StaticEndpointTest extends TestCase
 
     public function testUriCallWithPrototype_ReturnsPrototypeWithPath()
     {
-        $proto = new FakeUri('', '/foo/bar');
+        $proto = Uri::fromString('/foo/bar');
         $this->assertSame('/foo/bar', $proto->getPath());
-        $uri = $this->route('/home/page')->uri([], new FakeUri());
+        $uri = $this->route('/home/page')->uri([], Uri::fromString());
         $this->assertInstanceOf(UriInterface::class, $uri);
         $this->assertSame('/home/page', $uri->getPath());
     }
@@ -77,13 +77,13 @@ class StaticEndpointTest extends TestCase
     public function testQueryParamsAreIgnoredInRequestMatch()
     {
         $route = $this->route('/home/page');
-        $request = $this->request('/home/page', 'GET', 'query=foo&params=bar');
+        $request = $this->request('/home/page?query=foo&params=bar', 'GET');
         $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
     }
 
     public function testUriParamsProduceQueryString()
     {
-        $uri = $this->route('/hello/world')->uri(['first' => 'one', 'second' => 'two'], new FakeUri());
+        $uri = $this->route('/hello/world')->uri(['first' => 'one', 'second' => 'two'], Uri::fromString());
         $this->assertSame('first=one&second=two', $uri->getQuery());
     }
 
@@ -97,11 +97,11 @@ class StaticEndpointTest extends TestCase
         return function ($request) { return new DummyResponse(); };
     }
 
-    private function request($path, $method, $query = '')
+    private function request($path, $method)
     {
         $request = new DummyRequest();
         $request->method = $method;
-        $request->uri = new FakeUri('example.com', $path, $query);
+        $request->uri = Uri::fromString('//example.com' . $path);
 
         return $request;
     }

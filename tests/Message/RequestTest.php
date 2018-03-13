@@ -13,6 +13,7 @@ namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Request;
+use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\RequestInterface;
 use InvalidArgumentException;
 
@@ -44,7 +45,7 @@ class RequestTest extends TestCase
     {
         return [
             'withRequestTarget' => ['withRequestTarget', '*'],
-            'withUri' => ['withUri', new Doubles\FakeUri('', '/some/path')],
+            'withUri' => ['withUri', Uri::fromString('/some/path')],
             'withMethod' => ['withMethod', 'POST']
         ];
     }
@@ -57,7 +58,7 @@ class RequestTest extends TestCase
 
     public function testGetUri()
     {
-        $uri = new Doubles\FakeUri();
+        $uri = Uri::fromString();
         $this->assertSame($uri, $this->request('GET', [], $uri)->getUri());
         $this->assertSame($uri, $this->request()->withUri($uri)->getUri());
     }
@@ -83,21 +84,21 @@ class RequestTest extends TestCase
         $fail = 'Empty URIs path+query should produce root path for UNSPECIFIED target';
         $this->assertSame('/', $this->request()->getRequestTarget(), $fail);
 
-        $request = $this->request('GET', [], new Doubles\FakeUri('', '/some/path', 'query=param'));
+        $request = $this->request('GET', [], Uri::fromString('/some/path?query=param'));
 
         $fail = 'UNSPECIFIED or INVALID target should be resolved from URIs path+query';
         $this->assertSame('/some/path?query=param', $request->getRequestTarget(), $fail);
-        $this->assertSame('/fizz/buzz', $request->withUri(new Doubles\FakeUri('', '/fizz/buzz'))->getRequestTarget(), $fail);
-        $this->assertSame('/fizz/buzz', $request->withUri(new Doubles\FakeUri('', '/fizz/buzz'))->withRequestTarget(500)->getRequestTarget(), $fail);
+        $this->assertSame('/fizz/buzz', $request->withUri(Uri::fromString('/fizz/buzz'))->getRequestTarget(), $fail);
+        $this->assertSame('/fizz/buzz', $request->withUri(Uri::fromString('/fizz/buzz'))->withRequestTarget(500)->getRequestTarget(), $fail);
 
         $fail = 'withRequestTarget() with VALID target should change target';
         $this->assertSame('*', $request->withRequestTarget('*')->getRequestTarget(), $fail);
 
         $fail = 'withUri() should not change previously SPECIFIED request target';
-        $this->assertSame('*', $request->withRequestTarget('*')->withUri(new Doubles\FakeUri('', 'fizz/buzz'))->getRequestTarget(), $fail);
+        $this->assertSame('*', $request->withRequestTarget('*')->withUri(Uri::fromString('fizz/buzz'))->getRequestTarget(), $fail);
 
         $fail = 'Uri should not affect request target SPECIFIED in constructor';
-        $request = $this->request('GET', [], new Doubles\FakeUri('', '/foo/bar'), '/fizz/buzz');
+        $request = $this->request('GET', [], Uri::fromString('/foo/bar'), '/fizz/buzz');
         $this->assertSame('/fizz/buzz', $request->getRequestTarget(), $fail);
     }
 
@@ -108,26 +109,26 @@ class RequestTest extends TestCase
         $this->assertFalse($request->hasHeader('host'), $fail);
 
         $fail = 'Constructor should create missing host header if URI has host info';
-        $request = $this->request('GET', [], new Doubles\FakeUri('example.com'));
+        $request = $this->request('GET', [], Uri::fromString('//example.com'));
         $this->assertSame('example.com', $request->getHeaderLine('host'), $fail);
 
         $fail = 'Constructor should not overwrite host header';
-        $request = $this->request('GET', ['host' => ['foo.com']], new Doubles\FakeUri('bar.com'));
+        $request = $this->request('GET', ['host' => ['foo.com']], Uri::fromString('//bar.com'));
         $this->assertSame('foo.com', $request->getHeaderLine('host'), $fail);
     }
 
     public function testWithUriResolvesHostHeader()
     {
         $fail = 'WithUri() should not create host header from URI with no host';
-        $request = $this->request()->withUri(new Doubles\FakeUri('', 'path/only'));
+        $request = $this->request()->withUri(Uri::fromString('path/only'));
         $this->assertFalse($request->hasHeader('host'), $fail);
 
         $fail = 'WithUri() should create missing host header if URI has host info';
-        $request = $this->request()->withUri(new Doubles\FakeUri('example.com'));
+        $request = $this->request()->withUri(Uri::fromString('//example.com'));
         $this->assertSame('example.com', $request->getHeaderLine('host'), $fail);
 
         $request = $this->request('GET', ['host' => ['header-example.com']]);
-        $uri = new Doubles\FakeUri('uri-example.com');
+        $uri = Uri::fromString('//uri-example.com');
         $fail = 'WithUri($uri, true) should not overwrite host header';
         $this->assertSame('header-example.com', $request->withUri($uri, true)->getHeaderLine('host'), $fail);
         $fail = 'WithUri($uri, [false]) should overwrite host header';
@@ -137,7 +138,7 @@ class RequestTest extends TestCase
     private function request($method = 'GET', array $headers = [], $uri = null, $target = null)
     {
         if (!isset($uri)) {
-            $uri = new Doubles\FakeUri();
+            $uri = Uri::fromString();
         }
         if (!$target) {
             return new Request($method, $uri, new Doubles\DummyStream(), $headers, []);

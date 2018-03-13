@@ -12,9 +12,9 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\SchemeGateway;
 use Polymorphine\Http\Tests\Doubles;
-use Polymorphine\Http\Tests\Message\Doubles\FakeUri;
 use Psr\Http\Message\ResponseInterface;
 
 
@@ -78,8 +78,7 @@ class SchemeGatewayTest extends TestCase
     private function request($scheme = 'http')
     {
         $request = new Doubles\DummyRequest();
-        $request->uri = new FakeUri('example.com', '/foo/bar');
-        $request->uri->scheme = $scheme;
+        $request->uri = Uri::fromString('//example.com/foo/bar')->withScheme($scheme);
 
         return $request;
     }
