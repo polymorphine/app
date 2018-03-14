@@ -13,18 +13,19 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Uri;
-use Polymorphine\Http\Routing\Route\SchemeGateway;
+use Polymorphine\Http\Routing\Route\Pattern\UriMask;
+use Polymorphine\Http\Routing\Route\PatternGateway;
 use Polymorphine\Http\Tests\Doubles;
 use Psr\Http\Message\ResponseInterface;
 
 
-class SchemeGatewayTest extends TestCase
+class PatternGatewayTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(SchemeGateway::class, $default = $this->route());
-        $this->assertInstanceOf(SchemeGateway::class, $https = $this->route('https'));
-        $this->assertInstanceOf(SchemeGateway::class, $http = $this->route('http'));
+        $this->assertInstanceOf(PatternGateway::class, $default = $this->route());
+        $this->assertInstanceOf(PatternGateway::class, $https = $this->route('https'));
+        $this->assertInstanceOf(PatternGateway::class, $http = $this->route('http'));
 
         $this->assertEquals($default, $https);
         $this->assertNotEquals($default, $http);
@@ -70,9 +71,12 @@ class SchemeGatewayTest extends TestCase
 
     private function route(string $scheme = null, $subRoute = null)
     {
-        return ($scheme)
-            ? new SchemeGateway($subRoute ?: new Doubles\MockedRoute('default'), $scheme)
-            : new SchemeGateway($subRoute ?: new Doubles\MockedRoute('default'));
+        $scheme or $scheme = 'https';
+
+        return new PatternGateway(
+            UriMask::fromUriString($scheme . ':'),
+            $subRoute ?: new Doubles\MockedRoute('default')
+        );
     }
 
     private function request($scheme = 'http')
