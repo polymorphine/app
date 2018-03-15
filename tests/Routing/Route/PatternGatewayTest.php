@@ -23,66 +23,66 @@ class PatternGatewayTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(PatternGateway::class, $default = $this->route());
-        $this->assertInstanceOf(PatternGateway::class, $https = $this->route('https'));
-        $this->assertInstanceOf(PatternGateway::class, $http = $this->route('http'));
+        $this->assertInstanceOf(PatternGateway::class, $default = $this->staticGate());
+        $this->assertInstanceOf(PatternGateway::class, $https = $this->staticGate('https:'));
+        $this->assertInstanceOf(PatternGateway::class, $http = $this->staticGate('http:'));
 
         $this->assertEquals($default, $https);
         $this->assertNotEquals($default, $http);
     }
 
-    public function testNotMatchingScheme_ReturnsNull()
+    public function testNotMatchingPattern_ReturnsNull()
     {
-        $this->assertNull($this->route('https')->forward($this->request('http')));
-        $this->assertNull($this->route('http')->forward($this->request('https')));
+        $this->assertNull($this->staticGate('https:/some/path')->forward($this->request('http:/some/path')));
+        $this->assertNull($this->staticGate('example.com/foo/bar')->forward($this->request('http://example.com/foo/baz')));
     }
 
-    public function testMatchingScheme_ReturnsForwardedRouteResponse()
+    public function testMatchingPattern_ReturnsForwardedRouteResponse()
     {
-        $this->assertInstanceOf(ResponseInterface::class, $this->route('https')->forward($this->request('https')));
-        $this->assertInstanceOf(ResponseInterface::class, $this->route('http')->forward($this->request('http')));
+        $this->assertInstanceOf(ResponseInterface::class, $this->staticGate('//example.com')->forward($this->request('http://example.com/some/path')));
+        $this->assertInstanceOf(ResponseInterface::class, $this->staticGate('http:?query=string')->forward($this->request('http://www.example.com?query=string')));
     }
 
-    public function testUri_ReturnsUriWithCorrectScheme()
+    public function testUri_ReturnsUriWithPatternDefinedSegments()
     {
-        $subRoute = new Doubles\MockedRoute('default');
+        $subRoute = new Doubles\MockedRoute('/foo/bar');
 
-        $subRoute->uriScheme = 'http';
-        $this->assertSame('https', $this->route('https', $subRoute)->uri()->getScheme());
-        $this->assertSame('http', $this->route('http', $subRoute)->uri()->getScheme());
-
-        $subRoute->uriScheme = 'https';
-        $this->assertSame('https', $this->route('https', $subRoute)->uri()->getScheme());
-        $this->assertSame('http', $this->route('http', $subRoute)->uri()->getScheme());
+        //TODO: unreachable endpoint? - inconsistent path
+        $this->assertSame('https', $this->staticGate('https:/some/path', $subRoute)->uri()->getScheme());
+        $this->assertSame('', $this->staticGate('https:/some/path', $subRoute)->uri()->getHost());
+        $this->assertSame('/some/path', $this->staticGate('https:/some/path', $subRoute)->uri()->getPath());
+        $this->assertSame('', $this->staticGate('//example.com', $subRoute)->uri()->getScheme());
+        $this->assertSame('example.com', $this->staticGate('//example.com', $subRoute)->uri()->getHost());
+        $this->assertSame('/foo/bar', $this->staticGate('//example.com', $subRoute)->uri()->getPath());
     }
 
-    public function testGateway_ReturnsRouteWithCorrectSchemeUri()
+    public function testGateway_ReturnsRouteProducingUriWithDefinedSegments()
     {
-        $subRoute = new Doubles\MockedRoute('default');
+        $subRoute = new Doubles\MockedRoute('/foo/bar');
 
-        $subRoute->uriScheme = 'http';
-        $this->assertSame('https', $this->route('https', $subRoute)->gateway('some.path')->uri()->getScheme());
-        $this->assertSame('http', $this->route('http', $subRoute)->gateway('some.path')->uri()->getScheme());
-
-        $subRoute->uriScheme = 'https';
-        $this->assertSame('https', $this->route('https', $subRoute)->gateway('some.path')->uri()->getScheme());
-        $this->assertSame('http', $this->route('http', $subRoute)->gateway('some.path')->uri()->getScheme());
+        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https://example.com', $subRoute)->gateway('some.path')->uri());
+        $this->assertSame('http:/foo/bar', (string) $this->staticGate('http:', $subRoute)->gateway('some.path')->uri());
     }
 
-    private function route(string $scheme = null, $subRoute = null)
+    public function testComposedGateway_ReturnsRouteProducingUriWithDefinedSegments()
     {
-        $scheme or $scheme = 'https';
+        $subRoute = $this->staticGate('//example.com', new Doubles\MockedRoute('/foo/bar'));
 
+        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https:', $subRoute)->gateway('some.path')->uri());
+    }
+
+    private function staticGate(string $uriPattern = 'https:', $subRoute = null)
+    {
         return new PatternGateway(
-            UriMask::fromUriString($scheme . ':'),
+            UriMask::fromUriString($uriPattern),
             $subRoute ?: new Doubles\MockedRoute('default')
         );
     }
 
-    private function request($scheme = 'http')
+    private function request($uri = 'http://example.com/foo/bar?query=string')
     {
         $request = new Doubles\DummyRequest();
-        $request->uri = Uri::fromString('//example.com/foo/bar')->withScheme($scheme);
+        $request->uri = Uri::fromString($uri);
 
         return $request;
     }

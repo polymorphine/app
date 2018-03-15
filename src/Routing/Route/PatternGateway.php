@@ -38,7 +38,9 @@ class PatternGateway extends Route
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
-        return $this->pattern->uri($params, $prototype ?: new Uri());
+        $uri = $this->route->uri($params, $prototype ?: new Uri());
+
+        return $this->pattern->uri($params, $uri);
     }
 
     public function gateway(string $path): Route
