@@ -3,18 +3,19 @@
 namespace Polymorphine\Http\Tests\Routing\Route\Pattern;
 
 use Polymorphine\Http\Message\Uri;
-use Polymorphine\Http\Routing\Route\Pattern\UriMask;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
+use Polymorphine\Http\Routing\Route\Pattern\StaticUriMask;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class UriMaskTest extends TestCase
+class StaticUriMaskTest extends TestCase
 {
     private function pattern(string $uri)
     {
-        return UriMask::fromUriString($uri);
+        return StaticUriMask::fromUriString($uri);
     }
 
     private function request(string $uri)
@@ -27,7 +28,7 @@ class UriMaskTest extends TestCase
 
     public function testInstantiation()
     {
-        $this->assertInstanceOf(UriMask::class, $this->pattern('http:/some/path&query=foo'));
+        $this->assertInstanceOf(StaticUriMask::class, $this->pattern('http:/some/path&query=foo'));
     }
 
     /**
@@ -82,11 +83,12 @@ class UriMaskTest extends TestCase
     /**
      * @dataProvider patterns
      * @param $pattern
+     * @param $uriString
      * @param $expected
      */
-    public function testUriIsReturnedWithDefinedUriParts($pattern, $expected)
+    public function testUriIsReturnedWithDefinedUriParts($pattern, $uriString, $expected)
     {
-        $uri = Uri::fromString('http://example.com/some/path?query=params&foo=bar');
+        $uri = Uri::fromString($uriString);
 
         $mask = $this->pattern($pattern);
         $this->assertSame($expected, (string) $mask->uri([], $uri));
@@ -95,14 +97,35 @@ class UriMaskTest extends TestCase
     public function patterns()
     {
         return [
-            ['', 'http://example.com/some/path?query=params&foo=bar'],
-            ['https:', 'https://example.com/some/path?query=params&foo=bar'],
-            ['//www.example.com', 'http://www.example.com/some/path?query=params&foo=bar'],
-            ['/some/other/path', 'http://example.com/some/other/path?query=params&foo=bar'],
-            ['?different=param', 'http://example.com/some/path?different=param'],
-            ['https:?foo=bar', 'https://example.com/some/path?foo=bar'],
-            ['//localhost/other/path', 'http://localhost/other/path?query=params&foo=bar'],
-            ['//user:pass@example.com', 'http://user:pass@example.com/some/path?query=params&foo=bar']
+            ['', 'https://example.com/some/path?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
+            ['https:', '//example.com/some/path?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
+            ['//example.com', 'https:/some/path?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
+            ['/some/path', 'https://example.com?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
+            ['?query=params&foo=bar', 'https://example.com/some/path', 'https://example.com/some/path?query=params&foo=bar'],
+            ['https://example.com?query=params&foo=bar', '//example.com/some/path', 'https://example.com/some/path?query=params&foo=bar'],
+            ['//example.com/some/path', 'https:?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
+            ['//user:pass@example.com?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar', 'https://user:pass@example.com/some/path?query=params&foo=bar']
+        ];
+    }
+
+    /**
+     * @dataProvider prototypeConflict
+     * @param $pattern
+     * @param $uriString
+     */
+    public function testUriOverwritingPrototypeSegment_ThrowsException($pattern, $uriString)
+    {
+        $this->expectException(UnreachableEndpointException::class);
+        $this->pattern($pattern)->uri([], Uri::fromString($uriString));
+    }
+
+    public function prototypeConflict()
+    {
+        return [
+            ['http:', 'https://example.com'],
+            ['https://www.example.com', 'https://example.com'],
+            ['/foo/bar', '/baz'],
+            ['//user:pass@example.com', '//www.example.com']
         ];
     }
 }

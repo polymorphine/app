@@ -13,11 +13,12 @@ namespace Polymorphine\Http\Routing\Route\Pattern;
 
 use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class UriMask implements Pattern
+class StaticUriMask implements Pattern
 {
     private $uri;
 
@@ -39,23 +40,28 @@ class UriMask implements Pattern
     public function uri(array $params, UriInterface $prototype): UriInterface
     {
         if ($scheme = $this->uri->getScheme()) {
+            $this->checkConflict($scheme, $prototype->getScheme());
             $prototype = $prototype->withScheme($scheme);
         }
 
         if ($userInfo = $this->uri->getUserInfo()) {
+            $this->checkConflict($userInfo, $prototype->getUserInfo());
             [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
             $prototype = $prototype->withUserInfo($user, $pass);
         }
 
         if ($host = $this->uri->getHost()) {
+            $this->checkConflict($host, $prototype->getHost());
             $prototype = $prototype->withHost($host);
         }
 
         if ($path = $this->uri->getPath()) {
+            $this->checkConflict($path, $prototype->getPath());
             $prototype = $prototype->withPath($path);
         }
 
         if ($query = $this->uri->getQuery()) {
+            $this->checkConflict($query, $prototype->getQuery());
             $prototype = $prototype->withQuery($query);
         }
 
@@ -85,5 +91,13 @@ class UriMask implements Pattern
         }
 
         return true;
+    }
+
+    private function checkConflict(string $routeSegment, string $prototypeSegment)
+    {
+        if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
+            $message = 'Uri conflict detected prototype `%s` does not match route `%s`';
+            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, $routeSegment));
+        }
     }
 }

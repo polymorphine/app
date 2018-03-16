@@ -12,6 +12,8 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Routing\Exception\GatewayCallException;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use PHPUnit\Framework\TestCase;
@@ -20,14 +22,14 @@ use Polymorphine\Http\Tests\Doubles\DummyResponse;
 use Psr\Http\Message\ResponseInterface;
 
 
-class DynamicEndpointTest extends TestCase
+class PatternEndpointTest extends TestCase
 {
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $this->route());
 
-        $routeGet = Route\DynamicEndpoint::get('/home/{#id}', $this->dummyCallback());
-        $routePost = Route\DynamicEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
+        $routeGet = Route\PatternEndpoint::get('/home/{#id}', $this->dummyCallback());
+        $routePost = Route\PatternEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
 
         $this->assertInstanceOf(Route::class, $routeGet);
         $this->assertEquals($routeGet, $this->route('/home/{#id}', 'GET', $this->dummyCallback()));
@@ -202,11 +204,49 @@ class DynamicEndpointTest extends TestCase
         $this->assertEquals($uri_ordered, $uri_named);
     }
 
+    public function testUnusedUriParamsAreIgnored()
+    {
+        $route = $this->route('/foo/{%bar}?name={$name}&fizz', 'POST');
+        $uri = $route->uri(['something', 'slug-string', 'unused-param']);
+        $this->assertSame('/foo/something?name=slug-string&fizz', (string) $uri);
+
+        $route = $this->route('/user/{#id}/{%name}');
+        $uri = $route->uri(['unused' => 'something', 'name' => 'shudd3r', 'id' => 22]);
+        $this->assertEquals('/user/22/shudd3r', (string) $uri);
+    }
+
+    /**
+     * @dataProvider prototypeConflict
+     * @param $pattern
+     * @param $uri
+     */
+    public function testUriOverwritingPrototypeSegment_ThrowsException($pattern, $uri)
+    {
+        $route = $this->route($pattern);
+        $this->expectException(UnreachableEndpointException::class);
+        $route->uri(['id' => 1500], Uri::fromString($uri));
+    }
+
+    public function prototypeConflict()
+    {
+        return [
+            ['/user/{#id}', '/some/other/path'],
+            ['/foo/{#id}?some=query', '?other=query']
+        ];
+    }
+
+    public function testGateway_ThrowsException()
+    {
+        $route = $this->route('//example.com');
+        $this->expectException(GatewayCallException::class);
+        $route->gateway('route.path');
+    }
+
     private function route($path = '/', $method = 'GET', $callback = null)
     {
-        return new Route\DynamicEndpoint(
+        return new Route\PatternEndpoint(
             $method,
-            new Route\Pattern\TargetPattern($path),
+            new Route\Pattern\DynamicTargetMask($path),
             $callback ?: $this->dummyCallback()
         );
     }

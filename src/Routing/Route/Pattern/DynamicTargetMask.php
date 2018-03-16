@@ -11,13 +11,14 @@
 
 namespace Polymorphine\Http\Routing\Route\Pattern;
 
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class TargetPattern implements Pattern
+class DynamicTargetMask implements Pattern
 {
     const PARAM_DELIM_LEFT = '{';
     const PARAM_DELIM_RIGHT = '}';
@@ -71,10 +72,14 @@ class TargetPattern implements Pattern
         $target = str_replace(array_keys($params), $params, $this->parsedPath);
 
         if (!$this->parsedQuery) {
+            $this->checkConflict($target, $prototype->getPath());
             return $prototype->withPath($target);
         }
 
         [$path, $query] = explode('?', $target, 2);
+
+        $this->checkConflict($path, $prototype->getPath());
+        $this->checkConflict($query, $prototype->getQuery());
 
         return $prototype->withPath($path)->withQuery($query);
     }
@@ -121,20 +126,17 @@ class TargetPattern implements Pattern
 
     private function uriPlaceholders(array $params): array
     {
-        if (count($params) !== count($this->params)) {
+        if (count($params) < count($this->params)) {
             $message = 'Route requires %s params for `%s` path - %s provided';
 
             throw new UriParamsException(sprintf($message, count($this->params), $this->parsedPath, count($params)));
         }
 
-        if (isset($this->params[key($params)])) {
-            $params = array_values(array_merge($this->params, $params));
-        }
-
         $placeholders = [];
         foreach ($this->params as $name => $type) {
+            $param = $params[$name] ?? array_shift($params);
             $token = self::PARAM_DELIM_LEFT . $name . self::PARAM_DELIM_RIGHT;
-            $placeholders[$token] = $this->validParam($name, $type, array_shift($params));
+            $placeholders[$token] = $this->validParam($name, $type, $param);
         }
 
         return $placeholders;
@@ -202,5 +204,13 @@ class TargetPattern implements Pattern
         }
 
         return implode('&', $segments);
+    }
+
+    private function checkConflict(string $routeSegment, string $prototypeSegment)
+    {
+        if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
+            $message = 'Uri conflict detected prototype `%s` does not match route `%s`';
+            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, $routeSegment));
+        }
     }
 }

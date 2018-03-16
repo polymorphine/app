@@ -53,20 +53,29 @@ abstract class Route
     /**
      * Get endpoint call Uri.
      *
+     * Uri itself used for incoming ServerRequest does not guarantee
+     * reaching current endpoint as other conditions might reject it
+     * (http method, authorization... etc.), but returned Uri parts
+     * are required by this endpoint to pass.
+     *
+     * Returned Uri segments MUST match those compared in forward() method.
+     * Other segments SHOULD NOT be added, and $prototype MUST NOT define
+     * different segments than returned from current route instance.
+     * If any Uri part defined in $prototype is overwritten with different
+     * value UnreachableEndpointException SHOULD be thrown.
+     *
      * If Route is not an endpoint for any ServerRequestInterface
-     * EndpointCallException must be thrown
+     * EndpointCallException MUST be thrown
      *
-     * If Uri cannot be built with given $params method should throw
-     * InvalidArgumentException
-     *
-     * Uri itself used for ServerRequest does not guarantee reaching
-     * current endpoint - other conditions might reject the request
-     * on its way here: http method, authorization, application state... etc.
+     * Redundant $params SHOULD be ignored, but if Uri cannot be built with
+     * given $params method MUST throw UriParamsException
      *
      * @param array        $params
      * @param UriInterface $prototype
      *
-     * @throws Exception\EndpointCallException|Exception\UriParamsException
+     * @throws Exception\EndpointCallException
+     * @throws Exception\UriParamsException
+     * @throws Exception\UnreachableEndpointException
      *
      * @return UriInterface
      */

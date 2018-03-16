@@ -13,7 +13,7 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Uri;
-use Polymorphine\Http\Routing\Route\Pattern\UriMask;
+use Polymorphine\Http\Routing\Route\Pattern\StaticUriMask;
 use Polymorphine\Http\Routing\Route\PatternGateway;
 use Polymorphine\Http\Tests\Doubles;
 use Psr\Http\Message\ResponseInterface;
@@ -47,13 +47,16 @@ class PatternGatewayTest extends TestCase
     {
         $subRoute = new Doubles\MockedRoute('/foo/bar');
 
-        //TODO: unreachable endpoint? - inconsistent path
-        $this->assertSame('https', $this->staticGate('https:/some/path', $subRoute)->uri()->getScheme());
-        $this->assertSame('', $this->staticGate('https:/some/path', $subRoute)->uri()->getHost());
-        $this->assertSame('/some/path', $this->staticGate('https:/some/path', $subRoute)->uri()->getPath());
-        $this->assertSame('', $this->staticGate('//example.com', $subRoute)->uri()->getScheme());
-        $this->assertSame('example.com', $this->staticGate('//example.com', $subRoute)->uri()->getHost());
-        $this->assertSame('/foo/bar', $this->staticGate('//example.com', $subRoute)->uri()->getPath());
+        $uri = $this->staticGate('https:?some=query', $subRoute)->uri();
+        $this->assertSame('https', $uri->getScheme());
+        $this->assertSame('', $uri->getHost());
+        $this->assertSame('/foo/bar', $uri->getPath());
+        $this->assertSame('some=query', $uri->getQuery());
+
+        $uri = $this->staticGate('//example.com', $subRoute)->uri();
+        $this->assertSame('', $uri->getScheme());
+        $this->assertSame('example.com', $uri->getHost());
+        $this->assertSame('/foo/bar', $uri->getPath());
     }
 
     public function testGateway_ReturnsRouteProducingUriWithDefinedSegments()
@@ -74,7 +77,7 @@ class PatternGatewayTest extends TestCase
     private function staticGate(string $uriPattern = 'https:', $subRoute = null)
     {
         return new PatternGateway(
-            UriMask::fromUriString($uriPattern),
+            StaticUriMask::fromUriString($uriPattern),
             $subRoute ?: new Doubles\MockedRoute('default')
         );
     }

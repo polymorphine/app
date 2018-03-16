@@ -19,7 +19,7 @@ use Psr\Http\Message\UriInterface;
 use Closure;
 
 
-class DynamicEndpoint extends Route
+class PatternEndpoint extends Route
 {
     private $method;
     private $callback;
@@ -34,18 +34,18 @@ class DynamicEndpoint extends Route
 
     public static function post(string $path, Closure $callback, array $params = [])
     {
-        return new self('POST', new Pattern\TargetPattern($path, $params), $callback);
+        return new self('POST', new Pattern\DynamicTargetMask($path, $params), $callback);
     }
 
     public static function get(string $path, Closure $callback, array $params = [])
     {
-        return new self('GET', new Pattern\TargetPattern($path, $params), $callback);
+        return new self('GET', new Pattern\DynamicTargetMask($path, $params), $callback);
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
-        return ($this->methodMatch($request) && $rq = $this->pattern->matchedRequest($request))
-            ? $this->callback->__invoke($rq)
+        return ($this->methodMatch($request) && $request = $this->pattern->matchedRequest($request))
+            ? $this->callback->__invoke($request)
             : null;
     }
 
