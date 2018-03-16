@@ -37,7 +37,7 @@ class AppTest extends TestCase
             'test' => new Setup\Record\DirectRecord('Hello World!')
         ]);
         $app->routeFound = true;
-        $response = $app->execute(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\DummyRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
@@ -47,12 +47,12 @@ class AppTest extends TestCase
         $app->routeFound = false;
 
         $app->overrideParent = false;
-        $response = $app->execute(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\DummyRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(NotFoundResponse::class, $response);
 
         $app->overrideParent = true;
-        $response = $app->execute(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\DummyRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(Doubles\DummyResponse::class, $response);
         $this->assertSame('Not Found', $response->body);

@@ -13,8 +13,9 @@
 - experiment ready - have fun
 
 ##### Concepts:
+- [x] Front controller as PSR-15 request handler
 - [x] encapsulated configuration
 - [x] PSR-11 container (optional use)
 - [x] composite routing (polymorphic structure)
-- [ ] middleware (context setting) in routing paths
+- [ ] middleware in routing paths
 - [ ] PSR-7 implementations

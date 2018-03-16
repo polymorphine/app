@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http;
 
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
@@ -20,7 +21,7 @@ use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Message\NotFoundResponse;
 
 
-abstract class App
+abstract class App implements RequestHandlerInterface
 {
     private $containerSetup;
 
@@ -29,7 +30,7 @@ abstract class App
         $this->containerSetup = $this->containerSetup($records);
     }
 
-    public function execute(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $container = $this->containerSetup->container();
         $response = $this->routing($container)->forward($request);
