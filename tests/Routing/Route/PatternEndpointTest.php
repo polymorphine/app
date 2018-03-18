@@ -13,13 +13,13 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 
 use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\GatewayCallException;
-use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
-use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Doubles\MockedPattern;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 
 class PatternEndpointTest extends TestCase
@@ -28,34 +28,29 @@ class PatternEndpointTest extends TestCase
     {
         $this->assertInstanceOf(Route::class, $this->route());
 
-        $routeGet = Route\PatternEndpoint::get('/home/{#id}', $this->dummyCallback());
-        $routePost = Route\PatternEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
+        $route = Route\PatternEndpoint::get('/home/{#id}', $this->dummyCallback());
+        $this->assertInstanceOf(Route::class, $route);
 
-        $this->assertInstanceOf(Route::class, $routeGet);
-        $this->assertEquals($routeGet, $this->route('/home/{#id}', 'GET', $this->dummyCallback()));
-        $this->assertNotEquals($routePost, $this->route('/home/{#id}', 'GET', $this->dummyCallback()));
-
-        $this->assertInstanceOf(Route::class, $routePost);
-        $this->assertEquals($routePost, $this->route('/home/path/{$slug}', 'POST', $this->dummyCallback()));
-        $this->assertNotEquals($routeGet, $this->route('/home/path/{$slug}', 'POST', $this->dummyCallback()));
-    }
+        $route = Route\PatternEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
+        $this->assertInstanceOf(Route::class, $route);
+}
 
     public function testNotMatchingRequest_ReturnsNull()
     {
-        $route = $this->route('/page/{#no}', 'GET', $this->dummyCallback());
+        $route = $this->route('/page/3', 'GET', $this->dummyCallback());
         $this->assertNull($route->forward($this->request('/page/3', 'POST')));
-        $this->assertNull($route->forward($this->request('/page', 'GET')));
+        $this->assertNull($route->forward($this->request('/page/4', 'GET')));
     }
 
     public function testMatchingRequest_ReturnsResponse()
     {
         $response = $this
-            ->route('/page/{#no}', 'GET', $this->dummyCallback())
+            ->route('/page/3', 'GET', $this->dummyCallback())
             ->forward($this->request('/page/3', 'GET'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
         $response = $this
-            ->route('/page/{#no}/{$title}', 'UPDATE', $this->dummyCallback())
+            ->route('/page/576/foo-bar-45', 'UPDATE', $this->dummyCallback())
             ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
@@ -63,176 +58,19 @@ class PatternEndpointTest extends TestCase
     public function testRequestIsForwardedWithMatchedAttributes()
     {
         $response = $this
-            ->route('/page/{#no}', 'GET')
+            ->route('/page/3', 'GET')
             ->forward($this->request('/page/3', 'GET'));
-        $this->assertSame(['no' => '3'], $response->fromRequest->attr);
+        $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
 
         $response = $this
-            ->route('/page/{#page}/{$title}', 'UPDATE')
+            ->route('/page/576/foo-bar-45', 'UPDATE')
             ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
-        $this->assertSame(['page' => '576', 'title' => 'foo-bar-45'], $response->fromRequest->attr);
+        $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
     }
 
-    public function testUriReplacesProvidedValues()
+    public function testUri_ReturnsUri()
     {
-        $route = $this->route('/page-{#no}/{%title}');
-        $this->assertSame('/page-12/something', $route->uri([12, 'something'])->getPath());
-        $this->assertSame('/page-852/foobar12', $route->uri([852, 'foobar12'])->getPath());
-    }
-
-    public function testUriInsufficientParams_ThrowsException()
-    {
-        $route = $this->route('/some-{#number}/{$slug}');
-        $this->expectException(UriParamsException::class);
-        $route->uri([22]);
-    }
-
-    public function testUriInvalidTypeParams_ThrowsException()
-    {
-        $route = $this->route('/user/{#countryId}');
-        $this->expectException(UriParamsException::class);
-        $route->uri(['Poland']);
-    }
-
-    public function testRouteWithoutParametersIsMatched()
-    {
-        $response = $this
-            ->route('/path/only')
-            ->forward($this->request('/path/only', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame([], $response->fromRequest->attr);
-    }
-
-    public function testRouteWithoutParametersReturnsUriWithProvidedPath()
-    {
-        $route = $this->route('/user/name');
-        $this->assertSame('/user/name', (string) $route->uri());
-    }
-
-    public function testQueryStringIsMatched()
-    {
-        $response = $this
-            ->route('/path/and?user={#id}')
-            ->forward($this->request('/path/and?user=938', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame(['id' => '938'], $response->fromRequest->attr);
-
-        $response = $this
-            ->route('/path/and?user={#id}&foo={$bar}')
-            ->forward($this->request('/path/and?user=938&foo=bar-BAZ', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $response->fromRequest->attr);
-    }
-
-    public function testQueryStringMatchIgnoresParamOrder()
-    {
-        $response = $this
-            ->route('/path/and?user={#id}&foo={$bar}')
-            ->forward($this->request('/path/and?foo=bar-BAZ&user=938', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $response->fromRequest->attr);
-    }
-
-    public function testQueryStringIsIgnoredWhenNotSpecifiedInRoute()
-    {
-        $response = $this
-            ->route('/path/only')
-            ->forward($this->request('/path/only?foo=bar-BAZ&user=938', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame([], $response->fromRequest->attr);
-    }
-
-    public function testNotSpecifiedQueryParamsAreIgnored()
-    {
-        $response = $this
-            ->route('/path/only?name={$slug}&user=938')
-            ->forward($this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame(['slug' => 'shudd3r'], $response->fromRequest->attr);
-    }
-
-    public function testMissingQueryParamWontForwardRequest()
-    {
-        $response = $this
-            ->route('/path/only?name={$slug}&user=938')
-            ->forward($this->request('/path/only?foo=bar-BAZ&name=shudd3r', 'GET'));
-        $this->assertNull($response);
-    }
-
-    public function testUriQueryParamsAreAssigned()
-    {
-        $uri = $this->route('/foo/{%bar}?name={$name}&fizz={%buzz}')->uri(['something', 'slug-name', 'BUZZER']);
-        $this->assertSame('/foo/something', $uri->getPath());
-        $this->assertSame('name=slug-name&fizz=BUZZER', $uri->getQuery());
-    }
-
-    public function testUndefinedQueryParamValueIsIgnoredButKeyIsRequired()
-    {
-        $route = $this->route('/foo/{%bar}?name={$name}&fizz', 'POST');
-        $uri = $route->uri(['something', 'slug-string']);
-        $request = $this->request('/foo/bar?fizz&name=slug-example', 'POST');
-
-        $this->assertSame('name=slug-string&fizz', $uri->getQuery());
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
-
-        $request = $this->request('/foo/bar?fizz=value&name=slug-example', 'POST');
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request));
-        $this->assertNull($route->forward($this->request('/foo/bar?name=slug-example', 'POST')));
-    }
-
-
-    public function testEmptyQueryParamValueIsRequiredAsSpecified()
-    {
-        $route = $this->route('/foo/{%bar}?name={$name}&fizz=', 'POST');
-        $uri = $route->uri(['something', 'slug-string']);
-        $request_emptyValue = $this->request('/foo/bar?fizz=&name=slug-example', 'POST');
-        $request_noValue = $this->request('/foo/bar?fizz&name=slug-example', 'POST');
-        $request_givenValue = $this->request('/foo/bar?fizz=value&name=slug-example', 'POST');
-
-        $this->assertSame('name=slug-string&fizz=', $uri->getQuery());
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request_emptyValue));
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward($request_noValue));
-        $this->assertNull($route->forward($request_givenValue));
-    }
-
-    public function testNamedUriParamsCanBePassedOutOfOrder()
-    {
-        $route = $this->route('/user/{#id}/{%name}');
-        $uri_ordered = $route->uri([22, 'shudd3r'], Uri::fromString());
-        $uri_named = $route->uri(['name' => 'shudd3r', 'id' => 22], Uri::fromString());
-
-        $this->assertEquals($uri_ordered, $uri_named);
-    }
-
-    public function testUnusedUriParamsAreIgnored()
-    {
-        $route = $this->route('/foo/{%bar}?name={$name}&fizz', 'POST');
-        $uri = $route->uri(['something', 'slug-string', 'unused-param']);
-        $this->assertSame('/foo/something?name=slug-string&fizz', (string) $uri);
-
-        $route = $this->route('/user/{#id}/{%name}');
-        $uri = $route->uri(['unused' => 'something', 'name' => 'shudd3r', 'id' => 22]);
-        $this->assertEquals('/user/22/shudd3r', (string) $uri);
-    }
-
-    /**
-     * @dataProvider prototypeConflict
-     * @param $pattern
-     * @param $uri
-     */
-    public function testUriOverwritingPrototypeSegment_ThrowsException($pattern, $uri)
-    {
-        $route = $this->route($pattern);
-        $this->expectException(UnreachableEndpointException::class);
-        $route->uri(['id' => 1500], Uri::fromString($uri));
-    }
-
-    public function prototypeConflict()
-    {
-        return [
-            ['/user/{#id}', '/some/other/path'],
-            ['/foo/{#id}?some=query', '?other=query']
-        ];
+        $this->assertInstanceOf(UriInterface::class, $this->route('/foo/bar')->uri([], new Uri()));
     }
 
     public function testGateway_ThrowsException()
@@ -246,7 +84,7 @@ class PatternEndpointTest extends TestCase
     {
         return new Route\PatternEndpoint(
             $method,
-            new Route\Pattern\DynamicTargetMask($path),
+            new MockedPattern($path),
             $callback ?: $this->dummyCallback()
         );
     }
@@ -265,7 +103,7 @@ class PatternEndpointTest extends TestCase
     {
         $request = new DummyRequest();
         $request->method = $method;
-        $request->uri = Uri::fromString('//example.com' . $path);
+        $request->uri = Uri::fromString($path);
 
         return $request;
     }
