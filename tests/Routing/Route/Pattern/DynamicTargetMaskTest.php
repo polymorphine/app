@@ -214,6 +214,30 @@ class DynamicTargetMaskTest extends TestCase
         ];
     }
 
+    public function testMatchWithProvidedPattern()
+    {
+        $pattern = new DynamicTargetMask('/some/path/{hex}', ['hex' => '[A-F0-9]+']);
+        $request = $this->request('/some/path/D6E8A9F6');
+        $this->assertInstanceOf(ServerRequestInterface::class, $pattern->matchedRequest($request));
+        $this->assertSame(['hex' => 'D6E8A9F6'], $pattern->matchedRequest($request)->getAttributes());
+
+        $request = $this->request('/some/path/d6e8a9f6');
+        $this->assertNull($pattern->matchedRequest($request));
+    }
+
+    public function testUriValidParamWithProvidedPattern()
+    {
+        $pattern = new DynamicTargetMask('/{lang}/foo', ['lang' => '(en|pl|fr)']);
+        $this->assertSame('/en/foo', (string) $pattern->uri(['en'], new Uri()));
+    }
+
+    public function testUriInvalidParamWithProvidedPattern()
+    {
+        $pattern = new DynamicTargetMask('/{lang}/foo', ['lang' => '(en|pl|fr)']);
+        $this->expectException(UriParamsException::class);
+        $pattern->uri(['es'], new Uri());
+    }
+
     private function pattern($pattern = '')
     {
         return new DynamicTargetMask($pattern);
