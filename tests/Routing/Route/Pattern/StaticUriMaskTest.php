@@ -45,7 +45,8 @@ class StaticUriMaskTest extends TestCase
             ['https:', 'https://example.com'],
             ['//www.example.com', 'http://www.example.com/some/path'],
             ['http:/some/path', 'http://whatever.com/some/path?query=part&ignored=values'],
-            ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=baz']
+            ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=baz'],
+            ['//example.com:9001', 'https://example.com:9001/foo/path']
         ];
     }
 
@@ -67,7 +68,9 @@ class StaticUriMaskTest extends TestCase
             ['https:', 'http://example.com'],
             ['//www.example.com', 'http://example.com/some/path'],
             ['http:/some/path', 'http://whatever.com/some/other/path?query=part&ignored=values'],
-            ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=qux']
+            ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=qux'],
+            ['//example.com:8080', '//example.com:9001'],
+            ['//example.com:8080', '//example.com'],
         ];
     }
 
@@ -101,7 +104,8 @@ class StaticUriMaskTest extends TestCase
             ['?query=params&foo=bar', 'https://example.com/some/path', 'https://example.com/some/path?query=params&foo=bar'],
             ['https://example.com?query=params&foo=bar', '//example.com/some/path', 'https://example.com/some/path?query=params&foo=bar'],
             ['//example.com/some/path', 'https:?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
-            ['//user:pass@example.com?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar', 'https://user:pass@example.com/some/path?query=params&foo=bar']
+            ['//user:pass@example.com?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar', 'https://user:pass@example.com/some/path?query=params&foo=bar'],
+            ['//example.com:9001', 'http://example.com/foo/bar', 'http://example.com:9001/foo/bar']
         ];
     }
 

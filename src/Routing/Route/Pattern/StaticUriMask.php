@@ -55,6 +55,11 @@ class StaticUriMask implements Pattern
             $prototype = $prototype->withHost($host);
         }
 
+        if ($port = $this->uri->getPort()) {
+            $this->checkConflict($port, $prototype->getPort() ?: '');
+            $prototype = $prototype->withPort($port);
+        }
+
         //TODO: refactoring
         if ($path = $this->uri->getPath()) {
             if ($path[0] !== '/') {
@@ -106,8 +111,8 @@ class StaticUriMask implements Pattern
     private function checkConflict(string $routeSegment, string $prototypeSegment)
     {
         if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
-            $message = 'Uri conflict detected prototype `%s` does not match route `%s`';
-            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, $routeSegment));
+            $message = 'Uri conflict in `%s` prototype segment for `%s` uri';
+            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, (string) $this->uri));
         }
     }
 }
