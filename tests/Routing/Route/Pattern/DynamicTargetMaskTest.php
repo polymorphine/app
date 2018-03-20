@@ -238,6 +238,33 @@ class DynamicTargetMaskTest extends TestCase
         $pattern->uri(['es'], new Uri());
     }
 
+    public function testRelativePathIsMatched()
+    {
+        $pattern = $this->pattern('{#id}');
+        $request = $pattern->matchedRequest($this->request('/foo/bar/234'));
+        $this->assertInstanceOf(ServerRequestInterface::class, $request);
+        $this->assertSame(['id' => '234'], $request->getAttributes());
+    }
+
+    public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
+    {
+        $pattern = $this->pattern('{#id}/{$slug}');
+        $prototype = Uri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
+
+        $pattern = $this->pattern('{#id}/{$slug}?query=string');
+        $prototype = Uri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
+    }
+
+    public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
+    {
+        $pattern = $this->pattern('foo/{#id}');
+        $prototype = new Uri();
+        $this->expectException(UnreachableEndpointException::class);
+        $pattern->uri(['34'], $prototype);
+    }
+
     private function pattern($pattern = '')
     {
         return new DynamicTargetMask($pattern);

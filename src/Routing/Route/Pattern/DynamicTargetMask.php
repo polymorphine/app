@@ -71,6 +71,10 @@ class DynamicTargetMask implements Pattern
         $params = $this->uriPlaceholders($params);
         $target = str_replace(array_keys($params), $params, $this->parsedPath);
 
+        if ($target[0] !== '/') {
+            return $this->resolveRelativePath($target, $prototype);
+        }
+
         if (!$this->parsedQuery) {
             $this->checkConflict($target, $prototype->getPath());
             return $prototype->withPath($target);
@@ -93,7 +97,9 @@ class DynamicTargetMask implements Pattern
             $pattern = str_replace($placeholder, $replace, $pattern);
         }
 
-        return '#^' . $pattern . '$#';
+        if ($this->parsedPath[0] === '/') { $pattern = '^' . $pattern; }
+
+        return '#' . $pattern . '$#';
     }
 
     private function parsePattern(): string
@@ -172,8 +178,7 @@ class DynamicTargetMask implements Pattern
 
     private function normalizeTarget(string $target): ?string
     {
-        $pos = strpos($target, '?');
-        if ($pos === false) {
+        if (strpos($target, '?') === false) {
             return ($this->parsedQuery) ? null : $target;
         }
 
@@ -204,6 +209,24 @@ class DynamicTargetMask implements Pattern
         }
 
         return implode('&', $segments);
+    }
+
+    private function resolveRelativePath($target, UriInterface $prototype): UriInterface
+    {
+        if (!$path = $prototype->getPath()) {
+            throw new UnreachableEndpointException('Unresolved relative path');
+        }
+
+        $target = $path . '/' . $target;
+
+        if (!$this->parsedQuery) {
+            return $prototype->withPath($target);
+        }
+
+        [$path, $query] = explode('?', $target, 2);
+        $this->checkConflict($query, $prototype->getQuery());
+
+        return $prototype->withPath($path)->withQuery($query);
     }
 
     private function checkConflict(string $routeSegment, string $prototypeSegment)

@@ -55,9 +55,17 @@ class StaticUriMask implements Pattern
             $prototype = $prototype->withHost($host);
         }
 
+        //TODO: refactoring
         if ($path = $this->uri->getPath()) {
-            $this->checkConflict($path, $prototype->getPath());
-            $prototype = $prototype->withPath($path);
+            if ($path[0] !== '/') {
+                if (!$prototypePath = $prototype->getPath()) {
+                    throw new UnreachableEndpointException('Unresolved relative path');
+                }
+                $prototype = $prototype->withPath($prototypePath . '/' . $path);
+            } else {
+                $this->checkConflict($path, $prototype->getPath());
+                $prototype = $prototype->withPath($path);
+            }
         }
 
         if ($query = $this->uri->getQuery()) {
@@ -81,8 +89,10 @@ class StaticUriMask implements Pattern
         }
 
         $path = $this->uri->getPath();
-        if ($path && $path !== $uri->getPath()) {
-            return false;
+        if ($path && $uriPath = $uri->getPath()) {
+            if (($path[0] === '/' && $path !== $uriPath) || ($path[0] !== '/' && !strpos($uriPath, $path))) {
+                return false;
+            }
         }
 
         $query = $this->uri->getQuery();

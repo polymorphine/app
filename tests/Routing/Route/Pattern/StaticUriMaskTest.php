@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Polymorphine\Http\Tests\Routing\Route\Pattern;
 
 use Polymorphine\Http\Message\Uri;
@@ -13,19 +22,6 @@ use Psr\Http\Message\UriInterface;
 
 class StaticUriMaskTest extends TestCase
 {
-    private function pattern(string $uri)
-    {
-        return StaticUriMask::fromUriString($uri);
-    }
-
-    private function request(string $uri)
-    {
-        $request = new DummyRequest();
-        $request->uri = Uri::fromString($uri);
-
-        return $request;
-    }
-
     public function testInstantiation()
     {
         $this->assertInstanceOf(StaticUriMask::class, $this->pattern('http:/some/path&query=foo'));
@@ -82,6 +78,7 @@ class StaticUriMaskTest extends TestCase
 
     /**
      * @dataProvider patterns
+     *
      * @param $pattern
      * @param $uriString
      * @param $expected
@@ -110,6 +107,7 @@ class StaticUriMaskTest extends TestCase
 
     /**
      * @dataProvider prototypeConflict
+     *
      * @param $pattern
      * @param $uriString
      */
@@ -127,5 +125,45 @@ class StaticUriMaskTest extends TestCase
             ['/foo/bar', '/baz'],
             ['//user:pass@example.com', '//www.example.com']
         ];
+    }
+
+    public function testRelativePathIsMatched()
+    {
+        $pattern = $this->pattern('bar');
+        $request = $pattern->matchedRequest($this->request('/foo/bar'));
+        $this->assertInstanceOf(ServerRequestInterface::class, $request);
+        $this->assertSame([], $request->getAttributes());
+    }
+
+    public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
+    {
+        $pattern = $this->pattern('bar/slug-string');
+        $prototype = Uri::fromString('/foo');
+        $this->assertSame('/foo/bar/slug-string', (string) $pattern->uri([], $prototype));
+
+        $pattern = $this->pattern('last/segments?query=string');
+        $prototype = Uri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/last/segments?query=string', (string) $pattern->uri([], $prototype));
+    }
+
+    public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
+    {
+        $pattern = $this->pattern('bar');
+        $prototype = new Uri();
+        $this->expectException(UnreachableEndpointException::class);
+        $pattern->uri([], $prototype);
+    }
+
+    private function pattern(string $uri)
+    {
+        return StaticUriMask::fromUriString($uri);
+    }
+
+    private function request(string $uri)
+    {
+        $request = new DummyRequest();
+        $request->uri = Uri::fromString($uri);
+
+        return $request;
     }
 }
