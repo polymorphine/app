@@ -46,7 +46,9 @@ class StaticUriMaskTest extends TestCase
             ['//www.example.com', 'http://www.example.com/some/path'],
             ['http:/some/path', 'http://whatever.com/some/path?query=part&ignored=values'],
             ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=baz'],
-            ['//example.com:9001', 'https://example.com:9001/foo/path']
+            ['//example.com:9001', 'https://example.com:9001/foo/path'],
+            ['?query=bar&foo', '?query=bar&foo=anything'],
+            ['?query=bar&foo=', '?foo=&query=bar']
         ];
     }
 
@@ -71,6 +73,8 @@ class StaticUriMaskTest extends TestCase
             ['?query=foo&bar=baz', 'http://example.com/some/path?query=foo&bar=qux'],
             ['//example.com:8080', '//example.com:9001'],
             ['//example.com:8080', '//example.com'],
+            ['?query=bar&foo', '?query=bar'],
+            ['?query=bar&foo=', '?foo=emptyRequired&query=bar']
         ];
     }
 
