@@ -74,8 +74,7 @@ class StaticUriMask implements Pattern
         }
 
         if ($query = $this->uri->getQuery()) {
-            $this->checkConflict($query, $prototype->getQuery());
-            $prototype = $prototype->withQuery($query);
+            $prototype = $prototype->withQuery($this->combinedQuery($query, $prototype->getQuery()));
         }
 
         return $prototype;
@@ -114,6 +113,36 @@ class StaticUriMask implements Pattern
             $message = 'Uri conflict in `%s` prototype segment for `%s` uri';
             throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, (string) $this->uri));
         }
+    }
+
+    private function combinedQuery(string $routeQuery, string $prototypeQuery)
+    {
+        if (empty($prototypeQuery)) {
+            return $routeQuery;
+        }
+
+        $requiredSegments = $this->queryValues($routeQuery);
+        $prototypeSegments = $this->queryValues($prototypeQuery);
+
+        foreach ($requiredSegments as $name => $value) {
+            if (isset($value) && isset($prototypeSegments[$name]) && $prototypeSegments[$name] !== $value) {
+                $message = 'Query param conflict for `%s` segment in `%s` uri';
+                throw new UnreachableEndpointException(sprintf($message, $name, (string) $this->uri));
+            }
+
+            if (!isset($value) && isset($prototypeSegments[$name])) {
+                continue;
+            }
+
+            $prototypeSegments[$name] = $value;
+        }
+
+        $query = [];
+        foreach ($prototypeSegments as $name => $value) {
+            $query[] = isset($value) ? $name . '=' . $value : $name;
+        }
+
+        return implode('&', $query);
     }
 
     private function queryMatch($routeQuery, $requestQuery)

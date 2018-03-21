@@ -109,7 +109,9 @@ class StaticUriMaskTest extends TestCase
             ['https://example.com?query=params&foo=bar', '//example.com/some/path', 'https://example.com/some/path?query=params&foo=bar'],
             ['//example.com/some/path', 'https:?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar'],
             ['//user:pass@example.com?query=params&foo=bar', 'https://example.com/some/path?query=params&foo=bar', 'https://user:pass@example.com/some/path?query=params&foo=bar'],
-            ['//example.com:9001', 'http://example.com/foo/bar', 'http://example.com:9001/foo/bar']
+            ['//example.com:9001', 'http://example.com/foo/bar', 'http://example.com:9001/foo/bar'],
+            ['?foo=&some', 'foo/bar?some=value', 'foo/bar?some=value&foo='],
+            ['?foo=&some=value', 'foo/bar?foo&some', 'foo/bar?foo=&some=value']
         ];
     }
 
@@ -131,7 +133,9 @@ class StaticUriMaskTest extends TestCase
             ['http:', 'https://example.com'],
             ['https://www.example.com', 'https://example.com'],
             ['/foo/bar', '/baz'],
-            ['//user:pass@example.com', '//www.example.com']
+            ['//user:pass@example.com', '//www.example.com'],
+            ['?foo=bar&some=value', '?foo=bar&some=otherValue'],
+            ['?foo=&some=value', '?foo=something&some=value']
         ];
     }
 
