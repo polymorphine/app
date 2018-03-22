@@ -18,7 +18,7 @@ use Psr\Container\ContainerInterface;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Http\Routing\Route;
-use Polymorphine\Http\Message\NotFoundResponse;
+use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 
 abstract class App implements RequestHandlerInterface

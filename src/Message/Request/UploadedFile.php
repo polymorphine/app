@@ -9,10 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message;
+namespace Polymorphine\Http\Message\Request;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Polymorphine\Http\Message;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -48,7 +49,7 @@ class UploadedFile implements UploadedFileInterface
     {
         $this->checkFileAccess();
 
-        return Stream::fromResourceUri($this->fileName, 'r');
+        return Message\Stream::fromResourceUri($this->fileName, 'r');
     }
 
     public function moveTo($targetPath)

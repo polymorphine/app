@@ -9,15 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message;
+namespace Polymorphine\Http\Message\Response;
 
+use Polymorphine\Http\Message;
 use Psr\Http\Message\StreamInterface;
 
 
-class NotFoundResponse extends Response
+class NotFoundResponse extends Message\Response
 {
     public function __construct(StreamInterface $body = null)
     {
-        parent::__construct(404, $body ?: Stream::fromResourceUri('php://temp'));
+        parent::__construct(404, $body ?: Message\Stream::fromResourceUri('php://temp'));
     }
 }

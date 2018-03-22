@@ -9,13 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message\Traits;
+namespace Polymorphine\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 
 
-trait MessageMethods
+trait MessageMethodsTrait
 {
     private $body;
     private $version;

@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message\Traits;
+namespace Polymorphine\Http\Message\Response;
 
 
-trait StatusCodes
+trait StatusCodesTrait
 {
     private $statusCodes = [
         // INFORMATIONAL CODES

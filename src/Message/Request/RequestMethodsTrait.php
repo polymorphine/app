@@ -9,15 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message\Traits;
+namespace Polymorphine\Http\Message\Request;
 
+use Polymorphine\Http\Message\MessageMethodsTrait;
 use Psr\Http\Message\UriInterface;
 use InvalidArgumentException;
 
 
-trait RequestMethods
+trait RequestMethodsTrait
 {
-    use MessageMethods;
+    use MessageMethodsTrait;
 
     private $method;
     private $uri;

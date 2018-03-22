@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\App;
 use Polymorphine\Container\Setup;
-use Polymorphine\Http\Message\NotFoundResponse;
+use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 
 class AppTest extends TestCase

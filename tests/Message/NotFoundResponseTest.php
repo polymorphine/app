@@ -12,7 +12,7 @@
 namespace Polymorphine\Http\Tests\Message;
 
 use Psr\Http\Message\ResponseInterface;
-use Polymorphine\Http\Message\NotFoundResponse;
+use Polymorphine\Http\Message\Response\NotFoundResponse;
 use PHPUnit\Framework\TestCase;
 
 
