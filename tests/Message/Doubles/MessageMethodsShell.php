@@ -13,7 +13,7 @@ namespace Polymorphine\Http\Tests\Message\Doubles;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
-use Polymorphine\Http\Message\MessageMethods;
+use Polymorphine\Http\Message\Traits\MessageMethods;
 
 
 class MessageMethodsShell implements MessageInterface

@@ -18,7 +18,7 @@ use Psr\Http\Message\StreamInterface;
 
 class Request implements RequestInterface
 {
-    use RequestMethods;
+    use Traits\RequestMethods;
 
     public function __construct(
         string $method,

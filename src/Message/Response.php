@@ -18,8 +18,8 @@ use InvalidArgumentException;
 
 class Response implements ResponseInterface
 {
-    use StatusCodes;
-    use MessageMethods;
+    use Traits\StatusCodes;
+    use Traits\MessageMethods;
 
     private $status;
     private $reason;

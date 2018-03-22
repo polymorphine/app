@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message;
+namespace Polymorphine\Http\Message\Traits;
 
 use Psr\Http\Message\UriInterface;
 use InvalidArgumentException;
