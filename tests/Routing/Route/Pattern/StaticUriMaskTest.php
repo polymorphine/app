@@ -74,7 +74,8 @@ class StaticUriMaskTest extends TestCase
             ['//example.com:8080', '//example.com:9001'],
             ['//example.com:8080', '//example.com'],
             ['?query=bar&foo', '?query=bar'],
-            ['?query=bar&foo=', '?foo=emptyRequired&query=bar']
+            ['?query=bar&foo=', '?foo=emptyRequired&query=bar'],
+            ['/some/path?query=string', '/some/path']
         ];
     }
 
