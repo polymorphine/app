@@ -36,79 +36,126 @@ class StaticUriMask implements Pattern
     {
         $uri = $request->getUri();
 
-        $scheme = $this->uri->getScheme();
-        if ($scheme && $scheme !== $uri->getScheme()) {
-            return null;
-        }
+        $match = $this->match($this->uri->getScheme(), $uri->getScheme()) &&
+            $this->match($this->uri->getAuthority(), $uri->getAuthority()) &&
+            $this->matchPath($this->uri->getPath(), $uri->getPath());
 
-        $auth = $this->uri->getAuthority();
-        if ($auth && $auth !== $uri->getAuthority()) {
-            return null;
-        }
-
-        $path = $this->uri->getPath();
-        if ($path && $uriPath = $uri->getPath()) {
-            if (($path[0] === '/' && $path !== $uriPath) || ($path[0] !== '/' && !strpos($uriPath, $path))) {
-                return null;
-            }
-        }
-
-        if ($query = $this->uri->getQuery()) {
-            $pattern = new StaticQueryPattern($query);
-            return $pattern->matchedRequest($request);
-        }
-
-        return $request;
+        return ($match) ? $this->matchQuery($this->uri->getQuery(), $request) : null;
     }
 
     public function uri(array $params, UriInterface $prototype): UriInterface
     {
-        if ($scheme = $this->uri->getScheme()) {
-            $this->checkConflict($scheme, $prototype->getScheme());
-            $prototype = $prototype->withScheme($scheme);
+        $prototype = $this->setScheme($prototype);
+        $prototype = $this->setUserInfo($prototype);
+        $prototype = $this->setHost($prototype);
+        $prototype = $this->setPort($prototype);
+        $prototype = $this->setPath($prototype);
+
+        return $this->setQuery($params, $prototype);
+    }
+
+    protected function queryPattern(string $queryString): Pattern
+    {
+        return new StaticQueryPattern($queryString);
+    }
+
+    private function match($routeSegment, $requestSegment)
+    {
+        return !$routeSegment || $routeSegment === $requestSegment;
+    }
+
+    private function matchPath($routePath, $requestPath)
+    {
+        if (!$routePath || !$requestPath) {
+            return true;
+        }
+        if ($routePath[0] === '/') {
+            return $routePath === $requestPath;
         }
 
-        if ($userInfo = $this->uri->getUserInfo()) {
-            $this->checkConflict($userInfo, $prototype->getUserInfo());
-            [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
-            $prototype = $prototype->withUserInfo($user, $pass);
+        return strpos($requestPath, $routePath) > 0;
+    }
+
+    private function matchQuery($query, ServerRequestInterface $request)
+    {
+        return ($query) ? $this->queryPattern($query)->matchedRequest($request) : $request;
+    }
+
+    private function setScheme(UriInterface $prototype)
+    {
+        if (!$scheme = $this->uri->getScheme()) {
+            return $prototype;
+        }
+        $this->checkConflict($scheme, $prototype->getScheme());
+
+        return $prototype->withScheme($scheme);
+    }
+
+    private function setUserInfo(UriInterface $prototype)
+    {
+        if (!$userInfo = $this->uri->getUserInfo()) {
+            return $prototype;
+        }
+        $this->checkConflict($userInfo, $prototype->getUserInfo());
+        [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
+
+        return $prototype->withUserInfo($user, $pass);
+    }
+
+    private function setHost(UriInterface $prototype)
+    {
+        if (!$host = $this->uri->getHost()) {
+            return $prototype;
+        }
+        $this->checkConflict($host, $prototype->getHost());
+
+        return $prototype->withHost($host);
+    }
+
+    private function setPort(UriInterface $prototype)
+    {
+        if (!$port = $this->uri->getPort()) {
+            return $prototype;
+        }
+        $this->checkConflict($port, $prototype->getPort() ?: '');
+
+        return $prototype->withPort($port);
+    }
+
+    private function setPath(UriInterface $prototype)
+    {
+        if (!$path = $this->uri->getPath()) {
+            return $prototype;
         }
 
-        if ($host = $this->uri->getHost()) {
-            $this->checkConflict($host, $prototype->getHost());
-            $prototype = $prototype->withHost($host);
+        $prototypePath = $prototype->getPath();
+        if ($path[0] === '/') {
+            $this->checkConflict($path, $prototypePath);
+
+            return $prototype->withPath($path);
         }
 
-        if ($port = $this->uri->getPort()) {
-            $this->checkConflict($port, $prototype->getPort() ?: '');
-            $prototype = $prototype->withPort($port);
+        if (!$prototypePath) {
+            throw new UnreachableEndpointException('Unresolved relative path');
         }
 
-        //TODO: refactoring
-        if ($path = $this->uri->getPath()) {
-            if ($path[0] !== '/') {
-                if (!$prototypePath = $prototype->getPath()) {
-                    throw new UnreachableEndpointException('Unresolved relative path');
-                }
-                $prototype = $prototype->withPath($prototypePath . '/' . $path);
-            } else {
-                $this->checkConflict($path, $prototype->getPath());
-                $prototype = $prototype->withPath($path);
-            }
+        return $prototype->withPath($prototypePath . '/' . $path);
+    }
+
+    private function setQuery(array $params, UriInterface $prototype)
+    {
+        if (!$query = $this->uri->getQuery()) {
+            return $prototype;
         }
 
-        if ($query = $this->uri->getQuery()) {
-            $pattern = new StaticQueryPattern($query);
-            $prototype = $pattern->uri($params, $prototype);
-        }
-
-        return $prototype;
+        return $this->queryPattern($query)->uri($params, $prototype);
     }
 
     private function checkConflict(string $routeSegment, string $prototypeSegment)
     {
         if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
             $message = 'Uri conflict in `%s` prototype segment for `%s` uri';
+
             throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, (string) $this->uri));
         }
     }
