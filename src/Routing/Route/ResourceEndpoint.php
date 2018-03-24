@@ -12,6 +12,8 @@
 namespace Polymorphine\Http\Routing\Route;
 
 use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
+use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,7 +56,18 @@ class ResourceEndpoint extends Route
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
         $id = ($params) ? $params['id'] ?? array_shift($params) : '';
+
+        if ($id && !$this->validId($id)) {
+            $message = 'Cannot build valid uri string with `%s` id param for `%s` resource path';
+
+            throw new UriParamsException(sprintf($message, $id, $this->path));
+        }
+
         $path = ($id) ? $this->path . '/' . $id : $this->path;
+
+        if ($prototype && $prototype->getPath()) {
+            throw new UnreachableEndpointException(sprintf('Path conflict for `%s` resource uri', $path));
+        }
 
         return $prototype ? $prototype->withPath($path) : Uri::fromString($path);
     }

@@ -13,6 +13,8 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
+use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\ResourceEndpoint;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
@@ -99,6 +101,18 @@ class ResourceEndpointTest extends TestCase
 
         $uri = Uri::fromString('http://example.com:9000?query=string');
         $this->assertSame('http://example.com:9000/some/path/300?query=string', (string) $resource->uri(['id' => 300], $uri));
+    }
+
+    public function testUriWithInvalidIdParam_ThrowsException()
+    {
+        $this->expectException(UriParamsException::class);
+        $this->resource('/path/to/resource')->uri(['id' => '08ab']);
+    }
+
+    public function testUriPrototypeWithDefinedPath_ThrowsException()
+    {
+        $this->expectException(UnreachableEndpointException::class);
+        $this->resource('/foo/bar')->uri([], Uri::fromString('/other/path'));
     }
 
     private function resource(string $path, array $methods = ['INDEX', 'POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
