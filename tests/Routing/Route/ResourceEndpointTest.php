@@ -115,6 +115,20 @@ class ResourceEndpointTest extends TestCase
         $this->resource('/foo/bar')->uri([], Uri::fromString('/other/path'));
     }
 
+    public function testUriForRelativePathWithoutPrototypePath_throwsException()
+    {
+        $resource = $this->resource('bar/baz');
+        $this->expectException(UnreachableEndpointException::class);
+        $resource->uri([], Uri::fromString('http://example.com'));
+    }
+
+    public function testUriForRelativePath_ReturnsUriWithPathAppendedToPrototype()
+    {
+        $resource = $this->resource('bar/baz');
+        $uri = $resource->uri(['id'=> '3456'], Uri::fromString('http://example.com/'));
+        $this->assertSame('http://example.com/bar/baz/3456', (string) $uri);
+    }
+
     private function resource(string $path, array $methods = ['INDEX', 'POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
     {
         $handlers = [];

@@ -34,7 +34,7 @@ class ResourceEndpoint extends Route
 
     public function __construct(string $path, array $handlers)
     {
-        $this->path = '/' . trim($path, '/');
+        $this->path = $path;
         $this->handlers = $handlers;
     }
 
@@ -65,7 +65,9 @@ class ResourceEndpoint extends Route
 
         $path = ($id) ? $this->path . '/' . $id : $this->path;
 
-        if ($prototype && $prototype->getPath()) {
+        if ($path[0] !== '/') {
+            $path = $this->resolveRelativePath($path, $prototype);
+        } elseif ($prototype && $prototype->getPath()) {
             throw new UnreachableEndpointException(sprintf('Path conflict for `%s` resource uri', $path));
         }
 
@@ -116,5 +118,14 @@ class ResourceEndpoint extends Route
         return ($this->path === $request->getUri()->getPath())
             ? $this->forwardToHandler(self::INDEX, $request)
             : $this->forwardWithId(self::GET, $request);
+    }
+
+    private function resolveRelativePath($path, UriInterface $prototype = null)
+    {
+        if (!$prototype || !$prototypePath = $prototype->getPath()) {
+            throw new UnreachableEndpointException('Unresolved relative path');
+        }
+
+        return '/' . ltrim($prototypePath . '/' . $path, '/');
     }
 }
