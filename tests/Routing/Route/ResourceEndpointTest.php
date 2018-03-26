@@ -129,6 +129,18 @@ class ResourceEndpointTest extends TestCase
         $this->assertSame('http://example.com/bar/baz/3456', (string) $uri);
     }
 
+    public function testRelativePathResourceIsMatched()
+    {
+        $resource = $this->resource('bar/baz');
+        $this->assertInstanceOf(ResponseInterface::class, $resource->forward($this->request('/foo/bar/baz')));
+        $this->assertInstanceOf(ResponseInterface::class, $response = $resource->forward($this->request('/foo/bar/baz/600')));
+        $this->assertSame(['id' => '600'], $response->fromRequest->getAttributes());
+
+        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'));
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(['id' => '554'], $response->fromRequest->getAttributes());
+    }
+
     private function resource(string $path, array $methods = ['INDEX', 'POST', 'GET', 'PUT', 'PATCH', 'DELETE'])
     {
         $handlers = [];

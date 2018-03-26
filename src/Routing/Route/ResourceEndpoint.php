@@ -40,17 +40,23 @@ class ResourceEndpoint extends Route
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
+        if ($this->path[0] !== '/') {
+            $reqPath = $request->getUri()->getPath();
+            if (!$pos = strpos($reqPath, $this->path)) { return null; }
+            $path = substr($reqPath, 0, $pos) . $this->path;
+        }
+
         $method = $request->getMethod();
 
         if ($method === self::GET) {
-            return $this->forwardGetMethod($request);
+            return $this->forwardGetMethod($request, $path ?? $this->path);
         }
 
         if ($method === self::POST) {
-            return $this->forwardPostMethod($request);
+            return $this->forwardPostMethod($request, $path ?? $this->path);
         }
 
-        return $this->forwardWithId($method, $request);
+        return $this->forwardWithId($method, $request, $path ?? $this->path);
     }
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
@@ -84,14 +90,14 @@ class ResourceEndpoint extends Route
         return is_numeric($id);
     }
 
-    private function forwardWithId($name, ServerRequestInterface $request)
+    private function forwardWithId($name, ServerRequestInterface $request, $path)
     {
         $requestPath = $request->getUri()->getPath();
-        if (strpos($requestPath, $this->path) !== 0) {
+        if (strpos($requestPath, $path) !== 0) {
             return null;
         }
 
-        [$id, ] = explode('/', substr($requestPath, strlen($this->path) + 1), 2) + [false, false];
+        [$id, ] = explode('/', substr($requestPath, strlen($path) + 1), 2) + [false, false];
         if (!$this->validId($id)) {
             return null;
         }
@@ -104,20 +110,20 @@ class ResourceEndpoint extends Route
         return isset($this->handlers[$name]) ? $this->response($this->handlers[$name], $request) : null;
     }
 
-    private function forwardPostMethod(ServerRequestInterface $request)
+    private function forwardPostMethod(ServerRequestInterface $request, $path)
     {
-        if ($this->path !== $request->getUri()->getPath()) {
+        if ($path !== $request->getUri()->getPath()) {
             return null;
         }
 
         return $this->forwardToHandler(self::POST, $request);
     }
 
-    private function forwardGetMethod(ServerRequestInterface $request)
+    private function forwardGetMethod(ServerRequestInterface $request, string $path)
     {
-        return ($this->path === $request->getUri()->getPath())
+        return ($path === $request->getUri()->getPath())
             ? $this->forwardToHandler(self::INDEX, $request)
-            : $this->forwardWithId(self::GET, $request);
+            : $this->forwardWithId(self::GET, $request, $path);
     }
 
     private function resolveRelativePath($path, UriInterface $prototype = null)
