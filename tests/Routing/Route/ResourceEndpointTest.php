@@ -50,7 +50,10 @@ class ResourceEndpointTest extends TestCase
             'path not match' => [$this->request('/foo/something', 'GET'), $this->resource('/foo/bar')],
             'cannot post to id' => [$this->request('/foo/bar/123', 'POST'), $this->resource('/foo/bar')],
             'invalid id' => [$this->request('/foo/bar/a8b3ccf0', 'GET'), $this->resource('/foo/bar', ['GET'])],
-            'resource list (without id) handler is defined by route INDEX pseudo-method' => [$this->request('/foo/bar', 'GET'), $this->resource('/foo/bar', ['GET'])]
+            'resource list (without id) handler is defined by route INDEX pseudo-method' => [$this->request('/foo/bar', 'GET'), $this->resource('/foo/bar', ['GET'])],
+            'relative resource path is not substring of request path' => [$this->request('/foo/bar'), $this->resource('baz')],
+            'no resource id' => [$this->request('/some/path/foo'), $this->resource('some/path')],
+            'not a path segment' => [$this->request('/some/path/666'), $this->resource('me/path')]
         ];
     }
 
@@ -72,7 +75,10 @@ class ResourceEndpointTest extends TestCase
             [$this->request('/foo/bar', 'GET'), $this->resource('/foo/bar', ['INDEX', 'POST'])],
             [$this->request('/foo/bar/7645', 'GET'), $this->resource('/foo/bar', ['GET'])],
             [$this->request('/foo/bar/7645/slug-name', 'PUT'), $this->resource('/foo/bar', ['PUT'])],
-            [$this->request('/foo/bar/7645/some-string-300', 'ANYTHING'), $this->resource('/foo/bar', ['ANYTHING'])]
+            [$this->request('/foo/bar/7645/some-string-300', 'ANYTHING'), $this->resource('/foo/bar', ['ANYTHING'])],
+            [$this->request('/foo/bar/baz'), $this->resource('bar/baz')],
+            [$this->request('/foo/bar/baz/600'), $this->resource('bar/baz')],
+            [$this->request('/some/path/500/slug-string-1000'), $this->resource('some/path')]
         ];
     }
 
@@ -83,6 +89,12 @@ class ResourceEndpointTest extends TestCase
 
         $response = $this->resource('/foo', ['PATCH'])->forward($this->request('/foo/666/slug/3000', 'PATCH'));
         $this->assertSame(['id' => '666'], $response->fromRequest->getAttributes());
+
+        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'));
+        $this->assertSame(['id' => '554'], $response->fromRequest->getAttributes());
+
+        $response = $this->resource('some/path')->forward($this->request('/some/path/500/slug-string-1000', 'PATCH'));
+        $this->assertSame(['id' => '500'], $response->fromRequest->getAttributes());
     }
 
     public function testUriMethod_ReturnsUriWithPath()
@@ -127,18 +139,6 @@ class ResourceEndpointTest extends TestCase
         $resource = $this->resource('bar/baz');
         $uri = $resource->uri(['id'=> '3456'], Uri::fromString('http://example.com/'));
         $this->assertSame('http://example.com/bar/baz/3456', (string) $uri);
-    }
-
-    public function testRelativePathResourceIsMatched()
-    {
-        $resource = $this->resource('bar/baz');
-        $this->assertInstanceOf(ResponseInterface::class, $resource->forward($this->request('/foo/bar/baz')));
-        $this->assertInstanceOf(ResponseInterface::class, $response = $resource->forward($this->request('/foo/bar/baz/600')));
-        $this->assertSame(['id' => '600'], $response->fromRequest->getAttributes());
-
-        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertSame(['id' => '554'], $response->fromRequest->getAttributes());
     }
 
     private function resource(string $path, array $methods = ['INDEX', 'POST', 'GET', 'PUT', 'PATCH', 'DELETE'])

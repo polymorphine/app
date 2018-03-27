@@ -40,23 +40,25 @@ class ResourceEndpoint extends Route
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
-        if ($this->path[0] !== '/') {
-            $reqPath = $request->getUri()->getPath();
-            if (!$pos = strpos($reqPath, $this->path)) { return null; }
-            $path = substr($reqPath, 0, $pos) . $this->path;
+        $path = ($this->path[0] !== '/')
+            ? $this->relativeRequestPath($request->getUri()->getPath())
+            : $this->path;
+
+        if (!$path) {
+            return null;
         }
 
         $method = $request->getMethod();
 
         if ($method === self::GET) {
-            return $this->forwardGetMethod($request, $path ?? $this->path);
+            return $this->forwardGetMethod($request, $path);
         }
 
         if ($method === self::POST) {
-            return $this->forwardPostMethod($request, $path ?? $this->path);
+            return $this->forwardPostMethod($request, $path);
         }
 
-        return $this->forwardWithId($method, $request, $path ?? $this->path);
+        return $this->forwardWithId($method, $request, $path);
     }
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
@@ -133,5 +135,15 @@ class ResourceEndpoint extends Route
         }
 
         return '/' . ltrim($prototypePath . '/' . $path, '/');
+    }
+
+    private function relativeRequestPath($path)
+    {
+        $pos = strpos($path, $this->path);
+        if (!$pos || $path[$pos - 1] !== '/') {
+            return null;
+        }
+
+        return substr($path, 0, $pos) . $this->path;
     }
 }
