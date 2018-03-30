@@ -19,6 +19,10 @@ use Psr\Http\Message\StreamInterface;
 class DummyResponse implements ResponseInterface
 {
     public $body;
+    public $headers = [];
+    public $protocol = '1.1';
+    public $status = 200;
+    public $reason = 'OK';
 
     /**
      * @var ServerRequestInterface
@@ -32,6 +36,7 @@ class DummyResponse implements ResponseInterface
 
     public function getProtocolVersion()
     {
+        return $this->protocol;
     }
 
     public function withProtocolVersion($version)
@@ -40,6 +45,7 @@ class DummyResponse implements ResponseInterface
 
     public function getHeaders()
     {
+        return $this->headers;
     }
 
     public function hasHeader($name)
@@ -68,6 +74,7 @@ class DummyResponse implements ResponseInterface
 
     public function getBody()
     {
+        return new FakeStream($this->body);
     }
 
     public function withBody(StreamInterface $body)
@@ -76,6 +83,7 @@ class DummyResponse implements ResponseInterface
 
     public function getStatusCode()
     {
+        return $this->status;
     }
 
     public function withStatus($code, $reasonPhrase = '')
@@ -84,5 +92,6 @@ class DummyResponse implements ResponseInterface
 
     public function getReasonPhrase()
     {
+        return $this->reason;
     }
 }
