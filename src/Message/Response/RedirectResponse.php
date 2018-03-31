@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Message\Response;
 
+use Polymorphine\Container\Exception\InvalidArgumentException;
 use Polymorphine\Http\Message\Response;
 use Polymorphine\Http\Message\Stream;
 use Psr\Http\Message\UriInterface;
@@ -18,12 +19,16 @@ use Psr\Http\Message\UriInterface;
 
 class RedirectResponse extends Response
 {
-    public function __construct(string $uri, $status = 303)
+    public function __construct(string $uri, int $status = 303)
     {
+        if ($status < 300 || $status > 399) {
+            throw new InvalidArgumentException('Invalid status code for redirect response');
+        }
+
         parent::__construct($status, new Stream(fopen('php://temp', 'r')), ['Location' => $uri]);
     }
 
-    public static function fromUri(UriInterface $uri, $status = 303)
+    public static function fromUri(UriInterface $uri, int $status = 303)
     {
         return new self((string) $uri, $status);
     }
