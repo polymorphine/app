@@ -13,6 +13,7 @@ namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Headers;
+use Polymorphine\Http\Message\Stream;
 use Polymorphine\Http\Server;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
@@ -24,10 +25,10 @@ use RuntimeException;
 
 class ServerTest extends TestCase
 {
-    private function server(ResponseInterface $response = null)
+    private function server(ResponseInterface $response = null, int $buffer = 0)
     {
         Headers::reset();
-        return new Server(new FakeRequestHandler($response ?: new DummyResponse()));
+        return new Server(new FakeRequestHandler($response ?: new DummyResponse()), $buffer);
     }
 
     private function emit(Server $server, ServerRequestInterface $request = null)
@@ -51,6 +52,13 @@ class ServerTest extends TestCase
     {
         $server = $this->server(new DummyResponse('Hello World!'));
         $this->assertSame('Hello World!', $this->emit($server));
+    }
+
+    public function testResponseBodyExceedingOutputBufferIsEmitted()
+    {
+        $response = new DummyResponse(Stream::fromBodyString('Hello World'));
+        $server = $this->server($response, 3);
+        $this->assertSame('Hello World', $this->emit($server));
     }
 
     public function testSendResponseWhenHeadersAlreadySent_ThrowsException()

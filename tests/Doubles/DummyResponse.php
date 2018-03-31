@@ -74,7 +74,7 @@ class DummyResponse implements ResponseInterface
 
     public function getBody()
     {
-        return new FakeStream($this->body);
+        return is_string($this->body) ? new FakeStream($this->body) : $this->body;
     }
 
     public function withBody(StreamInterface $body)

@@ -14,6 +14,7 @@ namespace Polymorphine\Http;
 use Polymorphine\Http\Message\ServerRequestFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 
@@ -21,10 +22,12 @@ use RuntimeException;
 class Server
 {
     protected $app;
+    protected $outputBufferSize;
 
-    public function __construct(RequestHandlerInterface $app)
+    public function __construct(RequestHandlerInterface $app, int $outputBufferSize = 0)
     {
         $this->app = $app;
+        $this->outputBufferSize = $outputBufferSize;
     }
 
     public function sendResponse(ServerRequestInterface $request = null): void
@@ -74,6 +77,24 @@ class Server
 
     protected function body(ResponseInterface $response)
     {
-        echo $response->getBody();
+        $body = $response->getBody();
+
+        if (!$this->chunksRequired($body)) {
+            echo $body;
+            return;
+        }
+
+        if ($body->isSeekable()) {
+            $body->rewind();
+        }
+
+        while (!$body->eof()) {
+            echo $body->read($this->outputBufferSize);
+        }
+    }
+
+    private function chunksRequired(StreamInterface $body)
+    {
+        return ($this->outputBufferSize && $body->isReadable() && $body->getSize() > $this->outputBufferSize);
     }
 }
