@@ -39,6 +39,12 @@ class DerivedResponsesTest extends TestCase
             Response\StringResponse::text('Hello World!')
         );
 
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><note>Hello</note>';
+        $this->equivalentConstructs(
+            new Response\StringResponse($xml, 200, ['Content-Type' => 'application/xml']),
+            Response\StringResponse::xml($xml)
+        );
+
         $this->equivalentConstructs(
             new Response\StringResponse('{"path":"some/path"}', 200, ['Content-Type' => 'application/json']),
             Response\StringResponse::json(['path' => 'some/path'])

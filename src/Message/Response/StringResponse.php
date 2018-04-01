@@ -51,6 +51,11 @@ class StringResponse extends Response
         return new self($html, $statusCode, ['Content-Type' => 'text/html']);
     }
 
+    public static function xml(string $xml, int $statusCode = 200)
+    {
+        return new self($xml, $statusCode, ['Content-Type' => 'application/xml']);
+    }
+
     /**
      * There's a XOR operator between $defaultEncode and $encodeOptions,
      * which means that if option is set in both provided and default it
