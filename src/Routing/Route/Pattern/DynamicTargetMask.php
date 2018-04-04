@@ -20,15 +20,15 @@ use Psr\Http\Message\UriInterface;
 
 class DynamicTargetMask implements Pattern
 {
-    const PARAM_DELIM_LEFT = '{';
+    const PARAM_DELIM_LEFT  = '{';
     const PARAM_DELIM_RIGHT = '}';
 
-    const PARAM_TYPE_NUM = '#';
+    const PARAM_TYPE_NUM  = '#';
     const PARAM_TYPE_NAME = '%';
     const PARAM_TYPE_SLUG = '$';
 
     protected $paramTypeRegexp = [
-        self::PARAM_TYPE_NUM => '[1-9][0-9]*',
+        self::PARAM_TYPE_NUM  => '[1-9][0-9]*',
         self::PARAM_TYPE_NAME => '[a-zA-Z0-9]+',
         self::PARAM_TYPE_SLUG => '[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]'
     ];
@@ -41,7 +41,7 @@ class DynamicTargetMask implements Pattern
     public function __construct(string $pattern, array $params = [])
     {
         $this->pattern = $pattern;
-        $this->params = $params;
+        $this->params  = $params;
     }
 
     public function matchedRequest(ServerRequestInterface $request): ?ServerRequestInterface
@@ -53,9 +53,7 @@ class DynamicTargetMask implements Pattern
         }
 
         $pattern = $this->pathPattern();
-        if (!preg_match($pattern, $target, $attributes)) {
-            return null;
-        }
+        if (!preg_match($pattern, $target, $attributes)) { return null; }
 
         foreach (array_intersect_key($attributes, $this->params) as $name => $param) {
             $request = $request->withAttribute($name, $param);
@@ -93,18 +91,20 @@ class DynamicTargetMask implements Pattern
         $pattern = preg_quote($this->parsedPath);
         foreach ($this->params as $name => $regexp) {
             $placeholder = '\\' . self::PARAM_DELIM_LEFT . $name . '\\' . self::PARAM_DELIM_RIGHT;
-            $replace = '(?P<' . $name . '>' . $regexp . ')';
-            $pattern = str_replace($placeholder, $replace, $pattern);
+            $replace     = '(?P<' . $name . '>' . $regexp . ')';
+            $pattern     = str_replace($placeholder, $replace, $pattern);
         }
 
-        if ($this->parsedPath[0] === '/') { $pattern = '^' . $pattern; }
+        if ($this->parsedPath[0] === '/') {
+            $pattern = '^' . $pattern;
+        }
 
         return '#' . $pattern . '$#';
     }
 
     private function parsePattern(): string
     {
-        $types = array_keys($this->paramTypeRegexp);
+        $types  = array_keys($this->paramTypeRegexp);
         $regexp = $this->typeMarkersRegexp($types);
 
         $pos = strpos($this->pattern, '?');
@@ -125,7 +125,7 @@ class DynamicTargetMask implements Pattern
     private function typeMarkersRegexp(array $types): string
     {
         $regexpMarkers = array_map(function ($typeMarker) { return preg_quote($typeMarker, '/'); }, $types);
-        $idPattern = '(?P<type>' . implode('|', $regexpMarkers) . ')(?P<id>[a-zA-Z]+)';
+        $idPattern     = '(?P<type>' . implode('|', $regexpMarkers) . ')(?P<id>[a-zA-Z]+)';
 
         return '/' . self::PARAM_DELIM_LEFT . $idPattern . self::PARAM_DELIM_RIGHT . '/';
     }
@@ -134,14 +134,13 @@ class DynamicTargetMask implements Pattern
     {
         if (count($params) < count($this->params)) {
             $message = 'Route requires %s params for `%s` path - %s provided';
-
             throw new UriParamsException(sprintf($message, count($this->params), $this->parsedPath, count($params)));
         }
 
         $placeholders = [];
         foreach ($this->params as $name => $type) {
-            $param = $params[$name] ?? array_shift($params);
-            $token = self::PARAM_DELIM_LEFT . $name . self::PARAM_DELIM_RIGHT;
+            $param                = $params[$name] ?? array_shift($params);
+            $token                = self::PARAM_DELIM_LEFT . $name . self::PARAM_DELIM_RIGHT;
             $placeholders[$token] = $this->validParam($name, $type, $param);
         }
 
@@ -153,7 +152,6 @@ class DynamicTargetMask implements Pattern
         $value = (string) $value;
         if (!preg_match('/^' . $type . '$/', $value)) {
             $message = 'Invalid param `%s` type for `%s` route path';
-
             throw new UriParamsException(sprintf($message, $name, $this->parsedPath));
         }
 
@@ -170,7 +168,7 @@ class DynamicTargetMask implements Pattern
         $params = [];
         foreach ($segments as $segment) {
             [$name, $value] = explode('=', $segment, 2) + [false, null];
-            $params[$name] = $value;
+            $params[$name]  = $value;
         }
 
         return $params;
@@ -184,13 +182,8 @@ class DynamicTargetMask implements Pattern
 
         [$path, $query] = explode('?', $target, 2);
 
-        if (!$this->parsedQuery) {
-            return $path;
-        }
-
-        if (!$query = $this->relevantQueryParams($query)) {
-            return null;
-        }
+        if (!$this->parsedQuery) { return $path; }
+        if (!$query = $this->relevantQueryParams($query)) { return null; }
 
         return $path . '?' . $query;
     }
@@ -201,10 +194,7 @@ class DynamicTargetMask implements Pattern
         $segments = [];
 
         foreach ($this->parsedQuery as $name => $value) {
-            if (!array_key_exists($name, $elements)) {
-                return null;
-            }
-
+            if (!array_key_exists($name, $elements)) { return null; }
             $segments[] = ($value === null) ? $name : $name . '=' . $elements[$name];
         }
 
@@ -219,9 +209,7 @@ class DynamicTargetMask implements Pattern
 
         $target = $path . '/' . $target;
 
-        if (!$this->parsedQuery) {
-            return $prototype->withPath($target);
-        }
+        if (!$this->parsedQuery) { return $prototype->withPath($target); }
 
         [$path, $query] = explode('?', $target, 2);
         $this->checkConflict($query, $prototype->getQuery());

@@ -21,13 +21,20 @@ use RuntimeException;
 
 class Server
 {
-    protected $app;
-    protected $outputBufferSize;
+    private $app;
+    private $buffer;
 
+    /**
+     * When large handler's responses are not expected
+     * buffer size parameter might be omitted.
+     *
+     * @param RequestHandlerInterface $app
+     * @param int                     $outputBufferSize (bytes)
+     */
     public function __construct(RequestHandlerInterface $app, int $outputBufferSize = 0)
     {
-        $this->app = $app;
-        $this->outputBufferSize = $outputBufferSize;
+        $this->app    = $app;
+        $this->buffer = $outputBufferSize;
     }
 
     public function sendResponse(ServerRequestInterface $request = null): void
@@ -37,14 +44,19 @@ class Server
         $this->emit($response);
     }
 
-    protected function emit(ResponseInterface $response)
+    private function emit(ResponseInterface $response)
     {
-        $this->status($response->getProtocolVersion(), $response->getStatusCode(), $response->getReasonPhrase());
-        $this->headers($response->getHeaders());
+        $protocol     = $response->getProtocolVersion();
+        $statusCode   = $response->getStatusCode();
+        $reasonPhrase = $response->getReasonPhrase();
+        $headers      = $response->getHeaders();
+
+        $this->status($protocol, $statusCode, $reasonPhrase);
+        $this->headers($headers);
         $this->body($response);
     }
 
-    protected function status($protocol, $statusCode, $reasonPhrase)
+    private function status($protocol, $statusCode, $reasonPhrase)
     {
         if (headers_sent()) {
             throw new RuntimeException('Headers already sent (application output side-effect)');
@@ -54,7 +66,7 @@ class Server
         header($string, true);
     }
 
-    protected function headers(array $headers)
+    private function headers(array $headers)
     {
         foreach ($headers as $name => $values) {
             $this->removePredefined($name);
@@ -62,20 +74,20 @@ class Server
         }
     }
 
-    protected function removePredefined(string $name)
+    private function removePredefined(string $name)
     {
         if (strtolower($name) === 'set-cookie') { return; }
         header_remove($name);
     }
 
-    protected function sendHeaderValues($name, array $values)
+    private function sendHeaderValues($name, array $values)
     {
         foreach ($values as $value) {
             header($name . ': ' . $value, false);
         }
     }
 
-    protected function body(ResponseInterface $response)
+    private function body(ResponseInterface $response)
     {
         $body = $response->getBody();
 
@@ -84,17 +96,15 @@ class Server
             return;
         }
 
-        if ($body->isSeekable()) {
-            $body->rewind();
-        }
+        if ($body->isSeekable()) { $body->rewind(); }
 
         while (!$body->eof()) {
-            echo $body->read($this->outputBufferSize);
+            echo $body->read($this->buffer);
         }
     }
 
     private function chunksRequired(StreamInterface $body)
     {
-        return ($this->outputBufferSize && $body->isReadable() && $body->getSize() > $this->outputBufferSize);
+        return $this->buffer && $body->isReadable() && $body->getSize() > $this->buffer;
     }
 }

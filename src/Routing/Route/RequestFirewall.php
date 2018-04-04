@@ -25,7 +25,7 @@ class RequestFirewall extends Route
     public function __construct(Closure $condition, Route $routes)
     {
         $this->condition = $condition;
-        $this->routes = $routes;
+        $this->routes    = $routes;
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface

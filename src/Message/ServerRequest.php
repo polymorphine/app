@@ -36,17 +36,17 @@ class ServerRequest implements ServerRequestInterface
         array $headers = [],
         array $params = []
     ) {
-        $this->method = $this->validMethod($method);
-        $this->uri = $uri;
-        $this->body = $body;
-        $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
-        $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
-        $this->server = isset($params['server']) ? (array) $params['server'] : [];
-        $this->cookie = isset($params['cookie']) ? (array) $params['cookie'] : [];
-        $this->query = isset($params['query']) ? (array) $params['query'] : [];
+        $this->method     = $this->validMethod($method);
+        $this->uri        = $uri;
+        $this->body       = $body;
+        $this->version    = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
+        $this->target     = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
+        $this->server     = isset($params['server']) ? (array) $params['server'] : [];
+        $this->cookie     = isset($params['cookie']) ? (array) $params['cookie'] : [];
+        $this->query      = isset($params['query']) ? (array) $params['query'] : [];
         $this->attributes = isset($params['attributes']) ? (array) $params['attributes'] : [];
         $this->parsedBody = empty($params['parsedBody']) ? null : $params['parsedBody'];
-        $this->files = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
+        $this->files      = isset($params['files']) ? $this->validUploadedFiles($params['files']) : [];
         $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }
@@ -63,7 +63,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withCookieParams(array $cookies)
     {
-        $clone = clone $this;
+        $clone         = clone $this;
         $clone->cookie = $cookies;
 
         return $clone;
@@ -76,7 +76,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withQueryParams(array $query)
     {
-        $clone = clone $this;
+        $clone        = clone $this;
         $clone->query = $query;
 
         return $clone;
@@ -89,7 +89,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withUploadedFiles(array $uploadedFiles)
     {
-        $clone = clone $this;
+        $clone        = clone $this;
         $clone->files = $this->validUploadedFiles($uploadedFiles);
 
         return $clone;
@@ -102,7 +102,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withParsedBody($data)
     {
-        $clone = clone $this;
+        $clone             = clone $this;
         $clone->parsedBody = empty($data) ? null : $data;
 
         return $clone;
@@ -120,7 +120,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withAttribute($name, $value)
     {
-        $clone = clone $this;
+        $clone                    = clone $this;
         $clone->attributes[$name] = $value;
 
         return $clone;
@@ -147,9 +147,7 @@ class ServerRequest implements ServerRequestInterface
     {
         foreach ($files as $file) {
             $uploadedFile = is_array($file) && $this->validFilesTree($file) || $file instanceof UploadedFileInterface;
-            if (!$uploadedFile) {
-                return false;
-            }
+            if (!$uploadedFile) { return false; }
         }
 
         return true;

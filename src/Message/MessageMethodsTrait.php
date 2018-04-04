@@ -22,6 +22,7 @@ trait MessageMethodsTrait
     private $headers;
 
     private $supportedProtocolVersions = ['1.0', '1.1', '2'];
+
     private $headerNames = [];
 
     public function getProtocolVersion()
@@ -31,7 +32,7 @@ trait MessageMethodsTrait
 
     public function withProtocolVersion($version)
     {
-        $clone = clone $this;
+        $clone          = clone $this;
         $clone->version = $this->validProtocolVersion($version);
 
         return $clone;
@@ -49,7 +50,12 @@ trait MessageMethodsTrait
 
     public function getHeader($name)
     {
-        return $this->hasHeader($name) ? $this->headers[$this->headerNames[strtolower($name)]] : [];
+        if (!$this->hasHeader($name)) { return []; }
+
+        $index = strtolower($name);
+        $name  = $this->headerNames[$index];
+
+        return $this->headers[$name];
     }
 
     public function getHeaderLine($name)
@@ -74,10 +80,11 @@ trait MessageMethodsTrait
             return $this->withHeader($name, $value);
         }
 
-        $name = $this->headerNames[strtolower($name)];
+        $index = strtolower($name);
+        $name  = $this->headerNames[$index];
         $value = $this->validHeaderValues($value);
 
-        $clone = clone $this;
+        $clone                 = clone $this;
         $clone->headers[$name] = array_merge($clone->headers[$name], $value);
 
         return $clone;
@@ -98,7 +105,7 @@ trait MessageMethodsTrait
 
     public function withBody(StreamInterface $body)
     {
-        $clone = clone $this;
+        $clone       = clone $this;
         $clone->body = $body;
 
         return $clone;
@@ -113,9 +120,11 @@ trait MessageMethodsTrait
 
     private function setHeader($name, $value)
     {
-        $name = $this->validHeaderName($name);
-        $this->headers[$name] = $this->validHeaderValues($value);
-        $this->headerNames[strtolower($name)] = $name;
+        $name  = $this->validHeaderName($name);
+        $index = strtolower($name);
+
+        $this->headers[$name]      = $this->validHeaderValues($value);
+        $this->headerNames[$index] = $name;
     }
 
     private function validHeaderName($name)
@@ -157,7 +166,7 @@ trait MessageMethodsTrait
 
     private function illegalHeaderChars(string $header)
     {
-        $illegalCharset = preg_match("/[^\t\r\n\x20-\x7E\x80-\xFE]/", $header);
+        $illegalCharset   = preg_match("/[^\t\r\n\x20-\x7E\x80-\xFE]/", $header);
         $invalidLineBreak = preg_match("/(?:[^\r]\n|\r[^\n]|\n[^ \t])/", $header);
 
         return $illegalCharset || $invalidLineBreak;
@@ -166,9 +175,7 @@ trait MessageMethodsTrait
     private function removeHeader($name)
     {
         $headerIndex = strtolower($name);
-        if (!isset($this->headerNames[$headerIndex])) {
-            return;
-        }
+        if (!isset($this->headerNames[$headerIndex])) { return; }
         unset($this->headers[$this->headerNames[$headerIndex]], $this->headerNames[$headerIndex]);
     }
 

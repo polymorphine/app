@@ -31,9 +31,7 @@ class FirstMatchForwardGateway extends Route
         $response = null;
         foreach ($this->routes as $route) {
             $response = $this->response($route, $request);
-            if ($response) {
-                break;
-            }
+            if ($response) { break; }
         }
 
         return $response;

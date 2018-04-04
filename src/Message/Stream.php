@@ -58,7 +58,6 @@ class Stream implements StreamInterface
     {
         try {
             $this->rewind();
-
             return $this->getContents();
         } catch (RuntimeException $e) {
             return '';
@@ -68,18 +67,15 @@ class Stream implements StreamInterface
     public function close()
     {
         $resource = $this->detach();
-        if ($resource) {
-            fclose($resource);
-        }
+        if ($resource) { fclose($resource); }
     }
 
     public function detach()
     {
-        if (!$this->resource) {
-            return null;
-        }
+        if (!$this->resource) { return null; }
 
         $resource = $this->resource;
+
         $this->resource = null;
         $this->readable = false;
         $this->seekable = false;
@@ -100,7 +96,6 @@ class Stream implements StreamInterface
         }
 
         $position = ftell($this->resource);
-
         if ($position === false) {
             throw new StreamResourceCallException('Failed to tell pointer position');
         }
@@ -115,9 +110,7 @@ class Stream implements StreamInterface
 
     public function isSeekable()
     {
-        if (isset($this->seekable)) {
-            return $this->seekable;
-        }
+        if (isset($this->seekable)) { return $this->seekable; }
 
         return $this->seekable = $this->getMetadata('seekable');
     }
@@ -129,7 +122,6 @@ class Stream implements StreamInterface
         }
 
         $exitCode = fseek($this->resource, $offset, $whence);
-
         if ($exitCode === -1) {
             throw new StreamResourceCallException('Failed to seek the stream');
         }
@@ -142,10 +134,9 @@ class Stream implements StreamInterface
 
     public function isWritable()
     {
-        if (isset($this->writable)) {
-            return $this->writable;
-        }
-        $mode = $this->getMetadata('mode');
+        if (isset($this->writable)) { return $this->writable; }
+
+        $mode     = $this->getMetadata('mode');
         $writable = ['w' => true, 'a' => true, 'x' => true, 'c' => true];
 
         return $this->writable = (isset($writable[$mode[0]]) || strstr($mode, '+'));
@@ -162,7 +153,6 @@ class Stream implements StreamInterface
         }
 
         $bytesWritten = fwrite($this->resource, $string);
-
         if ($bytesWritten === false) {
             throw new StreamResourceCallException('Failed writing to stream');
         }
@@ -172,9 +162,8 @@ class Stream implements StreamInterface
 
     public function isReadable()
     {
-        if (isset($this->readable)) {
-            return $this->readable;
-        }
+        if (isset($this->readable)) { return $this->readable; }
+
         $mode = $this->getMetadata('mode');
 
         return $this->readable = ($mode[0] === 'r' || strstr($mode, '+'));
@@ -191,7 +180,6 @@ class Stream implements StreamInterface
         }
 
         $streamData = fread($this->resource, $length);
-
         if ($streamData === false) {
             throw new StreamResourceCallException('Failed reading from stream');
         }
@@ -206,7 +194,6 @@ class Stream implements StreamInterface
         }
 
         $streamContents = stream_get_contents($this->resource);
-
         if ($streamContents === false) {
             throw new StreamResourceCallException('Failed to retrieve stream contents');
         }
@@ -216,10 +203,11 @@ class Stream implements StreamInterface
 
     public function getMetadata($key = null)
     {
-        isset($this->metaData) or $this->metaData = stream_get_meta_data($this->resource);
-        if ($key === null) {
-            return $this->metaData;
+        if (!isset($this->metaData)) {
+            $this->metaData = stream_get_meta_data($this->resource);
         }
+
+        if ($key === null) { return $this->metaData; }
 
         return isset($this->metaData[$key]) ? $this->metaData[$key] : null;
     }

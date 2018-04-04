@@ -66,9 +66,7 @@ class StaticUriMask implements Pattern
 
     private function matchPath($routePath, $requestPath)
     {
-        if (!$routePath || !$requestPath) {
-            return true;
-        }
+        if (!$routePath || !$requestPath) { return true; }
         if ($routePath[0] === '/') {
             return $routePath === $requestPath;
         }
@@ -83,9 +81,7 @@ class StaticUriMask implements Pattern
 
     private function setScheme(UriInterface $prototype)
     {
-        if (!$scheme = $this->uri->getScheme()) {
-            return $prototype;
-        }
+        if (!$scheme = $this->uri->getScheme()) { return $prototype; }
         $this->checkConflict($scheme, $prototype->getScheme());
 
         return $prototype->withScheme($scheme);
@@ -93,10 +89,9 @@ class StaticUriMask implements Pattern
 
     private function setUserInfo(UriInterface $prototype)
     {
-        if (!$userInfo = $this->uri->getUserInfo()) {
-            return $prototype;
-        }
+        if (!$userInfo = $this->uri->getUserInfo()) { return $prototype; }
         $this->checkConflict($userInfo, $prototype->getUserInfo());
+
         [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
 
         return $prototype->withUserInfo($user, $pass);
@@ -104,9 +99,7 @@ class StaticUriMask implements Pattern
 
     private function setHost(UriInterface $prototype)
     {
-        if (!$host = $this->uri->getHost()) {
-            return $prototype;
-        }
+        if (!$host = $this->uri->getHost()) { return $prototype; }
         $this->checkConflict($host, $prototype->getHost());
 
         return $prototype->withHost($host);
@@ -114,9 +107,7 @@ class StaticUriMask implements Pattern
 
     private function setPort(UriInterface $prototype)
     {
-        if (!$port = $this->uri->getPort()) {
-            return $prototype;
-        }
+        if (!$port = $this->uri->getPort()) { return $prototype; }
         $this->checkConflict($port, $prototype->getPort() ?: '');
 
         return $prototype->withPort($port);
@@ -124,9 +115,7 @@ class StaticUriMask implements Pattern
 
     private function setPath(UriInterface $prototype)
     {
-        if (!$path = $this->uri->getPath()) {
-            return $prototype;
-        }
+        if (!$path = $this->uri->getPath()) { return $prototype; }
 
         $prototypePath = $prototype->getPath();
         if ($path[0] === '/') {
@@ -144,9 +133,7 @@ class StaticUriMask implements Pattern
 
     private function setQuery(array $params, UriInterface $prototype)
     {
-        if (!$query = $this->uri->getQuery()) {
-            return $prototype;
-        }
+        if (!$query = $this->uri->getQuery()) { return $prototype; }
 
         return $this->queryPattern($query)->uri($params, $prototype);
     }
@@ -155,7 +142,6 @@ class StaticUriMask implements Pattern
     {
         if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
             $message = 'Uri conflict in `%s` prototype segment for `%s` uri';
-
             throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, (string) $this->uri));
         }
     }

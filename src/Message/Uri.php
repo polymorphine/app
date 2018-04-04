@@ -17,35 +17,43 @@ use InvalidArgumentException;
 
 class Uri implements UriInterface
 {
-    const CHARSET_HOST = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
-    const CHARSET_PATH = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
+    const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
+    const CHARSET_PATH  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
     const CHARSET_QUERY = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@?';
 
     protected $supportedSchemes = [
-        'http' => ['port' => 80],
+        'http'  => ['port' => 80],
         'https' => ['port' => 443]
     ];
 
     private $uri;
 
-    private $scheme = '';
+    private $scheme   = '';
     private $userInfo = '';
-    private $host = '';
+    private $host     = '';
     private $port;
-    private $path = '';
-    private $query = '';
+    private $path     = '';
+    private $query    = '';
     private $fragment = '';
 
     public function __construct(array $segments = [])
     {
-        isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
-        isset($segments['user']) and $this->userInfo = $this->encode($segments['user'], self::CHARSET_HOST);
-        isset($segments['pass']) and $this->userInfo and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_HOST . ':');
-        isset($segments['host']) and $this->host = $this->normalizedHost($segments['host']);
-        isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
-        isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
-        isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_QUERY);
-        isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
+        isset($segments['scheme'])
+            and $this->scheme = $this->validScheme($segments['scheme']);
+        isset($segments['user'])
+            and $this->userInfo = $this->encode($segments['user'], self::CHARSET_HOST);
+        isset($segments['pass'])
+            and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_HOST . ':');
+        isset($segments['host'])
+            and $this->host = $this->normalizedHost($segments['host']);
+        isset($segments['port'])
+            and $this->port = $this->validPortRange((int) $segments['port']);
+        isset($segments['path'])
+            and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
+        isset($segments['query'])
+            and $this->query = $this->encode($segments['query'], self::CHARSET_QUERY);
+        isset($segments['fragment'])
+            and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
     }
 
     public static function fromString($uri = '')
@@ -94,9 +102,8 @@ class Uri implements UriInterface
 
     public function getAuthority(): string
     {
-        if (!$this->host) {
-            return '';
-        }
+        if (!$this->host) { return ''; }
+
         $user = $this->userInfo ? $this->userInfo . '@' : '';
         $port = $this->getPort();
 
@@ -124,7 +131,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI scheme must be a string');
         }
 
-        $clone = clone $this;
+        $clone         = clone $this;
         $clone->scheme = $clone->validScheme($scheme);
 
         return $clone;
@@ -142,7 +149,7 @@ class Uri implements UriInterface
 
         empty($password) or $password = ':' . $this->encode($password, self::CHARSET_HOST . ':');
 
-        $clone = clone $this;
+        $clone           = clone $this;
         $clone->userInfo = $this->encode($user, self::CHARSET_HOST) . $password;
 
         return $clone;
@@ -154,7 +161,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI host must be a string');
         }
 
-        $clone = clone $this;
+        $clone       = clone $this;
         $clone->host = $this->normalizedHost($host);
 
         return $clone;
@@ -166,7 +173,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('Invalid port parameter - expected int<1-65535> or null');
         }
 
-        $clone = clone $this;
+        $clone       = clone $this;
         $clone->port = is_null($port) ? null : $clone->validPortRange($port);
 
         return $clone;
@@ -178,7 +185,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI path must be a string');
         }
 
-        $clone = clone $this;
+        $clone       = clone $this;
         $clone->path = $this->encode($path, self::CHARSET_PATH);
 
         return $clone;
@@ -190,7 +197,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI query must be a string');
         }
 
-        $clone = clone $this;
+        $clone        = clone $this;
         $clone->query = $this->encode($query, self::CHARSET_QUERY);
 
         return $clone;
@@ -202,7 +209,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI fragment must be a string.');
         }
 
-        $clone = clone $this;
+        $clone           = clone $this;
         $clone->fragment = $this->encode($fragment, self::CHARSET_QUERY);
 
         return $clone;
@@ -225,27 +232,22 @@ class Uri implements UriInterface
     private function authorityPath()
     {
         $authority = '//' . $this->getAuthority();
-        if (!$this->path) {
-            return $authority;
-        }
+
+        if (!$this->path) { return $authority; }
 
         return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
     }
 
     private function filteredPath()
     {
-        if (empty($this->path)) {
-            return '';
-        }
+        if (empty($this->path)) { return ''; }
 
         return ($this->path[0] === '/') ? '/' . ltrim($this->path, '/') : $this->path;
     }
 
     private function validScheme(string $scheme)
     {
-        if (empty($scheme)) {
-            return '';
-        }
+        if (empty($scheme)) { return ''; }
 
         $scheme = strtolower($scheme);
         if (!isset($this->supportedSchemes[$scheme])) {

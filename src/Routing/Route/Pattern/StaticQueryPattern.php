@@ -38,11 +38,9 @@ class StaticQueryPattern implements Pattern
 
     private function combinedQuery(string $prototypeQuery)
     {
-        if (empty($prototypeQuery)) {
-            return $this->query;
-        }
+        if (empty($prototypeQuery)) { return $this->query; }
 
-        $requiredSegments = $this->queryValues($this->query);
+        $requiredSegments  = $this->queryValues($this->query);
         $prototypeSegments = $this->queryValues($prototypeQuery);
 
         foreach ($requiredSegments as $name => $value) {
@@ -68,25 +66,15 @@ class StaticQueryPattern implements Pattern
 
     private function queryMatch($requestQuery)
     {
-        if (empty($requestQuery)) {
-            return false;
-        }
+        if (empty($requestQuery)) { return false; }
 
         $requiredSegments = $this->queryValues($this->query);
-        $requestSegments = $this->queryValues($requestQuery);
+        $requestSegments  = $this->queryValues($requestQuery);
 
         foreach ($requiredSegments as $key => $value) {
-            if (!isset($requestSegments[$key])) {
-                return false;
-            }
-
-            if (!isset($value)) {
-                continue;
-            }
-
-            if ($value !== $requestSegments[$key]) {
-                return false;
-            }
+            if (!isset($requestSegments[$key])) { return false; }
+            if (!isset($value)) { continue; }
+            if ($value !== $requestSegments[$key]) { return false; }
         }
 
         return true;
@@ -98,7 +86,7 @@ class StaticQueryPattern implements Pattern
 
         $segmentValues = [];
         foreach ($segments as $segment) {
-            [$name, $value] = explode('=', $segment) + [false, null];
+            [$name, $value]       = explode('=', $segment) + [false, null];
             $segmentValues[$name] = $value;
         }
 

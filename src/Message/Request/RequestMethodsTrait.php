@@ -31,7 +31,7 @@ trait RequestMethodsTrait
 
     public function withRequestTarget($requestTarget)
     {
-        $clone = clone $this;
+        $clone         = clone $this;
         $clone->target = $this->validRequestTarget($requestTarget);
 
         return $clone;
@@ -44,7 +44,7 @@ trait RequestMethodsTrait
 
     public function withMethod($method)
     {
-        $clone = clone $this;
+        $clone         = clone $this;
         $clone->method = $this->validMethod($method);
 
         return $clone;
@@ -57,7 +57,7 @@ trait RequestMethodsTrait
 
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
-        $clone = clone $this;
+        $clone      = clone $this;
         $clone->uri = $uri;
         $clone->resolveHostHeader($preserveHost);
 
@@ -83,9 +83,7 @@ trait RequestMethodsTrait
     private function resolveHostHeader($preserveHost = true)
     {
         $uriHost = $this->uri->getHost();
-        if ($preserveHost && $this->hasHeader('host') || !$uriHost) {
-            return;
-        }
+        if ($preserveHost && $this->hasHeader('host') || !$uriHost) { return; }
         $this->setHeader('Host', [$uriHost]);
     }
 

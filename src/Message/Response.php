@@ -30,9 +30,9 @@ class Response implements ResponseInterface
         array $headers = [],
         array $params = []
     ) {
-        $this->status = $this->validStatusCode($statusCode);
-        $this->body = $body;
-        $this->reason = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
+        $this->status  = $this->validStatusCode($statusCode);
+        $this->body    = $body;
+        $this->reason  = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
         $this->loadHeaders($headers);
     }
@@ -44,7 +44,7 @@ class Response implements ResponseInterface
 
     public function withStatus($code, $reasonPhrase = '')
     {
-        $clone = clone $this;
+        $clone         = clone $this;
         $clone->status = $this->validStatusCode($code);
         $clone->reason = $clone->validReasonPhrase($reasonPhrase);
 

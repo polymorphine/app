@@ -33,7 +33,7 @@ abstract class App implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $container = $this->containerSetup->container();
-        $response = $this->routing($container)->forward($request);
+        $response  = $this->routing($container)->forward($request);
 
         return $response ?: $this->notFoundResponse();
     }

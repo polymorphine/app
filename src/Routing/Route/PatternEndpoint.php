@@ -27,9 +27,9 @@ class PatternEndpoint extends Route
 
     public function __construct(string $method, Pattern $pattern, Closure $callback)
     {
-        $this->method = $method;
+        $this->method   = $method;
         $this->callback = $callback;
-        $this->pattern = $pattern;
+        $this->pattern  = $pattern;
     }
 
     public static function post(string $path, Closure $callback, array $params = [])

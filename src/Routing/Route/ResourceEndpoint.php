@@ -22,11 +22,11 @@ use Psr\Http\Message\UriInterface;
 
 class ResourceEndpoint extends Route
 {
-    const INDEX = 'INDEX';
-    const GET = 'GET';
-    const POST = 'POST';
-    const PUT = 'PUT';
-    const PATCH = 'PATCH';
+    const INDEX  = 'INDEX';
+    const GET    = 'GET';
+    const POST   = 'POST';
+    const PUT    = 'PUT';
+    const PATCH  = 'PATCH';
     const DELETE = 'DELETE';
 
     private $path;
@@ -34,7 +34,7 @@ class ResourceEndpoint extends Route
 
     public function __construct(string $path, array $handlers)
     {
-        $this->path = $path;
+        $this->path     = $path;
         $this->handlers = $handlers;
     }
 
@@ -44,9 +44,7 @@ class ResourceEndpoint extends Route
             ? $this->relativeRequestPath($request->getUri()->getPath())
             : $this->path;
 
-        if (!$path) {
-            return null;
-        }
+        if (!$path) { return null; }
 
         $method = $request->getMethod();
 
@@ -67,7 +65,6 @@ class ResourceEndpoint extends Route
 
         if ($id && !$this->validId($id)) {
             $message = 'Cannot build valid uri string with `%s` id param for `%s` resource path';
-
             throw new UriParamsException(sprintf($message, $id, $this->path));
         }
 
@@ -95,14 +92,10 @@ class ResourceEndpoint extends Route
     private function forwardWithId($name, ServerRequestInterface $request, $path)
     {
         $requestPath = $request->getUri()->getPath();
-        if (strpos($requestPath, $path) !== 0) {
-            return null;
-        }
+        if (strpos($requestPath, $path) !== 0) { return null; }
 
         [$id, ] = explode('/', substr($requestPath, strlen($path) + 1), 2) + [false, false];
-        if (!$this->validId($id)) {
-            return null;
-        }
+        if (!$this->validId($id)) { return null; }
 
         return $this->forwardToHandler($name, $request->withAttribute('id', $id));
     }
@@ -114,9 +107,7 @@ class ResourceEndpoint extends Route
 
     private function forwardPostMethod(ServerRequestInterface $request, $path)
     {
-        if ($path !== $request->getUri()->getPath()) {
-            return null;
-        }
+        if ($path !== $request->getUri()->getPath()) { return null; }
 
         return $this->forwardToHandler(self::POST, $request);
     }
@@ -140,9 +131,7 @@ class ResourceEndpoint extends Route
     private function relativeRequestPath($path)
     {
         $pos = strpos($path, $this->path);
-        if (!$pos || $path[$pos - 1] !== '/') {
-            return null;
-        }
+        if (!$pos || $path[$pos - 1] !== '/') { return null; }
 
         return substr($path, 0, $pos) . $this->path;
     }

@@ -26,22 +26,23 @@ class UploadedFile implements UploadedFileInterface
     protected $clientFilename;
     protected $clientMediaType;
     protected $isMoved = false;
+
     private $dataSpec = [
         'tmp_name' => 'string',
-        'size' => 'integer',
-        'error' => 'integer',
-        'name' => 'string',
-        'type' => 'string'
+        'size'     => 'integer',
+        'error'    => 'integer',
+        'name'     => 'string',
+        'type'     => 'string'
     ];
 
     public function __construct(array $file)
     {
         $this->checkSpec($file);
 
-        $this->fileName = $file['tmp_name'];
-        $this->fileSize = $file['size'];
-        $this->errorCode = $file['error'];
-        $this->clientFilename = $file['name'];
+        $this->fileName        = $file['tmp_name'];
+        $this->fileSize        = $file['size'];
+        $this->errorCode       = $file['error'];
+        $this->clientFilename  = $file['name'];
         $this->clientMediaType = $file['type'];
     }
 
@@ -57,7 +58,6 @@ class UploadedFile implements UploadedFileInterface
         $this->checkFileAccess();
 
         $this->isMoved = move_uploaded_file($this->fileName, $targetPath);
-
         if (!$this->isMoved) {
             throw new RuntimeException('Failed to move uploaded file');
         }

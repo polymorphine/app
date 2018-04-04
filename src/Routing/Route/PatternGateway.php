@@ -26,7 +26,7 @@ class PatternGateway extends Route
     public function __construct(Pattern $pattern, Route $route)
     {
         $this->pattern = $pattern;
-        $this->route = $route;
+        $this->route   = $route;
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface

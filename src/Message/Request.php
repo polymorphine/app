@@ -27,11 +27,11 @@ class Request implements RequestInterface
         array $headers = [],
         array $params = []
     ) {
-        $this->method = $this->validMethod($method);
-        $this->uri = $uri;
-        $this->body = $body;
+        $this->method  = $this->validMethod($method);
+        $this->uri     = $uri;
+        $this->body    = $body;
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
-        $this->target = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
+        $this->target  = isset($params['target']) ? $this->validRequestTarget($params['target']) : null;
         $this->loadHeaders($headers);
         $this->resolveHostHeader();
     }

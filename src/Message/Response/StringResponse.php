@@ -70,7 +70,7 @@ class StringResponse extends Response
     public static function json(array $data, int $statusCode = 200, $encodeOptions = 0)
     {
         $defaultEncode = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES;
-        $serialized = json_encode($data, $defaultEncode ^ $encodeOptions);
+        $serialized    = json_encode($data, $defaultEncode ^ $encodeOptions);
 
         return new self($serialized, $statusCode, ['Content-Type' => 'application/json']);
     }
