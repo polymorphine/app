@@ -27,30 +27,24 @@ class MockedRoute extends Route
 
     public function __construct(string $id, Closure $callback = null)
     {
-        $this->id = $id;
+        $this->id       = $id;
         $this->callback = $callback;
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
-        if ($this->callback) {
-            return $this->callback->__invoke($request);
-        }
-
+        if ($this->callback) { return $this->callback->__invoke($request); }
         return $this->id ? new DummyResponse($this->id) : null;
     }
 
     public function gateway(string $path): Route
     {
         $this->path = $path;
-
         return $this;
     }
 
     public function uri(array $params = [], UriInterface $prototype = null): UriInterface
     {
-        $uri = $this->id ? Uri::fromString($this->id) : Uri::fromString();
-
-        return $uri;
+        return $this->id ? Uri::fromString($this->id) : Uri::fromString();
     }
 }

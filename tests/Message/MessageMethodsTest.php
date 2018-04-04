@@ -12,6 +12,8 @@
 namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Tests\Fixtures\MessageMethodsClass;
+use Polymorphine\Http\Tests\Doubles\FakeStream;
 use Psr\Http\Message\MessageInterface;
 use InvalidArgumentException;
 
@@ -67,16 +69,16 @@ class MessageMethodsTest extends TestCase
 
     public function testGetBody_ReturnsPassedStream()
     {
-        $body = new Doubles\DummyStream();
+        $body = new FakeStream();
         $this->assertSame($body, $this->message()->withBody($body)->getBody());
-        $message = new Doubles\MessageMethodsShell($body, []);
+        $message = new MessageMethodsClass($body, []);
         $this->assertSame($body, $message->getBody());
     }
 
     public function testWithBody_ReturnsNewObject()
     {
         $original = $this->message();
-        $modified = $original->withBody(new Doubles\DummyStream());
+        $modified = $original->withBody(new FakeStream());
         $this->assertEquals($original, $modified);
         $this->assertNotSame($original, $modified);
     }
@@ -249,10 +251,10 @@ class MessageMethodsTest extends TestCase
     public function invalidHeaderNames()
     {
         return [
-            'null name' => [null],
-            'empty name' => [''],
-            'not a string name' => [23],
-            'spaced name' => ['header name'],
+            'null name'             => [null],
+            'empty name'            => [''],
+            'not a string name'     => [23],
+            'spaced name'           => ['header name'],
             'invalid name char "@"' => ['email@example']
         ];
     }
@@ -271,14 +273,14 @@ class MessageMethodsTest extends TestCase
     public function invalidHeaderValues()
     {
         return [
-            'null value' => [null],
-            'bool value' => [true],
-            'toString object' => [new Doubles\DummyStream()],
-            'int within array' => [['valid header', 9001]],
-            'illegal char' => ["some value\xFF"],
-            'invalid linebreak \n' => ["some\n value"],
-            'invalid linebreak \r' => ["some\r value"],
-            'invalid linebreak \n\r' => ["some\n\r value"],
+            'null value'                    => [null],
+            'bool value'                    => [true],
+            'toString object'               => [new FakeStream()],
+            'int within array'              => [['valid header', 9001]],
+            'illegal char'                  => ["some value\xFF"],
+            'invalid linebreak \n'          => ["some\n value"],
+            'invalid linebreak \r'          => ["some\r value"],
+            'invalid linebreak \n\r'        => ["some\n\r value"],
             'no whitespace after linebreak' => ["some\r\nvalue"]
         ];
     }
@@ -286,9 +288,9 @@ class MessageMethodsTest extends TestCase
     private function message(array $headers = [], $version = null)
     {
         if (!$version) {
-            return new Doubles\MessageMethodsShell(new Doubles\DummyStream(), $headers);
+            return new MessageMethodsClass(new FakeStream(), $headers);
         }
 
-        return new Doubles\MessageMethodsShell(new Doubles\DummyStream(), $headers, $version);
+        return new MessageMethodsClass(new FakeStream(), $headers, $version);
     }
 }

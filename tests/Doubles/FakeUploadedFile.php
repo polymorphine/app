@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Message\Doubles;
+namespace Polymorphine\Http\Tests\Doubles;
 
 use Psr\Http\Message\UploadedFileInterface;
 

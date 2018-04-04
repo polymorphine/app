@@ -33,7 +33,7 @@ class PatternEndpointTest extends TestCase
 
         $route = Route\PatternEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
         $this->assertInstanceOf(Route::class, $route);
-}
+    }
 
     public function testNotMatchingRequest_ReturnsNull()
     {
@@ -44,27 +44,23 @@ class PatternEndpointTest extends TestCase
 
     public function testMatchingRequest_ReturnsResponse()
     {
-        $response = $this
-            ->route('/page/3', 'GET', $this->dummyCallback())
-            ->forward($this->request('/page/3', 'GET'));
+        $response = $this->route('/page/3', 'GET', $this->dummyCallback())
+                         ->forward($this->request('/page/3', 'GET'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
-        $response = $this
-            ->route('/page/576/foo-bar-45', 'UPDATE', $this->dummyCallback())
-            ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
+        $response = $this->route('/page/576/foo-bar-45', 'UPDATE', $this->dummyCallback())
+                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 
     public function testRequestIsForwardedWithMatchedAttributes()
     {
-        $response = $this
-            ->route('/page/3', 'GET')
-            ->forward($this->request('/page/3', 'GET'));
+        $response = $this->route('/page/3', 'GET')
+                         ->forward($this->request('/page/3', 'GET'));
         $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
 
-        $response = $this
-            ->route('/page/576/foo-bar-45', 'UPDATE')
-            ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
+        $response = $this->route('/page/576/foo-bar-45', 'UPDATE')
+                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
         $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
     }
 
@@ -93,6 +89,7 @@ class PatternEndpointTest extends TestCase
     {
         return function ($request) {
             $response = new DummyResponse();
+
             $response->fromRequest = $request;
 
             return $response;
@@ -102,8 +99,9 @@ class PatternEndpointTest extends TestCase
     private function request($path, $method)
     {
         $request = new DummyRequest();
+
         $request->method = $method;
-        $request->uri = Uri::fromString($path);
+        $request->uri    = Uri::fromString($path);
 
         return $request;
     }

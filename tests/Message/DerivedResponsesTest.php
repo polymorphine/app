@@ -64,6 +64,7 @@ class DerivedResponsesTest extends TestCase
 
     /**
      * @dataProvider invalidRedirectCode
+     *
      * @param int $status
      */
     public function testInvalidRedirectResponseStatusCode_ThrowsException(int $status)
@@ -74,7 +75,7 @@ class DerivedResponsesTest extends TestCase
 
     public function invalidRedirectCode()
     {
-        return [[100],[200],[299],[400],[500]];
+        return [[100], [200], [299], [400], [500]];
     }
 
     private function equivalentConstructs(ResponseInterface $responseA, ResponseInterface $responseB)

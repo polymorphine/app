@@ -26,7 +26,7 @@ class DummyRequest implements ServerRequestInterface
     public function __construct(string $method = 'GET', UriInterface $uri = null)
     {
         $this->method = $method;
-        $this->uri = $uri;
+        $this->uri    = $uri;
     }
 
     public function getMethod()
@@ -42,7 +42,7 @@ class DummyRequest implements ServerRequestInterface
     public function getRequestTarget()
     {
         $query = $this->getUri()->getquery();
-        $path = $this->getUri()->getPath();
+        $path  = $this->getUri()->getPath();
 
         return $query ? $path . '?' . $query : $path;
     }

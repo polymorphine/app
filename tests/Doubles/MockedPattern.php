@@ -28,7 +28,7 @@ class MockedPattern implements Pattern
 
     public function matchedRequest(ServerRequestInterface $request): ?ServerRequestInterface
     {
-        $uri =(string) $request->getUri();
+        $uri = (string) $request->getUri();
         return ($uri === $this->path) ? $request->withAttribute('pattern', 'passed') : null;
     }
 

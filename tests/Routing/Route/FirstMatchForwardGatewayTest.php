@@ -42,9 +42,9 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testForwardingMatchingRequest_ReturnsCorrectResponse()
     {
-        $routeA = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\DummyResponse('A') : null; });
-        $routeB = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\DummyResponse('B') : null; });
-        $route = $this->route(['A' => $routeA, 'B' => $routeB]);
+        $routeA   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\DummyResponse('A') : null; });
+        $routeB   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\DummyResponse('B') : null; });
+        $route    = $this->route(['A' => $routeA, 'B' => $routeB]);
         $requestA = new Doubles\DummyRequest('POST');
         $requestB = new Doubles\DummyRequest('GET');
         $this->assertSame('A', $route->forward($requestA)->body);
@@ -61,7 +61,7 @@ class FirstMatchForwardGatewayTest extends TestCase
     {
         $routeA = new Doubles\MockedRoute('A');
         $routeB = new Doubles\MockedRoute('B');
-        $route = $this->route(['A' => $routeA, 'B' => $routeB]);
+        $route  = $this->route(['A' => $routeA, 'B' => $routeB]);
         $this->assertSame('A', $route->gateway('A')->id);
         $this->assertSame('B', $route->gateway('B')->id);
     }
@@ -70,7 +70,7 @@ class FirstMatchForwardGatewayTest extends TestCase
     {
         $routeA = new Doubles\MockedRoute('A');
         $routeB = new Doubles\MockedRoute('B');
-        $route = $this->route(['AFound' => $routeA, 'BFound' => $routeB]);
+        $route  = $this->route(['AFound' => $routeA, 'BFound' => $routeB]);
         $this->assertSame('PathA', $route->gateway('AFound.PathA')->path);
         $this->assertSame('PathB', $route->gateway('BFound.PathB')->path);
     }
@@ -91,6 +91,7 @@ class FirstMatchForwardGatewayTest extends TestCase
     private function route(array $routes = [])
     {
         $dummy = new Doubles\MockedRoute('DUMMY');
+
         $dummy->callback = function () { return null; };
 
         return new FirstMatchForwardGateway(['example' => $dummy] + $routes);

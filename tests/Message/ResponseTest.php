@@ -13,6 +13,7 @@ namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Response;
+use Polymorphine\Http\Tests\Doubles\FakeStream;
 use Psr\Http\Message\ResponseInterface;
 use InvalidArgumentException;
 
@@ -36,7 +37,7 @@ class ResponseTest extends TestCase
     public function testNewStatusCode_ReturnsNewObject()
     {
         $original = $this->response(404);
-        $clone = $original->withStatus(201);
+        $clone    = $original->withStatus(201);
         $this->assertEquals($clone, $original->withStatus(201));
         $this->assertNotSame($original, $clone);
     }
@@ -46,7 +47,7 @@ class ResponseTest extends TestCase
         $fail = 'Default status code (200) should resolve into default "OK" reason phrase if not specified';
         $this->assertSame('OK', $this->response()->getReasonPhrase(), $fail);
 
-        $fail = 'Specified reason phrase should take precedence over default one';
+        $fail   = 'Specified reason phrase should take precedence over default one';
         $reason = 'My Own Reason';
         $this->assertSame($reason, $this->response(200, $reason)->getReasonPhrase(), $fail);
 
@@ -62,7 +63,7 @@ class ResponseTest extends TestCase
         $fail = 'withStatus(standard_code) should resolve reason phrase into default';
         $this->assertSame('Created', $this->response()->withStatus(201)->getReasonPhrase(), $fail);
 
-        $fail = 'withStatus(standard_code, reason) should return specified reason';
+        $fail   = 'withStatus(standard_code, reason) should return specified reason';
         $reason = 'Another reason';
         $this->assertSame($reason, $this->response(201)->withStatus(201, $reason)->getReasonPhrase(), $fail);
     }
@@ -87,9 +88,9 @@ class ResponseTest extends TestCase
     public function invalidStatusCodes()
     {
         return [
-            'null' => [null],
-            'false' => [false],
-            'string' => ['200'],
+            'null'            => [null],
+            'false'           => [false],
+            'string'          => ['200'],
             'below min range' => [99],
             'above max range' => [600]
         ];
@@ -122,12 +123,12 @@ class ResponseTest extends TestCase
         return [
             'array' => [['Reason in array']],
             'false' => [false],
-            'int' => [20]
+            'int'   => [20]
         ];
     }
 
     private function response($status = 200, $reason = null)
     {
-        return new Response($status, new Doubles\DummyStream(), [], ['reason' => $reason]);
+        return new Response($status, new FakeStream(), [], ['reason' => $reason]);
     }
 }

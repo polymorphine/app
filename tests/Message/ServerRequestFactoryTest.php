@@ -13,9 +13,12 @@ namespace Polymorphine\Http\Tests\Message;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\ServerRequestFactory;
+use Polymorphine\Http\Tests\Doubles\FakeUploadedFile;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use InvalidArgumentException;
+
+require_once dirname(__DIR__) . '/Fixtures/request-factory-functions.php';
 
 
 class ServerRequestFactoryTest extends TestCase
@@ -34,7 +37,7 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testBasicIntegration()
     {
-        $data = $this->basicData();
+        $data    = $this->basicData();
         $factory = $this->factory($data);
         $this->assertInstanceOf(ServerRequestFactory::class, $factory);
 
@@ -49,10 +52,10 @@ class ServerRequestFactoryTest extends TestCase
 
     public function testOverridingSuperglobals()
     {
-        $_POST = ['name' => 'overwritten value', 'original' => 'original value'];
-        $_GET = ['name' => 'overwritten value'];
+        $_POST   = ['name' => 'overwritten value', 'original' => 'original value'];
+        $_GET    = ['name' => 'overwritten value'];
         $_COOKIE = ['cookie' => 'original cookie'];
-        $data = $this->basicData();
+        $data    = $this->basicData();
         $request = ServerRequestFactory::fromGlobals($data);
 
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
@@ -102,10 +105,10 @@ class ServerRequestFactoryTest extends TestCase
     {
         $files['test'] = [
             'tmp_name' => 'phpFOOBAR',
-            'name' => 'avatar.png',
-            'size' => 10240,
-            'type' => 'image/jpeg',
-            'error' => 0
+            'name'     => 'avatar.png',
+            'size'     => 10240,
+            'type'     => 'image/jpeg',
+            'error'    => 0
         ];
         $request = $this->factory(['files' => $files])->create();
         $this->assertInstanceOf(UploadedFileInterface::class, $request->getUploadedFiles()['test']);
@@ -114,8 +117,8 @@ class ServerRequestFactoryTest extends TestCase
     public function testUploadedFileNestedStructureParameter()
     {
         $files = [
-            'first' => new Doubles\FakeUploadedFile(),
-            'second' => ['subcategory' => new Doubles\FakeUploadedFile()]
+            'first'  => new FakeUploadedFile(),
+            'second' => ['subcategory' => new FakeUploadedFile()]
         ];
         $request = $this->factory(['files' => $files])->create();
         $this->assertSame($files, $request->getUploadedFiles());
@@ -124,8 +127,8 @@ class ServerRequestFactoryTest extends TestCase
     public function testSingleUploadedFileSuperglobalStructure()
     {
         $files['test'] = $this->fileData('test.txt');
-        $request = $this->factory(['files' => $files])->create();
-        $file = $request->getUploadedFiles();
+        $request       = $this->factory(['files' => $files])->create();
+        $file          = $request->getUploadedFiles();
         $this->assertInstanceOf(UploadedFileInterface::class, $file['test']);
         $this->assertSame('test.txt', $file['test']->getClientFilename());
     }
@@ -133,10 +136,8 @@ class ServerRequestFactoryTest extends TestCase
     public function testMultipleUploadedFileSuperglobalStructure()
     {
         $files['test'] = $this->fileData(['testA.txt', 'testB.txt']);
-        //var_dump($files); exit;
-
-        $request = $this->factory(['files' => $files])->create();
-        $file = $request->getUploadedFiles();
+        $request       = $this->factory(['files' => $files])->create();
+        $file          = $request->getUploadedFiles();
         $this->assertInstanceOf(UploadedFileInterface::class, $file['test'][0]);
         $this->assertSame('testB.txt', $file['test'][1]->getClientFilename());
     }
@@ -144,13 +145,13 @@ class ServerRequestFactoryTest extends TestCase
     public function testMixedStructureUploadedFiles()
     {
         $files = [
-            'test' => ['multiple' => $this->fileData(['testA.txt', 'testB.txt'])],
-            'multipleC' => [new Doubles\FakeUploadedFile(), new Doubles\FakeUploadedFile()],
-            'singleD' => $this->fileData('testD.txt')
+            'test'      => ['multiple' => $this->fileData(['testA.txt', 'testB.txt'])],
+            'multipleC' => [new FakeUploadedFile(), new FakeUploadedFile()],
+            'singleD'   => $this->fileData('testD.txt')
         ];
 
         $request = $this->factory(['files' => $files])->create();
-        $file = $request->getUploadedFiles();
+        $file    = $request->getUploadedFiles();
         $this->assertInstanceOf(UploadedFileInterface::class, $file['test']['multiple'][0]);
         $this->assertInstanceOf(UploadedFileInterface::class, $file['multipleC'][1]);
         $this->assertSame('testD.txt', $file['singleD']->getClientFilename());
@@ -170,41 +171,27 @@ class ServerRequestFactoryTest extends TestCase
     private function basicData()
     {
         return [
-            'post' => ['name' => 'post value'],
-            'get' => ['name' => 'get value'],
+            'post'   => ['name' => 'post value'],
+            'get'    => ['name' => 'get value'],
             'cookie' => ['cookie' => 'cookie value'],
             'server' => ['SERVER_NAME' => 'server value'],
-            'files' => []
+            'files'  => []
         ];
     }
 
     private function fileData($name)
     {
         $multi = is_array($name);
-        $fill = function ($value) use ($name) { return array_fill(0, count($name), $value); };
+        $fill  = function ($value) use ($name) { return array_fill(0, count($name), $value); };
 
         return [
             'tmp_name' => $multi ? $fill('phpFOOBAR') : 'phpFOOBAR',
-            'name' => $name,
-            'size' => $multi ? $fill(10240) : 10240,
-            'type' => $multi ? $fill('text/plain') : 'text/plain',
-            'error' => $multi ? $fill(0) : 0
+            'name'     => $name,
+            'size'     => $multi ? $fill(10240) : 10240,
+            'type'     => $multi ? $fill('text/plain') : 'text/plain',
+            'error'    => $multi ? $fill(0) : 0
         ];
     }
 
     //TODO: parsed body use cases
-}
-
-namespace Polymorphine\Http\Message;
-
-use Polymorphine\Http\Tests\Message\ServerRequestFactoryTest as Factory;
-
-function apache_request_headers()
-{
-    return Factory::$nativeCallResult ?? [];
-}
-
-function function_exists($name)
-{
-    return Factory::$nativeCallResult ? true : \function_exists($name);
 }

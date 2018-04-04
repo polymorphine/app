@@ -85,6 +85,7 @@ class PatternGatewayTest extends TestCase
     private function request($uri = 'http://example.com/foo/bar?query=string')
     {
         $request = new Doubles\DummyRequest();
+
         $request->uri = Uri::fromString($uri);
 
         return $request;

@@ -36,24 +36,25 @@ class ResourceEndpointTest extends TestCase
      *
      * @param ServerRequestInterface $request
      * @param Route                  $resource
+     * @param string                 $message
      */
-    public function testNotMatchingRequest_ReturnsNull(ServerRequestInterface $request, Route $resource)
+    public function testNotMatchingRequest_ReturnsNull(ServerRequestInterface $request, Route $resource, string $message)
     {
-        $this->assertNull($resource->forward($request));
+        $this->assertNull($resource->forward($request), $message);
     }
 
     public function notMatchingRequests()
     {
         return [
-            'method not allowed' => [$this->request('/foo/bar', 'POST'), $this->resource('/foo/bar', ['GET', 'INDEX'])],
-            'methods other than POST or GET require resource id request' => [$this->request('/foo/bar', 'DOIT'), $this->resource('/foo/bar', ['DOIT', 'INDEX'])],
-            'path not match' => [$this->request('/foo/something', 'GET'), $this->resource('/foo/bar')],
-            'cannot post to id' => [$this->request('/foo/bar/123', 'POST'), $this->resource('/foo/bar')],
-            'invalid id' => [$this->request('/foo/bar/a8b3ccf0', 'GET'), $this->resource('/foo/bar', ['GET'])],
-            'resource list (without id) handler is defined by route INDEX pseudo-method' => [$this->request('/foo/bar', 'GET'), $this->resource('/foo/bar', ['GET'])],
-            'relative resource path is not substring of request path' => [$this->request('/foo/bar'), $this->resource('baz')],
-            'no resource id' => [$this->request('/some/path/foo'), $this->resource('some/path')],
-            'not a path segment' => [$this->request('/some/path/666'), $this->resource('me/path')]
+            [$this->request('/foo/bar', 'POST'), $this->resource('/foo/bar', ['GET', 'INDEX']), 'method should not be allowed'],
+            [$this->request('/foo/bar', 'DOIT'), $this->resource('/foo/bar', ['DOIT', 'INDEX']), 'methods other than POST or GET should require resource id'],
+            [$this->request('/foo/something', 'GET'), $this->resource('/foo/bar'), 'path should not match'],
+            [$this->request('/foo/bar/123', 'POST'), $this->resource('/foo/bar'), 'cannot post to id'],
+            [$this->request('/foo/bar/a8b3ccf0', 'GET'), $this->resource('/foo/bar', ['GET']), 'invalid id format should not match'],
+            [$this->request('/foo/bar', 'GET'), $this->resource('/foo/bar', ['GET']), 'resource list should be defined by INDEX pseudo-method'],
+            [$this->request('/foo/bar'), $this->resource('baz'), 'relative resource path is not substring of request path'],
+            [$this->request('/some/path/foo'), $this->resource('some/path'), 'no resource id'],
+            [$this->request('/some/path/666'), $this->resource('me/path'), 'not a path segment']
         ];
     }
 
@@ -137,7 +138,7 @@ class ResourceEndpointTest extends TestCase
     public function testUriForRelativePath_ReturnsUriWithPathAppendedToPrototype()
     {
         $resource = $this->resource('bar/baz');
-        $uri = $resource->uri(['id'=> '3456'], Uri::fromString('http://example.com/'));
+        $uri      = $resource->uri(['id' => '3456'], Uri::fromString('http://example.com/'));
         $this->assertSame('http://example.com/bar/baz/3456', (string) $uri);
     }
 
@@ -155,6 +156,7 @@ class ResourceEndpointTest extends TestCase
     {
         return function ($request) {
             $response = new DummyResponse();
+
             $response->fromRequest = $request;
 
             return $response;
@@ -164,8 +166,9 @@ class ResourceEndpointTest extends TestCase
     private function request($path, $method = null)
     {
         $request = new DummyRequest();
+
         $request->method = $method ?? 'GET';
-        $request->uri = Uri::fromString($path);
+        $request->uri    = Uri::fromString($path);
 
         return $request;
     }

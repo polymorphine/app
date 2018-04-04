@@ -92,11 +92,11 @@ class DynamicTargetMaskTest extends TestCase
     public function matchingRequests()
     {
         return [
-            'no-params' => ['/path/only', '/path/only', []],
-            'id' => ['/page/{#no}', '/page/4', ['no' => '4']],
-            'id+slug' => ['/page/{#no}/{$title}', '/page/576/foo-bar-45', ['no' => '576', 'title' => 'foo-bar-45']],
+            'no-params'  => ['/path/only', '/path/only', []],
+            'id'         => ['/page/{#no}', '/page/4', ['no' => '4']],
+            'id+slug'    => ['/page/{#no}/{$title}', '/page/576/foo-bar-45', ['no' => '576', 'title' => 'foo-bar-45']],
             'literal-id' => ['/foo-{%name}', '/foo-bar5000', ['name' => 'bar5000']],
-            'query' => ['/path/and?user={#id}', '/path/and?user=938', ['id' => '938']],
+            'query'      => ['/path/and?user={#id}', '/path/and?user=938', ['id' => '938']],
             'query+path' => ['/path/user/{#id}?foo={$bar}', '/path/user/938?foo=bar-BAZ', ['id' => '938', 'bar' => 'bar-BAZ']]
         ];
     }
@@ -117,36 +117,32 @@ class DynamicTargetMaskTest extends TestCase
 
     public function testQueryStringMatchIgnoresParamOrder()
     {
-        $request = $this
-            ->pattern('/path/and?user={#id}&foo={$bar}')
-            ->matchedRequest($this->request('/path/and?foo=bar-BAZ&user=938'));
+        $request = $this->pattern('/path/and?user={#id}&foo={$bar}')
+                        ->matchedRequest($this->request('/path/and?foo=bar-BAZ&user=938'));
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $request->getAttributes());
     }
 
     public function testQueryStringIsIgnoredWhenNotSpecifiedInRoute()
     {
-        $request = $this
-            ->pattern('/path/{%directory}')
-            ->matchedRequest($this->request('/path/something?foo=bar-BAZ&user=938'));
+        $request = $this->pattern('/path/{%directory}')
+                        ->matchedRequest($this->request('/path/something?foo=bar-BAZ&user=938'));
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame(['directory' => 'something'], $request->getAttributes());
     }
 
     public function testNotSpecifiedQueryParamsAreIgnored()
     {
-        $request = $this
-            ->pattern('/path/only?name={$slug}&user=938')
-            ->matchedRequest($this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r'));
+        $request = $this->pattern('/path/only?name={$slug}&user=938')
+                        ->matchedRequest($this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r'));
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame(['slug' => 'shudd3r'], $request->getAttributes());
     }
 
     public function testMissingQueryParamWontMatchRequest()
     {
-        $request = $this
-            ->pattern('/path/only?name={$slug}&user=938')
-            ->matchedRequest($this->request('/path/only?foo=bar-BAZ&name=shudd3r'));
+        $request = $this->pattern('/path/only?name={$slug}&user=938')
+                        ->matchedRequest($this->request('/path/only?foo=bar-BAZ&name=shudd3r'));
         $this->assertNull($request);
     }
 
@@ -248,18 +244,18 @@ class DynamicTargetMaskTest extends TestCase
 
     public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
     {
-        $pattern = $this->pattern('{#id}/{$slug}');
+        $pattern   = $this->pattern('{#id}/{$slug}');
         $prototype = Uri::fromString('/foo/bar');
         $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
 
-        $pattern = $this->pattern('{#id}/{$slug}?query=string');
+        $pattern   = $this->pattern('{#id}/{$slug}?query=string');
         $prototype = Uri::fromString('/foo/bar');
         $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
     }
 
     public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
     {
-        $pattern = $this->pattern('foo/{#id}');
+        $pattern   = $this->pattern('foo/{#id}');
         $prototype = new Uri();
         $this->expectException(UnreachableEndpointException::class);
         $pattern->uri(['34'], $prototype);
@@ -273,6 +269,7 @@ class DynamicTargetMaskTest extends TestCase
     private function request($path)
     {
         $request = new DummyRequest();
+
         $request->uri = Uri::fromString('//example.com' . $path);
 
         return $request;

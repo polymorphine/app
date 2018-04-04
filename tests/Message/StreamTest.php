@@ -17,13 +17,16 @@ use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
+require_once dirname(__DIR__) . '/Fixtures/stream-functions.php';
+
 
 class StreamTest extends TestCase
 {
     /**
      * @var bool Force error responses from native function calls
      */
-    public static $overrideNativeFunctions;
+    public static $overrideFunctions = false;
+
     /**
      * @var StreamInterface
      */
@@ -34,19 +37,11 @@ class StreamTest extends TestCase
      */
     protected $testFilename;
 
-    public function setUp()
-    {
-        self::$overrideNativeFunctions = false;
-    }
-
     public function tearDown()
     {
-        if ($this->stream) {
-            $this->stream->close();
-        }
-        if (file_exists($this->testFilename)) {
-            unlink($this->testFilename);
-        }
+        self::$overrideFunctions = false;
+        if ($this->stream) { $this->stream->close(); }
+        if (file_exists($this->testFilename)) { unlink($this->testFilename); }
     }
 
     public function testInstantiateWithStreamName()
@@ -132,7 +127,8 @@ class StreamTest extends TestCase
     public function testTellError_ThrowsException()
     {
         $stream = $this->stream();
-        StreamTest::$overrideNativeFunctions = true;
+
+        self::$overrideFunctions = true;
         $this->expectException(RuntimeException::class);
         $stream->tell();
     }
@@ -150,9 +146,11 @@ class StreamTest extends TestCase
         $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
         $stream->seek(6);
         $this->assertSame(6, $stream->tell(), 'SEEK_SET offset resolves into absolute position');
+
         $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
         $stream->seek(6, SEEK_CUR);
         $this->assertSame(9, $stream->tell(), 'SEEK_CUR offset resolves into position relative to current');
+
         $stream = $this->streamWithPredefinedConditions('Hello World!', 3);
         $stream->seek(-3, SEEK_END);
         $this->assertSame(9, $stream->tell(), 'SEEK_END offset resolves into position relative to end of stream');
@@ -242,8 +240,9 @@ class StreamTest extends TestCase
 
     public function testReadError_ThrowsException()
     {
-        self::$overrideNativeFunctions = true;
         $stream = $this->stream(null, 'w+b');
+
+        self::$overrideFunctions = true;
         $this->expectException(RuntimeException::class);
         $stream->read(1);
     }
@@ -274,7 +273,8 @@ class StreamTest extends TestCase
     public function testGetContentsError_ThrowsException()
     {
         $stream = $this->streamWithPredefinedConditions('Hello World!', 0);
-        self::$overrideNativeFunctions = true;
+
+        self::$overrideFunctions = true;
         $this->expectException(RuntimeException::class);
         $stream->getContents();
     }
@@ -302,7 +302,7 @@ class StreamTest extends TestCase
     public function testWriteSendsDataToStream()
     {
         $stream = $this->stream(null, 'w+b');
-        $data = 'Hello World!';
+        $data   = 'Hello World!';
         $stream->write($data);
         $this->assertSame($data, (string) $stream);
     }
@@ -325,8 +325,9 @@ class StreamTest extends TestCase
 
     public function testErrorOnWrite_ThrowsException()
     {
-        StreamTest::$overrideNativeFunctions = true;
         $stream = $this->stream(null, 'w+b');
+
+        self::$overrideFunctions = true;
         $this->expectException(RuntimeException::class);
         $stream->write('Hello World!');
     }
@@ -366,7 +367,8 @@ class StreamTest extends TestCase
     public function testWhenErrorOccurs_ToStringReturnsEmptyString()
     {
         $stream = $this->streamWithPredefinedConditions('Hello World!', 6);
-        self::$overrideNativeFunctions = true;
+
+        self::$overrideFunctions = true;
         $this->assertSame('', (string) $stream);
     }
 
@@ -387,9 +389,7 @@ class StreamTest extends TestCase
     private function fileStream($mode = null, string $contents = '')
     {
         $this->testFilename = tempnam(sys_get_temp_dir(), 'test');
-        if ($contents) {
-            file_put_contents($this->testFilename, $contents);
-        }
+        if ($contents) { file_put_contents($this->testFilename, $contents); }
 
         return $this->stream($this->testFilename, $mode);
     }
@@ -402,28 +402,4 @@ class StreamTest extends TestCase
 
         return $this->stream($resource);
     }
-}
-
-namespace Polymorphine\Http\Message;
-
-use Polymorphine\Http\Tests\Message\StreamTest;
-
-function fread($resource, $count)
-{
-    return StreamTest::$overrideNativeFunctions ? false : \fread($resource, $count);
-}
-
-function fwrite($resource, $contents)
-{
-    return StreamTest::$overrideNativeFunctions ? false : \fwrite($resource, $contents);
-}
-
-function ftell($resource)
-{
-    return StreamTest::$overrideNativeFunctions ? false : \ftell($resource);
-}
-
-function stream_get_contents($resource)
-{
-    return StreamTest::$overrideNativeFunctions ? false : \stream_get_contents($resource);
 }

@@ -9,20 +9,20 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Message\Doubles;
+namespace Polymorphine\Http\Tests\Fixtures;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
 use Polymorphine\Http\Message\MessageMethodsTrait;
 
 
-class MessageMethodsShell implements MessageInterface
+class MessageMethodsClass implements MessageInterface
 {
     use MessageMethodsTrait;
 
     public function __construct(StreamInterface $body, array $headers, $version = '1.1')
     {
-        $this->body = $body;
+        $this->body    = $body;
         $this->version = $this->validProtocolVersion($version);
         $this->loadHeaders($headers);
     }

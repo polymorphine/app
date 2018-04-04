@@ -17,23 +17,25 @@ use Psr\Http\Message\StreamInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
+require_once dirname(__DIR__) . '/Fixtures/uploaded-file-functions.php';
+
 
 class UploadedFileTest extends TestCase
 {
     public static $forceNativeFunctionErrors = false;
+
     private $testFilename;
     private $movedFilename;
 
     public function tearDown()
     {
-        if (file_exists($this->testFilename)) {
-            unlink($this->testFilename);
-        }
+        if (file_exists($this->testFilename)) { unlink($this->testFilename); }
         if (file_exists($this->movedFilename)) {
             unlink($this->movedFilename);
         }
-        $this->testFilename = null;
+        $this->testFilename  = null;
         $this->movedFilename = null;
+
         self::$forceNativeFunctionErrors = false;
     }
 
@@ -60,18 +62,18 @@ class UploadedFileTest extends TestCase
     public function invalidConstructorParams()
     {
         return [
-            'name' => [['name' => false]],
-            'size' => [['size' => '123']],
-            'tmp_name' => [['tmp_name' => ['array.txt']]],
-            'type' => [['type' => 123]],
-            'error code string' => [['error' => 'UPLOAD_ERR_OK']],
+            'name'               => [['name' => false]],
+            'size'               => [['size' => '123']],
+            'tmp_name'           => [['tmp_name' => ['array.txt']]],
+            'type'               => [['type' => 123]],
+            'error code string'  => [['error' => 'UPLOAD_ERR_OK']],
             'error code unknown' => [['error' => 12]]
         ];
     }
 
     public function testFileIsMoved()
     {
-        $file = $this->file('empty');
+        $file   = $this->file('empty');
         $target = $this->targetPath();
         $this->assertFalse(file_exists($target));
         $file->moveTo($target);
@@ -95,8 +97,9 @@ class UploadedFileTest extends TestCase
 
     public function testFileMoveError_ThrowsException()
     {
-        $file = $this->file();
         self::$forceNativeFunctionErrors = true;
+
+        $file = $this->file();
         $this->expectException(RuntimeException::class);
         $file->moveTo($this->targetPath());
     }
@@ -124,17 +127,18 @@ class UploadedFileTest extends TestCase
 
     private function file($contents = '', array $data = [])
     {
-        isset($this->testFilename) or $this->testFilename = tempnam(sys_get_temp_dir(), 'test');
-        if ($contents) {
-            file_put_contents($this->testFilename, $contents);
+        if (!isset($this->testFilename)) {
+            $this->testFilename = tempnam(sys_get_temp_dir(), 'test');
         }
+
+        if ($contents) { file_put_contents($this->testFilename, $contents); }
 
         $fileData = [
             'tmp_name' => $this->testFilename,
-            'size' => strlen($contents),
-            'error' => UPLOAD_ERR_OK,
-            'name' => 'clientName.txt',
-            'type' => 'text/plain'
+            'size'     => strlen($contents),
+            'error'    => UPLOAD_ERR_OK,
+            'name'     => 'clientName.txt',
+            'type'     => 'text/plain'
         ];
 
         $_FILES['test'] = $data + $fileData;
@@ -146,17 +150,4 @@ class UploadedFileTest extends TestCase
     {
         return $this->movedFilename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $name;
     }
-}
-
-namespace Polymorphine\Http\Message\Request;
-
-use Polymorphine\Http\Tests\Message\UploadedFileTest as TestConfig;
-
-function move_uploaded_file($filename, $destination)
-{
-    if (TestConfig::$forceNativeFunctionErrors) {
-        return false;
-    }
-
-    return copy($filename, $destination);
 }

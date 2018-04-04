@@ -19,10 +19,10 @@ use Psr\Http\Message\StreamInterface;
 class DummyResponse implements ResponseInterface
 {
     public $body;
-    public $headers = [];
+    public $headers  = [];
     public $protocol = '1.1';
-    public $status = 200;
-    public $reason = 'OK';
+    public $status   = 200;
+    public $reason   = 'OK';
 
     /**
      * @var ServerRequestInterface

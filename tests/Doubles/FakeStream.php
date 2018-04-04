@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-
 use Psr\Http\Message\StreamInterface;
 
 
@@ -19,11 +18,10 @@ class FakeStream implements StreamInterface
 {
     private $body;
 
-    public function __construct(string $body)
+    public function __construct(string $body = '')
     {
         $this->body = $body;
     }
-
 
     public function __toString()
     {

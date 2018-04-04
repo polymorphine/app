@@ -19,7 +19,7 @@ use Polymorphine\Http\App;
 
 class MockedApp extends App
 {
-    public $routeFound = false;
+    public $routeFound     = false;
     public $overrideParent = false;
 
     protected function routing(ContainerInterface $c): Route

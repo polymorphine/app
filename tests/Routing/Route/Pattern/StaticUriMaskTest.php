@@ -93,8 +93,7 @@ class StaticUriMaskTest extends TestCase
      */
     public function testUriIsReturnedWithDefinedUriParts($pattern, $uriString, $expected)
     {
-        $uri = Uri::fromString($uriString);
-
+        $uri  = Uri::fromString($uriString);
         $mask = $this->pattern($pattern);
         $this->assertSame($expected, (string) $mask->uri([], $uri));
     }
@@ -150,18 +149,18 @@ class StaticUriMaskTest extends TestCase
 
     public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
     {
-        $pattern = $this->pattern('bar/slug-string');
+        $pattern   = $this->pattern('bar/slug-string');
         $prototype = Uri::fromString('/foo');
         $this->assertSame('/foo/bar/slug-string', (string) $pattern->uri([], $prototype));
 
-        $pattern = $this->pattern('last/segments?query=string');
+        $pattern   = $this->pattern('last/segments?query=string');
         $prototype = Uri::fromString('/foo/bar');
         $this->assertSame('/foo/bar/last/segments?query=string', (string) $pattern->uri([], $prototype));
     }
 
     public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
     {
-        $pattern = $this->pattern('bar');
+        $pattern   = $this->pattern('bar');
         $prototype = new Uri();
         $this->expectException(UnreachableEndpointException::class);
         $pattern->uri([], $prototype);
@@ -175,6 +174,7 @@ class StaticUriMaskTest extends TestCase
     private function request(string $uri)
     {
         $request = new DummyRequest();
+
         $request->uri = Uri::fromString($uri);
 
         return $request;

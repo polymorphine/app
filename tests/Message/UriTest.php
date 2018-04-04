@@ -201,13 +201,13 @@ class UriTest extends TestCase
     public function invalidPorts()
     {
         return [
-            'bool' => [true],
+            'bool'           => [true],
             'literal string' => ['string'],
-            'array' => [[45]],
-            'object' => [(object) ['port' => 113]],
-            'zero' => [0],
-            'negative' => [-20],
-            'out of range' => [65536],
+            'array'          => [[45]],
+            'object'         => [(object) ['port' => 113]],
+            'zero'           => [0],
+            'negative'       => [-20],
+            'out of range'   => [65536],
             'numeric string' => ['65']
         ];
     }
@@ -226,14 +226,14 @@ class UriTest extends TestCase
     public function invalidUserInfoArgs()
     {
         return [
-            'bool username' => [true, null],
-            'array username' => [['user', 'password'], null],
+            'bool username'   => [true, null],
+            'array username'  => [['user', 'password'], null],
             'object username' => [(object) ['user' => 'foo'], null],
-            'int username' => [65536, null],
-            'bool password' => ['user', false],
-            'array password' => ['user', ['password']],
+            'int username'    => [65536, null],
+            'bool password'   => ['user', false],
+            'array password'  => ['user', ['password']],
             'object password' => ['user', (object) ['password' => 'foo']],
-            'int password' => ['user', 65536]
+            'int password'    => ['user', 65536]
         ];
     }
 
@@ -290,10 +290,10 @@ class UriTest extends TestCase
     public function invalidNonStringArgs()
     {
         return [
-            'bool' => [true],
-            'array' => [['string']],
+            'bool'   => [true],
+            'array'  => [['string']],
             'object' => [(object) ['value' => 'string']],
-            'int' => [65536]
+            'int'    => [65536]
         ];
     }
 
