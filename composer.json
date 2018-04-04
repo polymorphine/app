@@ -11,7 +11,7 @@
         "psr/http-server-handler": "^1.0"
     },
     "require-dev": {
-        "polymorphine/cs": "^1.0",
+        "polymorphine/cs": "^1.1",
         "phpunit/phpunit": "^6.5",
         "php-coveralls/php-coveralls": "^2.0"
     },
