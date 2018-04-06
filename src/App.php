@@ -23,24 +23,28 @@ use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 abstract class App implements RequestHandlerInterface
 {
-    private $containerSetup;
+    protected const APP_ROUTER_ID = 'app.router';
+
+    private $setup;
 
     public function __construct(array $records = [])
     {
-        $this->containerSetup = $this->containerSetup($records);
+        $this->setup = $this->containerSetup($records);
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $container = $this->containerSetup->container();
-        $response  = $this->routing($container)->forward($request);
+        $container = $this->setup->container();
+        $routing   = $this->routing($container);
 
-        return $response ?: $this->notFoundResponse();
+        $this->setup->entry(static::APP_ROUTER_ID)->value($routing);
+
+        return $routing->forward($request) ?: $this->notFoundResponse();
     }
 
     public function config(string $id): RecordSetup
     {
-        return $this->containerSetup->entry($id);
+        return $this->setup->entry($id);
     }
 
     protected function notFoundResponse()
