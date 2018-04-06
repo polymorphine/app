@@ -60,7 +60,7 @@ class ServerRequestFactory
             'parsedBody' => $this->parsedBody(),
             'files'      => $this->normalizeFiles($this->files),
             'attributes' => $attributes,
-            'version'    => $this->server['SERVER_PROTOCOL'] ?? '1.1'
+            'version'    => $this->protocolVersion()
         ];
 
         return new ServerRequest($method, $uri, $body, $headers, $params);
@@ -69,6 +69,13 @@ class ServerRequestFactory
     protected function parsedBody()
     {
         return $this->post;
+    }
+
+    private function protocolVersion(): string
+    {
+        return isset($this->server['SERVER_PROTOCOL'])
+            ? explode('/', $this->server['SERVER_PROTOCOL'])[1]
+            : '1.1';
     }
 
     private function resolveUri(): UriInterface
@@ -163,9 +170,9 @@ class ServerRequestFactory
     private function transposeFileDataSet(array $files)
     {
         $normalizedFiles = [];
-        foreach ($files as $spec_key => $values) {
+        foreach ($files as $specKey => $values) {
             foreach ($values as $idx => $value) {
-                $normalizedFiles[$idx][$spec_key] = $value;
+                $normalizedFiles[$idx][$specKey] = $value;
             }
         }
 

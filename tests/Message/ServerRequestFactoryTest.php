@@ -48,6 +48,7 @@ class ServerRequestFactoryTest extends TestCase
         $this->assertSame($data['post'], $request->getParsedBody());
         $this->assertSame($data['cookie'], $request->getCookieParams());
         $this->assertSame(['attr' => 'attr value'], $request->getAttributes());
+        $this->assertSame('1.0', $request->getProtocolVersion());
     }
 
     public function testOverridingSuperglobals()
@@ -174,7 +175,7 @@ class ServerRequestFactoryTest extends TestCase
             'post'   => ['name' => 'post value'],
             'get'    => ['name' => 'get value'],
             'cookie' => ['cookie' => 'cookie value'],
-            'server' => ['SERVER_NAME' => 'server value'],
+            'server' => $this->serverContext(),
             'files'  => []
         ];
     }
@@ -190,6 +191,34 @@ class ServerRequestFactoryTest extends TestCase
             'size'     => $multi ? $fill(10240) : 10240,
             'type'     => $multi ? $fill('text/plain') : 'text/plain',
             'error'    => $multi ? $fill(0) : 0
+        ];
+    }
+
+    private function serverContext()
+    {
+        return [
+            'SCRIPT_URL'           => '/',
+            'SCRIPT_URI'           => 'http://server.local/',
+            'HTTP_HOST'            => 'server.local',
+            'HTTP_ACCEPT'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'HTTP_ACCEPT_LANGUAGE' => 'pl,en;q=0.7,en-US;q=0.3',
+            'HTTP_ACCEPT_ENCODING' => 'gzip, deflate',
+            'HTTP_REFERER'         => 'http://server.local/',
+            'HTTP_DNT'             => '1',
+            'HTTP_CONNECTION'      => 'keep-alive',
+            'HTTP_CACHE_CONTROL'   => 'max-age=0',
+            'SERVER_NAME'          => 'server.local',
+            'SERVER_ADDR'          => '127.0.0.1',
+            'SERVER_PORT'          => '80',
+            'REMOTE_ADDR'          => '127.0.0.1',
+            'REQUEST_SCHEME'       => 'http',
+            'REMOTE_PORT'          => '49847',
+            'SERVER_PROTOCOL'      => 'HTTP/1.0',
+            'REQUEST_METHOD'       => 'GET',
+            'QUERY_STRING'         => '',
+            'REQUEST_URI'          => '/',
+            'SCRIPT_NAME'          => '/index.php',
+            'PHP_SELF'             => '/index.php'
         ];
     }
 
