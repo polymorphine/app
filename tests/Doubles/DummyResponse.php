@@ -62,6 +62,8 @@ class DummyResponse implements ResponseInterface
 
     public function withHeader($name, $value)
     {
+        $this->headers[$name] = $value;
+        return $this;
     }
 
     public function withAddedHeader($name, $value)

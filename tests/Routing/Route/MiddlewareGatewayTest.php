@@ -16,9 +16,9 @@ use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\MiddlewareGateway;
 use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Closure;
 
 
@@ -28,12 +28,6 @@ class MiddlewareGatewayTest extends TestCase
     {
         $this->assertInstanceOf(Route::class, $route = $this->middleware());
         $this->assertInstanceOf(MiddlewareGateway::class, $route);
-    }
-
-    public function testClosurePreventsForwardingRequest()
-    {
-        $request = new DummyRequest();
-        $this->assertNull($this->middleware()->forward($request));
     }
 
     public function testMiddlewareForwardsRequest()
@@ -54,18 +48,8 @@ class MiddlewareGatewayTest extends TestCase
         $this->middleware()->uri();
     }
 
-    private function middleware(Closure $callback = null)
+    private function middleware()
     {
-        if (!$callback) {
-            $callback = $this->basicCallback();
-        }
-        return new MiddlewareGateway($callback, new MockedRoute('default'));
-    }
-
-    private function basicCallback()
-    {
-        return function (ServerRequestInterface $request, Closure $forward) {
-            return $request->getMethod() === 'POST' ? $forward($request) : null;
-        };
+        return new MiddlewareGateway(new FakeMiddleware(), new MockedRoute('default'));
     }
 }
