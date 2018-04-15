@@ -21,6 +21,10 @@ class FakeMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $handler->handle($request)->withHeader('Middleware', 'processed');
+        $request = $request->withAttribute('Middleware', 'processed request');
+        $response = $handler->handle($request)->withHeader('Middleware', 'processed response');
+        $response->fromRequest = $request;
+
+        return $response;
     }
 }

@@ -19,7 +19,6 @@ use Polymorphine\Http\Tests\Doubles\DummyRequest;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
-use Closure;
 
 
 class MiddlewareGatewayTest extends TestCase
@@ -33,7 +32,9 @@ class MiddlewareGatewayTest extends TestCase
     public function testMiddlewareForwardsRequest()
     {
         $request = new DummyRequest('POST');
-        $this->assertInstanceOf(ResponseInterface::class, $this->middleware()->forward($request));
+        $this->assertInstanceOf(ResponseInterface::class, $response = $this->middleware()->forward($request));
+        $this->assertSame(['Middleware' => 'processed request'], $response->fromRequest->getAttributes());
+        $this->assertSame(['Middleware' => 'processed response'], $response->getheaders());
     }
 
     public function testGatewayCallsRouteWithSameParameter()
