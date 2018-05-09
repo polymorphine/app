@@ -14,7 +14,6 @@ namespace Polymorphine\Http\Message\Response\Headers;
 use Psr\Http\Message\ResponseInterface;
 
 
-
 class ResponseHeadersCollection
 {
     private $headers;

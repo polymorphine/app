@@ -16,17 +16,11 @@ use Polymorphine\Http\Message\Response\Headers\CookieSetup;
 use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
 use Polymorphine\Http\Tests\Doubles\DummyResponse;
 
-
 require_once dirname(dirname(dirname(__DIR__))) . '/Fixtures/time-functions.php';
 
 
 class ResponseHeadersCollectionTest extends TestCase
 {
-    private function collection(array $headers = [])
-    {
-        return new ResponseHeadersCollection($headers);
-    }
-
     public function testInstantiation()
     {
         $this->assertInstanceOf(ResponseHeadersCollection::class, $this->collection());
@@ -40,15 +34,14 @@ class ResponseHeadersCollectionTest extends TestCase
                 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
             ],
             'X-Foo-Header' => ['foo'],
-            'X-Bar-Header' => ['bar'],
+            'X-Bar-Header' => ['bar']
         ];
 
         $collection = $this->collection($headers);
-        $response = $collection->setHeaders(new DummyResponse());
+        $response   = $collection->setHeaders(new DummyResponse());
 
         $this->assertSame($headers, $response->getHeaders());
     }
-
 
     public function testCookieSetupInstance()
     {
@@ -59,18 +52,18 @@ class ResponseHeadersCollectionTest extends TestCase
      * @dataProvider cookieData
      *
      * @param string $headerLine
-     * @param array $c
+     * @param array  $c
      */
     public function testCookieHeaders(string $headerLine, array $c)
     {
         $collection = $this->collection();
-        $cookie = $collection->cookie($c['name']);
+        $cookie     = $collection->cookie($c['name']);
 
-        isset($c['time']) and $cookie = ($c['time'] !== 2628000) ? $cookie->expires($c['time']) : $cookie->permanent();
+        isset($c['time']) and $cookie   = ($c['time'] !== 2628000) ? $cookie->expires($c['time']) : $cookie->permanent();
         isset($c['domain']) and $cookie = $cookie->domain($c['domain']);
-        isset($c['path']) and $cookie = $cookie->path($c['path']);
+        isset($c['path']) and $cookie   = $cookie->path($c['path']);
         isset($c['secure']) and $cookie = $cookie->secure($c['secure']);
-        isset($c['http']) and $cookie = $cookie->httpOnly($c['http']);
+        isset($c['http']) and $cookie   = $cookie->httpOnly($c['http']);
 
         $c['value'] ? $cookie->value($c['value']) : $cookie->remove();
         $this->assertEquals($this->collection(['Set-Cookie' => [$headerLine]]), $collection);
@@ -80,26 +73,29 @@ class ResponseHeadersCollectionTest extends TestCase
     {
         return [
             ['myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000', [
-                'name' => 'myCookie',
+                'name'  => 'myCookie',
                 'value' => null
             ]],
             ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly', [
-                'name' => 'fullCookie',
-                'value' => 'foo',
+                'name'   => 'fullCookie',
+                'value'  => 'foo',
                 'secure' => true,
-                'time' => 60,
-                'http' => true,
+                'time'   => 60,
+                'http'   => true,
                 'domain' => 'example.com',
-                'path' => '/directory/'
+                'path'   => '/directory/'
             ]],
             ['permanentCookie=hash-3284682736487236; Expires=Sunday, 30-Apr-2023 00:00:00 UTC; MaxAge=157680000; HttpOnly', [
-                'name' => 'permanentCookie',
+                'name'  => 'permanentCookie',
                 'value' => 'hash-3284682736487236',
-                'time' => 2628000,
-                'http' => true,
+                'time'  => 2628000,
+                'http'  => true
             ]]
         ];
     }
 
-
+    private function collection(array $headers = [])
+    {
+        return new ResponseHeadersCollection($headers);
+    }
 }

@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Message\Response\Headers;
 
-function time() {
+function time()
+{
     return 1525132800;
 }
