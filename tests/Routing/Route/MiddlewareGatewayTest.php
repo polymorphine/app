@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\MiddlewareGateway;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
@@ -31,7 +31,7 @@ class MiddlewareGatewayTest extends TestCase
 
     public function testMiddlewareForwardsRequest()
     {
-        $request = new DummyRequest('POST');
+        $request = new FakeServerRequest('POST');
         $this->assertInstanceOf(ResponseInterface::class, $response = $this->middleware()->forward($request));
         $this->assertSame(['Middleware' => 'processed request'], $response->fromRequest->getAttributes());
         $this->assertSame(['Middleware' => 'processed response'], $response->getheaders());

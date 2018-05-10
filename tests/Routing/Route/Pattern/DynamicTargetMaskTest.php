@@ -17,7 +17,7 @@ use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Polymorphine\Http\Routing\Route\Pattern\DynamicTargetMask;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -268,7 +268,7 @@ class DynamicTargetMaskTest extends TestCase
 
     private function request($path)
     {
-        $request = new DummyRequest();
+        $request = new FakeServerRequest();
 
         $request->uri = Uri::fromString('//example.com' . $path);
 

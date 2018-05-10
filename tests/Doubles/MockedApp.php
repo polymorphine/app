@@ -29,13 +29,13 @@ class MockedApp extends App
             $this->routeFound ? function (ServerRequestInterface $request) use ($c) {
                 $body = $request->getUri() . ': ' . $c->get('test');
 
-                return new DummyResponse($body);
+                return new FakeResponse($body);
             } : null
         );
     }
 
     protected function notFoundResponse()
     {
-        return $this->overrideParent ? new DummyResponse('Not Found') : parent::notFoundResponse();
+        return $this->overrideParent ? new FakeResponse('Not Found') : parent::notFoundResponse();
     }
 }

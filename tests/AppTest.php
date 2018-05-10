@@ -38,7 +38,7 @@ class AppTest extends TestCase
         ]);
         $app->routeFound = true;
 
-        $response = $app->handle(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
@@ -49,15 +49,15 @@ class AppTest extends TestCase
         $app->routeFound     = false;
         $app->overrideParent = false;
 
-        $response = $app->handle(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(NotFoundResponse::class, $response);
 
         $app->overrideParent = true;
 
-        $response = $app->handle(new Doubles\DummyRequest());
+        $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertInstanceOf(Doubles\DummyResponse::class, $response);
+        $this->assertInstanceOf(Doubles\FakeResponse::class, $response);
         $this->assertSame('Not Found', $response->body);
     }
 

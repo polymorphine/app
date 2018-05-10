@@ -34,7 +34,7 @@ class MockedRoute extends Route
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         if ($this->callback) { return $this->callback->__invoke($request); }
-        return $this->id ? new DummyResponse($this->id) : null;
+        return $this->id ? new FakeResponse($this->id) : null;
     }
 
     public function gateway(string $path): Route

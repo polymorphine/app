@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 
-class DummyResponse implements ResponseInterface
+class FakeResponse implements ResponseInterface
 {
     public $body;
     public $headers  = [];

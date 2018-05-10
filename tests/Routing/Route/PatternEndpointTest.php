@@ -15,8 +15,8 @@ use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\GatewayCallException;
 use Polymorphine\Http\Routing\Route;
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
-use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\MockedPattern;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -88,7 +88,7 @@ class PatternEndpointTest extends TestCase
     private function dummyCallback()
     {
         return function ($request) {
-            $response = new DummyResponse();
+            $response = new FakeResponse();
 
             $response->fromRequest = $request;
 
@@ -98,7 +98,7 @@ class PatternEndpointTest extends TestCase
 
     private function request($path, $method)
     {
-        $request = new DummyRequest();
+        $request = new FakeServerRequest();
 
         $request->method = $method;
         $request->uri    = Uri::fromString($path);

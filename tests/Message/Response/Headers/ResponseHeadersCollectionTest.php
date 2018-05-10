@@ -14,7 +14,7 @@ namespace Polymorphine\Http\Tests\Message\Response\Headers;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Response\Headers\CookieSetup;
 use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
-use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 
 require_once dirname(dirname(dirname(__DIR__))) . '/Fixtures/time-functions.php';
 
@@ -38,7 +38,7 @@ class ResponseHeadersCollectionTest extends TestCase
         ];
 
         $collection = $this->collection($headers);
-        $response   = $collection->setHeaders(new DummyResponse());
+        $response   = $collection->setHeaders(new FakeResponse());
 
         $this->assertSame($headers, $response->getHeaders());
     }

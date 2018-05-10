@@ -41,7 +41,7 @@ class RequestFirewallTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $route->forward($this->request('/foo/bar')));
         $this->assertSame('default', $route->forward($this->request('/foo/bar'))->body);
 
-        $route    = $this->route(function ($request) { return $request instanceof Doubles\DummyRequest; });
+        $route    = $this->route(function ($request) { return $request instanceof Doubles\FakeServerRequest; });
         $response = $route->forward($this->request('anything'));
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame('default', $response->body);
@@ -63,7 +63,7 @@ class RequestFirewallTest extends TestCase
 
     private function request($path = '/')
     {
-        $request = new Doubles\DummyRequest();
+        $request = new Doubles\FakeServerRequest();
 
         $request->uri = Uri::fromString('//example.com' . $path);
 

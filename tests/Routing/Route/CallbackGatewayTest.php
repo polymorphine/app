@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\CallbackGateway;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,13 +32,13 @@ class CallbackGatewayTest extends TestCase
 
     public function testClosurePreventsForwardingRequest()
     {
-        $request = new DummyRequest();
+        $request = new FakeServerRequest();
         $this->assertNull($this->middleware()->forward($request));
     }
 
     public function testMiddlewareForwardsRequest()
     {
-        $request = new DummyRequest('POST');
+        $request = new FakeServerRequest('POST');
         $this->assertInstanceOf(ResponseInterface::class, $this->middleware()->forward($request));
     }
 

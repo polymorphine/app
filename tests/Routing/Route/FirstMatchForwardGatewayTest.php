@@ -29,24 +29,24 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testForwardingNotMatchingRequest_ReturnsNull()
     {
-        $this->assertNull($this->route()->forward(new Doubles\DummyRequest()));
-        $this->assertNull($this->route(['name' => new Doubles\MockedRoute('')])->forward(new Doubles\DummyRequest()));
+        $this->assertNull($this->route()->forward(new Doubles\FakeServerRequest()));
+        $this->assertNull($this->route(['name' => new Doubles\MockedRoute('')])->forward(new Doubles\FakeServerRequest()));
     }
 
     public function testForwardingMatchingRequest_ReturnsResponse()
     {
-        $route = new Doubles\MockedRoute('', function () { return new Doubles\DummyResponse(); });
+        $route = new Doubles\MockedRoute('', function () { return new Doubles\FakeResponse(); });
         $route = $this->route(['name' => $route]);
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward(new Doubles\DummyRequest()));
+        $this->assertInstanceOf(ResponseInterface::class, $route->forward(new Doubles\FakeServerRequest()));
     }
 
     public function testForwardingMatchingRequest_ReturnsCorrectResponse()
     {
-        $routeA   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\DummyResponse('A') : null; });
-        $routeB   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\DummyResponse('B') : null; });
+        $routeA   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\FakeResponse('A') : null; });
+        $routeB   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\FakeResponse('B') : null; });
         $route    = $this->route(['A' => $routeA, 'B' => $routeB]);
-        $requestA = new Doubles\DummyRequest('POST');
-        $requestB = new Doubles\DummyRequest('GET');
+        $requestA = new Doubles\FakeServerRequest('POST');
+        $requestB = new Doubles\FakeServerRequest('GET');
         $this->assertSame('A', $route->forward($requestA)->body);
         $this->assertSame('B', $route->forward($requestB)->body);
     }

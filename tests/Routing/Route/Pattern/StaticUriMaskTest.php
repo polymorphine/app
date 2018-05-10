@@ -15,7 +15,7 @@ use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Route\Pattern\StaticUriMask;
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -173,7 +173,7 @@ class StaticUriMaskTest extends TestCase
 
     private function request(string $uri)
     {
-        $request = new DummyRequest();
+        $request = new FakeServerRequest();
 
         $request->uri = Uri::fromString($uri);
 

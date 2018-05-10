@@ -17,8 +17,8 @@ use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\ResourceEndpoint;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
-use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -155,7 +155,7 @@ class ResourceEndpointTest extends TestCase
     private function dummyCallback()
     {
         return function ($request) {
-            $response = new DummyResponse();
+            $response = new FakeResponse();
 
             $response->fromRequest = $request;
 
@@ -165,7 +165,7 @@ class ResourceEndpointTest extends TestCase
 
     private function request($path, $method = null)
     {
-        $request = new DummyRequest();
+        $request = new FakeServerRequest();
 
         $request->method = $method ?? 'GET';
         $request->uri    = Uri::fromString($path);

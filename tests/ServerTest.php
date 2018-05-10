@@ -14,8 +14,8 @@ namespace Polymorphine\Http\Tests;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Stream;
 use Polymorphine\Http\Server;
-use Polymorphine\Http\Tests\Doubles\DummyRequest;
-use Polymorphine\Http\Tests\Doubles\DummyResponse;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -58,13 +58,13 @@ class ServerTest extends TestCase
 
     public function testResponseBodyIsEmitted()
     {
-        $server = $this->server(new DummyResponse('Hello World!'));
+        $server = $this->server(new FakeResponse('Hello World!'));
         $this->assertSame('Hello World!', $this->emit($server));
     }
 
     public function testResponseBodyExceedingOutputBufferIsEmitted()
     {
-        $response = new DummyResponse(Stream::fromBodyString('Hello World'));
+        $response = new FakeResponse(Stream::fromBodyString('Hello World'));
         $server   = $this->server($response, 3);
         $this->assertSame('Hello World', $this->emit($server));
     }
@@ -80,7 +80,7 @@ class ServerTest extends TestCase
 
     public function testHeadersAreEmitted()
     {
-        $response = new DummyResponse();
+        $response = new FakeResponse();
 
         $response->headers = [
             'Header-Name'     => ['value1', 'value2'],
@@ -103,7 +103,7 @@ class ServerTest extends TestCase
 
     public function testHeadersOverwriteSetOutsideServerInstance()
     {
-        $response = new DummyResponse();
+        $response = new FakeResponse();
         $server   = $this->server($response);
 
         $response->headers = [
@@ -118,7 +118,7 @@ class ServerTest extends TestCase
 
     public function testCookieHeaderIsPreserved()
     {
-        $response = new DummyResponse();
+        $response = new FakeResponse();
         $server   = $this->server($response);
 
         $response->headers = [
@@ -134,14 +134,14 @@ class ServerTest extends TestCase
     private function server(ResponseInterface $response = null, int $buffer = 0)
     {
         self::reset();
-        return new Server(new FakeRequestHandler($response ?: new DummyResponse()), $buffer);
+        return new Server(new FakeRequestHandler($response ?: new FakeResponse()), $buffer);
     }
 
     private function emit(Server $server, ServerRequestInterface $request = null)
     {
         ob_start();
         try {
-            $server->sendResponse($request ?: new DummyRequest());
+            $server->sendResponse($request ?: new FakeServerRequest());
         } catch (RuntimeException $ex) {
             ob_get_clean();
             throw $ex;

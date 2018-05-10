@@ -17,7 +17,7 @@ use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Message\Uri;
 
 
-class DummyRequest implements ServerRequestInterface
+class FakeServerRequest implements ServerRequestInterface
 {
     public $uri;
     public $method;
