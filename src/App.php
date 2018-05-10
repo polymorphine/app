@@ -16,6 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use Polymorphine\Container\ContainerSetup;
+use Polymorphine\Container\Setup\Record;
 use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Message\Response\NotFoundResponse;
@@ -27,6 +28,9 @@ abstract class App implements RequestHandlerInterface
 
     private $setup;
 
+    /**
+     * @param Record[] $records
+     */
     public function __construct(array $records = [])
     {
         $this->setup = $this->containerSetup($records);
