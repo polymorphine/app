@@ -14,7 +14,6 @@ namespace Polymorphine\Http\Tests\Message\Response\Headers;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Response\Headers\CookieSetup;
 use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
 
 require_once dirname(dirname(dirname(__DIR__))) . '/Fixtures/time-functions.php';
 
@@ -26,21 +25,23 @@ class ResponseHeadersCollectionTest extends TestCase
         $this->assertInstanceOf(ResponseHeadersCollection::class, $this->collection());
     }
 
-    public function testAddsHeadersToResponse()
+    public function testGettingCollectionData()
     {
         $headers = [
             'Set-Cookie' => [
-                'fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly',
-                'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
+                'fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly'
             ],
             'X-Foo-Header' => ['foo'],
             'X-Bar-Header' => ['bar']
         ];
 
         $collection = $this->collection($headers);
-        $response   = $collection->setHeaders(new FakeResponse());
 
-        $this->assertSame($headers, $response->getHeaders());
+        $newHeader = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
+        $headers['Set-Cookie'][] = $newHeader;
+        $collection->add('Set-Cookie', 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000');
+
+        $this->assertSame($headers, $collection->data());
     }
 
     public function testCookieSetupInstance()

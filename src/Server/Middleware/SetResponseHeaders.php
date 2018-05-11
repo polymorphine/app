@@ -22,15 +22,28 @@ class SetResponseHeaders implements MiddlewareInterface
 {
     private $headers;
 
-    public function __construct(ResponseHeadersCollection $cookies)
+    public function __construct(ResponseHeadersCollection $headers)
     {
-        $this->headers = $cookies;
+        $this->headers = $headers;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
 
-        return $this->headers->setHeaders($response);
+        foreach ($this->headers->data() as $name => $headerLines) {
+            $response = $this->addHeaderLines($response, $name, $headerLines);
+        }
+
+        return $response;
+    }
+
+    private function addHeaderLines(ResponseInterface $response, string $name, array $headerLines): ResponseInterface
+    {
+        foreach ($headerLines as $header) {
+            $response = $response->withAddedHeader($name, $header);
+        }
+
+        return $response;
     }
 }

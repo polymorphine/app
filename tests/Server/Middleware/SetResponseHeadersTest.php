@@ -25,9 +25,11 @@ class SetResponseHeadersTest extends TestCase
     {
         $headers = [
             'Set-Cookie' => [
-                'fooCookie=foo; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly',
-                'barCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
-            ]
+                'fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly',
+                'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
+            ],
+            'X-Foo-Header' => ['foo'],
+            'X-Bar-Header' => ['bar']
         ];
 
         $middleware = new SetResponseHeaders(new ResponseHeadersCollection($headers));

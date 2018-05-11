@@ -11,8 +11,6 @@
 
 namespace Polymorphine\Http\Message\Response\Headers;
 
-use Psr\Http\Message\ResponseInterface;
-
 
 class ResponseHeadersCollection
 {
@@ -28,26 +26,13 @@ class ResponseHeadersCollection
         return new CookieSetup($name, $this);
     }
 
-    public function addHeader(string $name, string $header): void
+    public function add(string $name, string $header): void
     {
         $this->headers[$name][] = $header;
     }
 
-    public function setHeaders(ResponseInterface $response): ResponseInterface
+    public function data(): array
     {
-        foreach ($this->headers as $name => $headerLines) {
-            $response = $this->addHeaderLines($response, $name, $headerLines);
-        }
-
-        return $response;
-    }
-
-    private function addHeaderLines(ResponseInterface $response, string $name, array $headerLines): ResponseInterface
-    {
-        foreach ($headerLines as $header) {
-            $response = $response->withAddedHeader($name, $header);
-        }
-
-        return $response;
+        return $this->headers;
     }
 }

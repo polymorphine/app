@@ -38,7 +38,7 @@ class CookieSetup
     {
         $this->value = $value;
 
-        $this->headers->addHeader('Set-Cookie', $this->header());
+        $this->headers->add('Set-Cookie', $this->header());
     }
 
     public function remove(): void
@@ -46,7 +46,7 @@ class CookieSetup
         $this->value   = null;
         $this->minutes = -self::MAX_TIME;
 
-        $this->headers->addHeader('Set-Cookie', $this->header());
+        $this->headers->add('Set-Cookie', $this->header());
     }
 
     public function expires(int $minutes): CookieSetup
