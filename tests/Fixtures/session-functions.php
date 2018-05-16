@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Session\Middleware;
+namespace Polymorphine\Http\Server\Middleware;
 
 use Polymorphine\Http\Tests\Fixtures\SessionGlobalState;
 
@@ -19,7 +19,6 @@ function session_start()
 
     $_SESSION = SessionGlobalState::$sessionData;
 
-    SessionGlobalState::$sessionId     = '12345657890ABCD';
     SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
 }
 
@@ -44,6 +43,7 @@ function session_write_close()
 
     SessionGlobalState::$sessionStatus = PHP_SESSION_NONE;
     SessionGlobalState::$sessionId     = '';
+    SessionGlobalState::$sessionData   = $_SESSION;
     $_SESSION                          = null;
 }
 
@@ -53,7 +53,7 @@ function session_destroy()
 
     $_SESSION = null;
 
-    SessionGlobalState::$sessionData   = null;
+    SessionGlobalState::$sessionData   = [];
     SessionGlobalState::$sessionStatus = PHP_SESSION_NONE;
     SessionGlobalState::$sessionId     = '';
 }

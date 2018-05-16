@@ -21,7 +21,8 @@ class FakeServerRequest implements ServerRequestInterface
 {
     public $uri;
     public $method;
-    public $attr = [];
+    public $attr    = [];
+    public $cookies = [];
 
     public function __construct(string $method = 'GET', UriInterface $uri = null)
     {
@@ -109,6 +110,7 @@ class FakeServerRequest implements ServerRequestInterface
 
     public function getCookieParams()
     {
+        return $this->cookies;
     }
 
     public function withCookieParams(array $cookies)

@@ -134,7 +134,7 @@ class ServerTest extends TestCase
     private function server(ResponseInterface $response = null, int $buffer = 0)
     {
         self::reset();
-        return new Server(new FakeRequestHandler($response ?: new FakeResponse()), $buffer);
+        return new Server(new FakeRequestHandler(function () use ($response) { return $response ?: new FakeResponse(); }), $buffer);
     }
 
     private function emit(Server $server, ServerRequestInterface $request = null)

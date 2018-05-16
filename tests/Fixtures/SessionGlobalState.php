@@ -15,7 +15,7 @@ namespace Polymorphine\Http\Tests\Fixtures;
 class SessionGlobalState
 {
     public static $sessionName   = 'PHPSID';
-    public static $sessionId     = '';
+    public static $sessionId     = '12345657890ABCD';
     public static $sessionStatus = PHP_SESSION_NONE;
     public static $sessionData   = [];
 

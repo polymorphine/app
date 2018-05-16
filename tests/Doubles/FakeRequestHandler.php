@@ -14,19 +14,20 @@ namespace Polymorphine\Http\Tests\Doubles;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Closure;
 
 
 class FakeRequestHandler implements RequestHandlerInterface
 {
     private $response;
 
-    public function __construct(ResponseInterface $response)
+    public function __construct(Closure $response)
     {
         $this->response = $response;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return $this->response;
+        return $this->response->__invoke();
     }
 }
