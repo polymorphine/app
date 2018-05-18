@@ -31,27 +31,21 @@ class Session
 
     public function name(): string
     {
-        return $this->name ?? $this->name = session_name();
-    }
-
-    public function id(): string
-    {
-        if (!$this->id) { $this->start(); }
-        return $this->id;
+        return $this->name ?? session_name();
     }
 
     public function storage(): SessionStorage
     {
-        return $this->storage ?? $this->storage = new SessionStorage([]);
+        return $this->storage ?? $this->storage = new SessionStorage();
     }
 
     public function start()
     {
-        if (isset($this->name)) { session_name($this->name); }
-
         if (session_status() !== PHP_SESSION_NONE) {
             throw new RuntimeException('Session started outside object context');
         }
+
+        if (isset($this->name)) { session_name($this->name); }
 
         session_start();
 

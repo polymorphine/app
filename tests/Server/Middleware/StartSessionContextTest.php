@@ -11,10 +11,10 @@
 
 namespace Polymorphine\Http\Tests\Server\Middleware;
 
+use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Server\Session;
 use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
 use Polymorphine\Http\Server\Middleware\StartSessionContext;
-use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server\Session\SessionStorage;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
@@ -43,17 +43,17 @@ class StartSessionContextTest extends TestCase
 
     public function testSessionInitialization()
     {
-        $storage  = new SessionStorage([]);
+        $session  = new Session(SessionGlobalState::$sessionName);
         $headers  = new ResponseHeadersCollection();
-        $response = function () use ($storage) {
-            $storage->set('foo', 'bar');
+        $response = function () use ($session) {
+            $session->storage()->set('foo', 'bar');
             return new FakeResponse();
         };
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$sessionName . '=' . SessionGlobalState::$sessionId
+            SessionGlobalState::$sessionName . '=12345657890ABCD'
         ]];
 
-        $this->process($headers, $storage, $response);
+        $this->process($headers, $session, $response);
         $this->assertSame(['foo' => 'bar'], SessionGlobalState::$sessionData);
         $this->assertSame($cookie, $headers->data());
     }
@@ -62,14 +62,14 @@ class StartSessionContextTest extends TestCase
     {
         SessionGlobalState::$sessionData = ['foo' => 'bar'];
 
-        $storage  = new SessionStorage([]);
+        $session  = new Session();
         $headers  = new ResponseHeadersCollection();
-        $response = function () use ($storage) {
-            $storage->set('foo', $storage->get('foo') . '-baz');
+        $response = function () use ($session) {
+            $session->storage()->set('foo', $session->storage()->get('foo') . '-baz');
             return new FakeResponse();
         };
 
-        $this->process($headers, $storage, $response, true);
+        $this->process($headers, $session, $response, true);
         $this->assertSame(['foo' => 'bar-baz'], SessionGlobalState::$sessionData);
         $this->assertSame([], $headers->data());
     }
@@ -78,17 +78,17 @@ class StartSessionContextTest extends TestCase
     {
         SessionGlobalState::$sessionData = ['foo' => 'bar'];
 
-        $storage  = new SessionStorage([]);
+        $session  = new Session();
         $headers  = new ResponseHeadersCollection();
-        $response = function () use ($storage) {
-            $storage->clear('foo');
+        $response = function () use ($session) {
+            $session->storage()->clear('foo');
             return new FakeResponse();
         };
         $cookie = ['Set-Cookie' => [
             SessionGlobalState::$sessionName . '=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
         ]];
 
-        $this->process($headers, $storage, $response, true);
+        $this->process($headers, $session, $response, true);
         $this->assertSame([], SessionGlobalState::$sessionData);
         $this->assertSame($cookie, $headers->data());
     }
@@ -100,12 +100,12 @@ class StartSessionContextTest extends TestCase
         SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
 
         $response = function () { return new FakeResponse(); };
-        $this->process(new ResponseHeadersCollection(), new SessionStorage([]), $response, true);
+        $this->process(new ResponseHeadersCollection(), new Session(), $response, true);
     }
 
-    private function session(ResponseHeadersCollection $headers = null, SessionStorage $storage = null)
+    private function session(ResponseHeadersCollection $headers = null, Session $session = null)
     {
-        return new StartSessionContext($headers ?? new ResponseHeadersCollection(), $storage ?? new SessionStorage([]));
+        return new StartSessionContext($headers ?? new ResponseHeadersCollection(), $session ?? new Session());
     }
 
     private function request($cookie = false)
@@ -125,8 +125,8 @@ class StartSessionContextTest extends TestCase
         return new FakeRequestHandler($response);
     }
 
-    private function process($headers, $storage, $response, $cookie = false)
+    private function process($headers, $session, $response, $cookie = false)
     {
-        return $this->session($headers, $storage)->process($this->request($cookie), $this->handler($response));
+        return $this->session($headers, $session)->process($this->request($cookie), $this->handler($response));
     }
 }

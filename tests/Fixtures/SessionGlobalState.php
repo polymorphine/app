@@ -14,14 +14,14 @@ namespace Polymorphine\Http\Tests\Fixtures;
 
 class SessionGlobalState
 {
-    public static $sessionName   = 'PHPSID';
-    public static $sessionId     = '12345657890ABCD';
+    public static $sessionName   = 'PHPSESS';
+    public static $sessionId     = '';
     public static $sessionStatus = PHP_SESSION_NONE;
     public static $sessionData   = [];
 
     public static function reset()
     {
-        self::$sessionName   = 'PHPSID';
+        self::$sessionName   = 'PHPSESS';
         self::$sessionId     = '';
         self::$sessionStatus = PHP_SESSION_NONE;
         self::$sessionData   = [];

@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Middleware;
+namespace Polymorphine\Http\Server;
 
 use Polymorphine\Http\Tests\Fixtures\SessionGlobalState;
 
@@ -20,6 +20,7 @@ function session_start()
     $_SESSION = SessionGlobalState::$sessionData;
 
     SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
+    SessionGlobalState::$sessionId     = '12345657890ABCD';
 }
 
 function session_status()

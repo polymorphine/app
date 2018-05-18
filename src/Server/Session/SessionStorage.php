@@ -16,7 +16,7 @@ class SessionStorage
 {
     private $sessionData;
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
         $this->sessionData = $data;
     }
