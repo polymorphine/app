@@ -83,6 +83,8 @@ class FakeResponse implements ResponseInterface
 
     public function withBody(StreamInterface $body)
     {
+        $this->body = $body;
+        return $this;
     }
 
     public function getStatusCode()

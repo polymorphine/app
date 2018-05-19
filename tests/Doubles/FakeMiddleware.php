@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
+use Polymorphine\Http\Message\Stream;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -19,12 +20,23 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FakeMiddleware implements MiddlewareInterface
 {
+    private $begin;
+    private $end;
+
+    public function __construct(string $begin = 'processed', string $end = 'response')
+    {
+        $this->begin = $begin;
+        $this->end   = $end;
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $request = $request->withAttribute('Middleware', 'processed request');
+        $request  = $request->withAttribute('Middleware', 'processed request');
         $response = $handler->handle($request)->withHeader('Middleware', 'processed response');
+        $body     = $this->begin . ' ' . $response->getBody() . ' ' . $this->end;
+
         $response->fromRequest = $request;
 
-        return $response;
+        return $response->withBody(Stream::fromBodyString($body));
     }
 }
