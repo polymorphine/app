@@ -20,22 +20,21 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FakeMiddleware implements MiddlewareInterface
 {
-    private $begin;
-    private $end;
+    private $bodyWrap;
 
-    public function __construct(string $begin = 'processed', string $end = 'response')
+    public function __construct(string $bodyWrap = 'processed')
     {
-        $this->begin = $begin;
-        $this->end   = $end;
+        $this->bodyWrap = $bodyWrap;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $request  = $request->withAttribute('Middleware', 'processed request');
-        $response = $handler->handle($request)->withHeader('Middleware', 'processed response');
-        $body     = $this->begin . ' ' . $response->getBody() . ' ' . $this->end;
+        $response = $handler->handle($request);
 
-        $response->fromRequest = $request;
+        $body = $this->bodyWrap . ' ' . $response->getBody() . ' ' . $this->bodyWrap;
+        if ($requestInfo = $request->getAttribute('middleware')) {
+            $body = $requestInfo . ': ' . $body;
+        }
 
         return $response->withBody(Stream::fromBodyString($body));
     }

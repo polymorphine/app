@@ -31,10 +31,11 @@ class MiddlewareGatewayTest extends TestCase
 
     public function testMiddlewareForwardsRequest()
     {
-        $request = new FakeServerRequest('POST');
-        $this->assertInstanceOf(ResponseInterface::class, $response = $this->middleware()->forward($request));
-        $this->assertSame(['Middleware' => 'processed request'], $response->fromRequest->getAttributes());
-        $this->assertSame(['Middleware' => 'processed response'], $response->getheaders());
+        $request  = new FakeServerRequest('POST');
+        $response = $this->middleware()->forward($request->withAttribute('middleware', 'processed'));
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame('processed: wrap response wrap', (string) $response->getBody());
     }
 
     public function testGatewayCallsRouteWithSameParameter()
@@ -51,6 +52,6 @@ class MiddlewareGatewayTest extends TestCase
 
     private function middleware()
     {
-        return new MiddlewareGateway(new FakeMiddleware(), new MockedRoute('default'));
+        return new MiddlewareGateway(new FakeMiddleware('wrap'), new MockedRoute('response'));
     }
 }

@@ -148,6 +148,7 @@ class FakeServerRequest implements ServerRequestInterface
 
     public function getAttribute($name, $default = null)
     {
+        return $this->attr[$name] ?? $default;
     }
 
     public function withAttribute($name, $value)

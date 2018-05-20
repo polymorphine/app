@@ -32,20 +32,20 @@ class MiddlewareChainTest extends TestCase
     {
         $chain    = new MiddlewareChain($this->handler(), $this->middleware());
         $response = $chain->handle(new FakeServerRequest());
-        $this->assertSame('a b c  c b a', (string) $response->getBody());
+        $this->assertSame('a b c response c b a', (string) $response->getBody());
     }
 
     private function handler()
     {
-        return new FakeRequestHandler(function () { return new FakeResponse(); });
+        return new FakeRequestHandler(function () { return new FakeResponse('response'); });
     }
 
     private function middleware()
     {
         return [
-            new FakeMiddleware('a', 'a'),
-            new FakeMiddleware('b', 'b'),
-            new FakeMiddleware('c', 'c')
+            new FakeMiddleware('a'),
+            new FakeMiddleware('b'),
+            new FakeMiddleware('c')
         ];
     }
 }
