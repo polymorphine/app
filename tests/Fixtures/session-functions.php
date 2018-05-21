@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server;
+namespace Polymorphine\Http\Server\Middleware;
 
 use Polymorphine\Http\Tests\Fixtures\SessionGlobalState;
 
@@ -17,34 +17,34 @@ function session_start()
 {
     global $_SESSION;
 
-    $_SESSION = SessionGlobalState::$sessionData;
+    $_SESSION = SessionGlobalState::$data;
 
-    SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
-    SessionGlobalState::$sessionId     = '12345657890ABCD';
+    SessionGlobalState::$status = PHP_SESSION_ACTIVE;
+    SessionGlobalState::$id     = '12345657890ABCD';
 }
 
 function session_status()
 {
-    return SessionGlobalState::$sessionStatus;
+    return SessionGlobalState::$status;
 }
 
 function session_name(string $name = null)
 {
-    return $name ? SessionGlobalState::$sessionName = $name : SessionGlobalState::$sessionName;
+    return $name ? SessionGlobalState::$name = $name : SessionGlobalState::$name;
 }
 
 function session_id(string $id = null)
 {
-    return $id ? SessionGlobalState::$sessionId = $id : SessionGlobalState::$sessionId;
+    return $id ? SessionGlobalState::$id = $id : SessionGlobalState::$id;
 }
 
 function session_write_close()
 {
     global $_SESSION;
 
-    SessionGlobalState::$sessionStatus = PHP_SESSION_NONE;
-    SessionGlobalState::$sessionId     = '';
-    SessionGlobalState::$sessionData   = $_SESSION;
+    SessionGlobalState::$status = PHP_SESSION_NONE;
+    SessionGlobalState::$id     = '';
+    SessionGlobalState::$data   = $_SESSION;
     $_SESSION                          = null;
 }
 
@@ -54,7 +54,7 @@ function session_destroy()
 
     $_SESSION = null;
 
-    SessionGlobalState::$sessionData   = [];
-    SessionGlobalState::$sessionStatus = PHP_SESSION_NONE;
-    SessionGlobalState::$sessionId     = '';
+    SessionGlobalState::$data   = [];
+    SessionGlobalState::$status = PHP_SESSION_NONE;
+    SessionGlobalState::$id     = '';
 }

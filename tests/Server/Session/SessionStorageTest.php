@@ -43,9 +43,16 @@ class SessionStorageTest extends TestCase
 
     public function testRemoveData()
     {
-        $storage = $this->storage(['foo' => 'bar']);
-        $storage->clear('foo');
+        $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
+        $storage->remove('foo');
         $this->assertNull($storage->get('foo'));
+    }
+
+    public function testClearData()
+    {
+        $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
+        $storage->clear();
+        $this->assertSame([], $storage->toArray());
     }
 
     public function testDefaultForMissingValues()
@@ -66,7 +73,7 @@ class SessionStorageTest extends TestCase
         $data['fizz'] = 'buzz';
         $storage->set('fizz', 'buzz');
 
-        $this->assertSame($data, $storage->getAll());
+        $this->assertSame($data, $storage->toArray());
     }
 
     public function testSettingNullRemovesData()
@@ -75,6 +82,6 @@ class SessionStorageTest extends TestCase
         $this->assertTrue($storage->exists('foo'));
         $storage->set('foo', null);
         $this->assertFalse($storage->exists('foo'));
-        $this->assertFalse(array_key_exists('foo', $storage->getAll()));
+        $this->assertFalse(array_key_exists('foo', $storage->toArray()));
     }
 }

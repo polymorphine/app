@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Tests\Server\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server\Session;
 use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
 use Polymorphine\Http\Server\Middleware\SessionContext;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
@@ -36,76 +35,93 @@ class SessionContextTest extends TestCase
 
     public function testInstantiation()
     {
-        $session = $this->session();
-        $this->assertInstanceOf(MiddlewareInterface::class, $session);
-        $this->assertInstanceOf(SessionContext::class, $session);
+        $context = $this->context();
+        $this->assertInstanceOf(MiddlewareInterface::class, $context);
+        $this->assertInstanceOf(SessionContext::class, $context);
     }
 
     public function testSessionInitialization()
     {
-        $session  = new Session(SessionGlobalState::$sessionName);
-        $headers  = new ResponseHeaders();
-        $response = function () use ($session) {
-            $session->storage()->set('foo', 'bar');
+        $headers = new ResponseHeaders();
+        $context = new SessionContext($headers);
+
+        $handler = $this->handler(function () use ($context) {
+            $context->session()->set('foo', 'bar');
             return new FakeResponse();
-        };
+        });
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$sessionName . '=12345657890ABCD'
+            SessionGlobalState::$name . '=12345657890ABCD'
         ]];
 
-        $this->process($headers, $session, $response);
-        $this->assertSame(['foo' => 'bar'], SessionGlobalState::$sessionData);
+        $context->process($this->request(), $handler);
+
+        $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
         $this->assertSame($cookie, $headers->data());
     }
 
     public function testSessionResume()
     {
-        SessionGlobalState::$sessionData = ['foo' => 'bar'];
+        SessionGlobalState::$data = ['foo' => 'bar'];
 
-        $session  = new Session();
-        $headers  = new ResponseHeaders();
-        $response = function () use ($session) {
-            $session->storage()->set('foo', $session->storage()->get('foo') . '-baz');
+        $headers = new ResponseHeaders();
+        $context = new SessionContext($headers);
+
+        $handler = $this->handler(function () use ($context) {
+            $session = $context->session();
+            $session->set('foo', $session->get('foo') . '-baz');
             return new FakeResponse();
-        };
+        });
 
-        $this->process($headers, $session, $response, true);
-        $this->assertSame(['foo' => 'bar-baz'], SessionGlobalState::$sessionData);
+        $context->process($this->request(true), $handler);
+
+        $this->assertSame(['foo' => 'bar-baz'], SessionGlobalState::$data);
         $this->assertSame([], $headers->data());
     }
 
     public function testSessionDestroy()
     {
-        SessionGlobalState::$sessionData = ['foo' => 'bar'];
+        SessionGlobalState::$data = ['foo' => 'bar'];
 
-        $session  = new Session();
-        $headers  = new ResponseHeaders();
-        $response = function () use ($session) {
-            $session->storage()->clear('foo');
+        $headers = new ResponseHeaders();
+        $context = new SessionContext($headers);
+
+        $handler = $this->handler(function () use ($context) {
+            $session = $context->session();
+            $session->clear();
             return new FakeResponse();
-        };
+        });
+
+        $context->process($this->request(true), $handler);
+
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$sessionName . '=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
+            SessionGlobalState::$name . '=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
         ]];
 
-        $this->process($headers, $session, $response, true);
-        $this->assertSame([], SessionGlobalState::$sessionData);
+        $this->assertSame([], SessionGlobalState::$data);
         $this->assertSame($cookie, $headers->data());
     }
 
-    public function testProcessingWithStartedSession_ThrowsException()
+    public function testProcessingWhileSessionStarted_ThrowsException()
     {
         $this->expectException(RuntimeException::class);
 
-        SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
+        SessionGlobalState::$status = PHP_SESSION_ACTIVE;
 
-        $response = function () { return new FakeResponse(); };
-        $this->process(new ResponseHeaders(), new Session(), $response, true);
+        $context = $this->context();
+        $context->process($this->request(true), $this->handler());
     }
 
-    private function session(ResponseHeaders $headers = null, Session $session = null)
+    public function testCallingSessionWithoutContextProcessing_ThrowsException()
     {
-        return new SessionContext($headers ?? new ResponseHeaders(), $session ?? new Session());
+        $this->expectException(RuntimeException::class);
+
+        $context = $this->context();
+        $context->session();
+    }
+
+    private function context(ResponseHeaders $headers = null)
+    {
+        return new SessionContext($headers ?? new ResponseHeaders());
     }
 
     private function request($cookie = false)
@@ -113,7 +129,7 @@ class SessionContextTest extends TestCase
         $request = new FakeServerRequest();
 
         if ($cookie) {
-            $request->cookies[SessionGlobalState::$sessionName] = SessionGlobalState::$sessionId;
+            $request->cookies[SessionGlobalState::$name] = SessionGlobalState::$id;
         }
 
         return $request;
@@ -123,10 +139,5 @@ class SessionContextTest extends TestCase
     {
         $response = $response ?? function () { return new FakeResponse(); };
         return new FakeRequestHandler($response);
-    }
-
-    private function process($headers, $session, $response, $cookie = false)
-    {
-        return $this->session($headers, $session)->process($this->request($cookie), $this->handler($response));
     }
 }

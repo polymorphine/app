@@ -14,35 +14,40 @@ namespace Polymorphine\Http\Server\Session;
 
 class SessionStorage
 {
-    private $sessionData;
+    private $data;
 
     public function __construct(array $data = [])
     {
-        $this->sessionData = $data;
+        $this->data = $data;
     }
 
     public function get(string $key, $default = null)
     {
-        return $this->exists($key) ? $this->sessionData[$key] : $default;
+        return $this->exists($key) ? $this->data[$key] : $default;
     }
 
     public function set(string $key, $value = null): void
     {
-        isset($value) ? $this->sessionData[$key] = $value : $this->clear($key);
+        isset($value) ? $this->data[$key] = $value : $this->remove($key);
     }
 
     public function exists(string $key): bool
     {
-        return isset($this->sessionData[$key]);
+        return isset($this->data[$key]);
     }
 
-    public function clear(string $key): void
+    public function remove(string $key): void
     {
-        unset($this->sessionData[$key]);
+        unset($this->data[$key]);
     }
 
-    public function getAll(): array
+    public function clear(): void
     {
-        return $this->sessionData;
+        $this->data = [];
+    }
+
+    public function toArray(): array
+    {
+        return $this->data;
     }
 }
