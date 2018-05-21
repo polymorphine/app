@@ -13,16 +13,16 @@ namespace Polymorphine\Http\Tests\Message\Response\Headers;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Message\Response\Headers\CookieSetup;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
+use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
 
 require_once dirname(dirname(dirname(__DIR__))) . '/Fixtures/time-functions.php';
 
 
-class ResponseHeadersCollectionTest extends TestCase
+class ResponseHeadersTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(ResponseHeadersCollection::class, $this->collection());
+        $this->assertInstanceOf(ResponseHeaders::class, $this->collection());
     }
 
     public function testGettingCollectionData()
@@ -97,6 +97,6 @@ class ResponseHeadersCollectionTest extends TestCase
 
     private function collection(array $headers = [])
     {
-        return new ResponseHeadersCollection($headers);
+        return new ResponseHeaders($headers);
     }
 }

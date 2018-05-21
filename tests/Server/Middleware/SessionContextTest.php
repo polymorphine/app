@@ -13,8 +13,8 @@ namespace Polymorphine\Http\Tests\Server\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Server\Session;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
-use Polymorphine\Http\Server\Middleware\StartSessionContext;
+use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
+use Polymorphine\Http\Server\Middleware\SessionContext;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
@@ -27,7 +27,7 @@ require_once dirname(dirname(__DIR__)) . '/Fixtures/session-functions.php';
 require_once dirname(dirname(__DIR__)) . '/Fixtures/time-functions.php';
 
 
-class StartSessionContextTest extends TestCase
+class SessionContextTest extends TestCase
 {
     public function tearDown()
     {
@@ -38,13 +38,13 @@ class StartSessionContextTest extends TestCase
     {
         $session = $this->session();
         $this->assertInstanceOf(MiddlewareInterface::class, $session);
-        $this->assertInstanceOf(StartSessionContext::class, $session);
+        $this->assertInstanceOf(SessionContext::class, $session);
     }
 
     public function testSessionInitialization()
     {
         $session  = new Session(SessionGlobalState::$sessionName);
-        $headers  = new ResponseHeadersCollection();
+        $headers  = new ResponseHeaders();
         $response = function () use ($session) {
             $session->storage()->set('foo', 'bar');
             return new FakeResponse();
@@ -63,7 +63,7 @@ class StartSessionContextTest extends TestCase
         SessionGlobalState::$sessionData = ['foo' => 'bar'];
 
         $session  = new Session();
-        $headers  = new ResponseHeadersCollection();
+        $headers  = new ResponseHeaders();
         $response = function () use ($session) {
             $session->storage()->set('foo', $session->storage()->get('foo') . '-baz');
             return new FakeResponse();
@@ -79,7 +79,7 @@ class StartSessionContextTest extends TestCase
         SessionGlobalState::$sessionData = ['foo' => 'bar'];
 
         $session  = new Session();
-        $headers  = new ResponseHeadersCollection();
+        $headers  = new ResponseHeaders();
         $response = function () use ($session) {
             $session->storage()->clear('foo');
             return new FakeResponse();
@@ -100,12 +100,12 @@ class StartSessionContextTest extends TestCase
         SessionGlobalState::$sessionStatus = PHP_SESSION_ACTIVE;
 
         $response = function () { return new FakeResponse(); };
-        $this->process(new ResponseHeadersCollection(), new Session(), $response, true);
+        $this->process(new ResponseHeaders(), new Session(), $response, true);
     }
 
-    private function session(ResponseHeadersCollection $headers = null, Session $session = null)
+    private function session(ResponseHeaders $headers = null, Session $session = null)
     {
-        return new StartSessionContext($headers ?? new ResponseHeadersCollection(), $session ?? new Session());
+        return new SessionContext($headers ?? new ResponseHeaders(), $session ?? new Session());
     }
 
     private function request($cookie = false)

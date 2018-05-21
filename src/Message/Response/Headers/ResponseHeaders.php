@@ -12,7 +12,7 @@
 namespace Polymorphine\Http\Message\Response\Headers;
 
 
-class ResponseHeadersCollection
+class ResponseHeaders
 {
     private $headers;
 

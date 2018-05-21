@@ -28,7 +28,7 @@ class CookieSetup
     private $name;
     private $value;
 
-    public function __construct(string $name, ResponseHeadersCollection $headers)
+    public function __construct(string $name, ResponseHeaders $headers)
     {
         $this->name    = $name;
         $this->headers = $headers;

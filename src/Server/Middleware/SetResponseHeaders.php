@@ -12,7 +12,7 @@
 namespace Polymorphine\Http\Server\Middleware;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
+use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,7 +22,7 @@ class SetResponseHeaders implements MiddlewareInterface
 {
     private $headers;
 
-    public function __construct(ResponseHeadersCollection $headers)
+    public function __construct(ResponseHeaders $headers)
     {
         $this->headers = $headers;
     }

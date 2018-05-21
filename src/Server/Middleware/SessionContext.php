@@ -12,19 +12,19 @@
 namespace Polymorphine\Http\Server\Middleware;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeadersCollection;
+use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
 use Polymorphine\Http\Server\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class StartSessionContext implements MiddlewareInterface
+class SessionContext implements MiddlewareInterface
 {
     private $headers;
     private $session;
 
-    public function __construct(ResponseHeadersCollection $headers, Session $session)
+    public function __construct(ResponseHeaders $headers, Session $session)
     {
         $this->session = $session;
         $this->headers = $headers;
