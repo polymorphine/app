@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Middleware;
+namespace Polymorphine\Http\Server\Session;
 
 use Polymorphine\Http\Tests\Fixtures\SessionGlobalState;
 

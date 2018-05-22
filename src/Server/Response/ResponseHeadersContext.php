@@ -9,16 +9,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Middleware;
+namespace Polymorphine\Http\Server\Response;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class SetResponseHeaders implements MiddlewareInterface
+class ResponseHeadersContext implements MiddlewareInterface
 {
     private $headers;
 

@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Http\Tests\Server\Handler;
 
-use Polymorphine\Http\Server\Handler\MiddlewareChain;
+use Polymorphine\Http\Server\MiddlewareChain;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;

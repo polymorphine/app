@@ -12,14 +12,14 @@
 namespace Polymorphine\Http\Tests\Server\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
-use Polymorphine\Http\Server\Middleware\SetResponseHeaders;
+use Polymorphine\Http\Server\Response\ResponseHeadersContext;
+use Polymorphine\Http\Server\Response\ResponseHeaders;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 
 
-class SetResponseHeadersTest extends TestCase
+class ResponseHeadersContextTest extends TestCase
 {
     public function testProcessing()
     {
@@ -32,7 +32,7 @@ class SetResponseHeadersTest extends TestCase
             'X-Bar-Header' => ['bar']
         ];
 
-        $middleware = new SetResponseHeaders(new ResponseHeaders($headers));
+        $middleware = new ResponseHeadersContext(new ResponseHeaders($headers));
         $handler = new FakeRequestHandler(function () { return new FakeResponse('test'); });
         $response = $middleware->process(new FakeServerRequest(), $handler);
 

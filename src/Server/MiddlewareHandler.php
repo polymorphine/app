@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Handler;
+namespace Polymorphine\Http\Server;
 
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;

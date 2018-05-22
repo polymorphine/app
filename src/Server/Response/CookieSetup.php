@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Message\Response\Headers;
+namespace Polymorphine\Http\Server\Response;
 
 use DateTime;
 

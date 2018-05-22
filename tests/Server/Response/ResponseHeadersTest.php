@@ -9,13 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Message\Response\Headers;
+namespace Polymorphine\Http\Tests\Server\Response;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Response\Headers\CookieSetup;
-use Polymorphine\Http\Message\Response\Headers\ResponseHeaders;
+use Polymorphine\Http\Server\Response\CookieSetup;
+use Polymorphine\Http\Server\Response\ResponseHeaders;
 
-require_once dirname(dirname(dirname(__DIR__))) . '/Fixtures/time-functions.php';
+require_once dirname(dirname(__DIR__)) . '/Fixtures/time-functions.php';
 
 
 class ResponseHeadersTest extends TestCase
@@ -37,8 +37,7 @@ class ResponseHeadersTest extends TestCase
 
         $collection = $this->collection($headers);
 
-        $newHeader = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
-        $headers['Set-Cookie'][] = $newHeader;
+        $headers['Set-Cookie'][] = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
         $collection->add('Set-Cookie', 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000');
 
         $this->assertSame($headers, $collection->data());
