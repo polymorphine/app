@@ -24,7 +24,7 @@ use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 abstract class App implements RequestHandlerInterface
 {
-    protected const APP_ROUTER_ID = 'app.router';
+    public const APP_ROUTER_ID = 'app.router';
 
     private $setup;
 

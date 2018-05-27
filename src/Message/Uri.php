@@ -17,9 +17,9 @@ use InvalidArgumentException;
 
 class Uri implements UriInterface
 {
-    const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
-    const CHARSET_PATH  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
-    const CHARSET_QUERY = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@?';
+    public const CHARSET_HOST  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%';
+    public const CHARSET_PATH  = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@';
+    public const CHARSET_QUERY = '^a-z0-9A-Z.\-_~&=+;,$!\'()*%:\/@?';
 
     protected $supportedSchemes = [
         'http'  => ['port' => 80],
@@ -133,7 +133,6 @@ class Uri implements UriInterface
 
         $clone         = clone $this;
         $clone->scheme = $clone->validScheme($scheme);
-
         return $clone;
     }
 
@@ -151,7 +150,6 @@ class Uri implements UriInterface
 
         $clone           = clone $this;
         $clone->userInfo = $this->encode($user, self::CHARSET_HOST) . $password;
-
         return $clone;
     }
 
@@ -163,7 +161,6 @@ class Uri implements UriInterface
 
         $clone       = clone $this;
         $clone->host = $this->normalizedHost($host);
-
         return $clone;
     }
 
@@ -175,7 +172,6 @@ class Uri implements UriInterface
 
         $clone       = clone $this;
         $clone->port = is_null($port) ? null : $clone->validPortRange($port);
-
         return $clone;
     }
 
@@ -187,7 +183,6 @@ class Uri implements UriInterface
 
         $clone       = clone $this;
         $clone->path = $this->encode($path, self::CHARSET_PATH);
-
         return $clone;
     }
 
@@ -199,7 +194,6 @@ class Uri implements UriInterface
 
         $clone        = clone $this;
         $clone->query = $this->encode($query, self::CHARSET_QUERY);
-
         return $clone;
     }
 
@@ -211,7 +205,6 @@ class Uri implements UriInterface
 
         $clone           = clone $this;
         $clone->fragment = $this->encode($fragment, self::CHARSET_QUERY);
-
         return $clone;
     }
 
@@ -232,7 +225,6 @@ class Uri implements UriInterface
     private function authorityPath()
     {
         $authority = '//' . $this->getAuthority();
-
         if (!$this->path) { return $authority; }
 
         return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
@@ -287,8 +279,8 @@ class Uri implements UriInterface
 
     private function uppercaseEncoded($string)
     {
-        $upper_encoded = function ($matches) { return strtoupper($matches[0]); };
+        $upperEncoded = function ($matches) { return strtoupper($matches[0]); };
 
-        return preg_replace_callback('/%(?=[A-Za-z0-9]{2}).{2}/', $upper_encoded, $string);
+        return preg_replace_callback('/%(?=[A-Za-z0-9]{2}).{2}/', $upperEncoded, $string);
     }
 }

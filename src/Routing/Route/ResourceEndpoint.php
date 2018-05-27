@@ -22,12 +22,12 @@ use Psr\Http\Message\UriInterface;
 
 class ResourceEndpoint extends Route
 {
-    const INDEX  = 'INDEX';
-    const GET    = 'GET';
-    const POST   = 'POST';
-    const PUT    = 'PUT';
-    const PATCH  = 'PATCH';
-    const DELETE = 'DELETE';
+    public const INDEX  = 'INDEX';
+    public const GET    = 'GET';
+    public const POST   = 'POST';
+    public const PUT    = 'PUT';
+    public const PATCH  = 'PATCH';
+    public const DELETE = 'DELETE';
 
     private $path;
     private $handlers;

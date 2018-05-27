@@ -20,12 +20,12 @@ use Psr\Http\Message\UriInterface;
 
 class DynamicTargetMask implements Pattern
 {
-    const PARAM_DELIM_LEFT  = '{';
-    const PARAM_DELIM_RIGHT = '}';
+    public const PARAM_DELIM_LEFT  = '{';
+    public const PARAM_DELIM_RIGHT = '}';
 
-    const PARAM_TYPE_NUM  = '#';
-    const PARAM_TYPE_NAME = '%';
-    const PARAM_TYPE_SLUG = '$';
+    public const PARAM_TYPE_NUM  = '#';
+    public const PARAM_TYPE_NAME = '%';
+    public const PARAM_TYPE_SLUG = '$';
 
     protected $paramTypeRegexp = [
         self::PARAM_TYPE_NUM  => '[1-9][0-9]*',
