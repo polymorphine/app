@@ -76,7 +76,6 @@ class Server
 
     private function removePredefined(string $name)
     {
-        if (strtolower($name) === 'set-cookie') { return; }
         header_remove($name);
     }
 

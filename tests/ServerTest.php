@@ -107,28 +107,19 @@ class ServerTest extends TestCase
         $server   = $this->server($response);
 
         $response->headers = [
-            'X-Custom-Header' => ['only this one']
+            'X-Custom-Header' => ['only this one', 'one more'],
+            'Set-Cookie'      => ['my session cookie']
         ];
 
         self::$headers['x-custom-header'] = ['X-Custom-Header: this one is removed'];
+        self::$headers['set-cookie']      = ['Set-Cookie: default session cookie'];
+        self::$headers['x-powered-by']    = ['X-Powered-By: PHPUnit Framework'];
+
         $this->emit($server);
 
-        $this->assertSame(['X-Custom-Header: only this one'], self::$headers['x-custom-header']);
-    }
-
-    public function testCookieHeaderIsPreserved()
-    {
-        $response = new FakeResponse();
-        $server   = $this->server($response);
-
-        $response->headers = [
-            'Set-Cookie' => ['yay cookie!']
-        ];
-
-        self::$headers['set-cookie'] = ['Set-Cookie: session cookie'];
-        $this->emit($server);
-
-        $this->assertSame(['Set-Cookie: session cookie', 'Set-Cookie: yay cookie!'], self::$headers['set-cookie']);
+        $this->assertSame(['X-Custom-Header: only this one', 'X-Custom-Header: one more'], self::$headers['x-custom-header']);
+        $this->assertSame(['Set-Cookie: my session cookie'], self::$headers['set-cookie']);
+        $this->assertSame(['X-Powered-By: PHPUnit Framework'], self::$headers['x-powered-by']);
     }
 
     private function server(ResponseInterface $response = null, int $buffer = 0)
