@@ -29,6 +29,11 @@ class PatternGateway extends Route
         $this->route   = $route;
     }
 
+    public static function withPatternString(string $pattern, Route $route, array $params = [])
+    {
+        return new self(self::selectPattern($pattern, $params), $route);
+    }
+
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         $request = $this->pattern->matchedRequest($request);
@@ -46,5 +51,12 @@ class PatternGateway extends Route
     public function gateway(string $path): Route
     {
         return new self($this->pattern, $this->route->gateway($path));
+    }
+
+    private static function selectPattern($pattern, $params)
+    {
+        return strpos($pattern, Pattern\DynamicTargetMask::PARAM_DELIM_RIGHT)
+            ? new Pattern\DynamicTargetMask($pattern, $params)
+            : Pattern\StaticUriMask::fromUriString($pattern);
     }
 }

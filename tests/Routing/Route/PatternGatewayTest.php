@@ -29,6 +29,12 @@ class PatternGatewayTest extends TestCase
 
         $this->assertEquals($default, $https);
         $this->assertNotEquals($default, $http);
+
+        $gateway = PatternGateway::withPatternString('/test/{#testId}', new Doubles\MockedRoute('default'));
+        $this->assertInstanceOf(PatternGateway::class, $gateway);
+
+        $gateway = PatternGateway::withPatternString('//domain.com/test/foo', new Doubles\MockedRoute('default'));
+        $this->assertInstanceOf(PatternGateway::class, $gateway);
     }
 
     public function testNotMatchingPattern_ReturnsNull()
@@ -70,7 +76,6 @@ class PatternGatewayTest extends TestCase
     public function testComposedGateway_ReturnsRouteProducingUriWithDefinedSegments()
     {
         $subRoute = $this->staticGate('//example.com', new Doubles\MockedRoute('/foo/bar'));
-
         $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https:', $subRoute)->gateway('some.path')->uri());
     }
 
@@ -84,8 +89,7 @@ class PatternGatewayTest extends TestCase
 
     private function request($uri = 'http://example.com/foo/bar?query=string')
     {
-        $request = new Doubles\FakeServerRequest();
-
+        $request      = new Doubles\FakeServerRequest();
         $request->uri = Uri::fromString($uri);
 
         return $request;

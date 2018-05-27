@@ -28,10 +28,10 @@ class PatternEndpointTest extends TestCase
     {
         $this->assertInstanceOf(Route::class, $this->route());
 
-        $route = Route\PatternEndpoint::get('/home/{#id}', $this->dummyCallback());
+        $route = Route\PatternEndpoint::post('/home/{#id}', $this->dummyCallback());
         $this->assertInstanceOf(Route::class, $route);
 
-        $route = Route\PatternEndpoint::post('/home/path/{$slug}', $this->dummyCallback());
+        $route = Route\PatternEndpoint::get('http://example.com/home/path', $this->dummyCallback());
         $this->assertInstanceOf(Route::class, $route);
     }
 

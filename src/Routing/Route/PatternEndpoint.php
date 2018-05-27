@@ -34,12 +34,12 @@ class PatternEndpoint extends Route
 
     public static function post(string $path, Closure $callback, array $params = [])
     {
-        return new self('POST', new Pattern\DynamicTargetMask($path, $params), $callback);
+        return new self('POST', self::selectPattern($path, $params), $callback);
     }
 
     public static function get(string $path, Closure $callback, array $params = [])
     {
-        return new self('GET', new Pattern\DynamicTargetMask($path, $params), $callback);
+        return new self('GET', self::selectPattern($path, $params), $callback);
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
@@ -57,5 +57,12 @@ class PatternEndpoint extends Route
     private function methodMatch(ServerRequestInterface $request): bool
     {
         return $this->method === $request->getMethod();
+    }
+
+    private static function selectPattern($path, $params)
+    {
+        return strpos($path, Pattern\DynamicTargetMask::PARAM_DELIM_RIGHT)
+            ? new Pattern\DynamicTargetMask($path, $params)
+            : Pattern\StaticUriMask::fromUriString($path);
     }
 }
