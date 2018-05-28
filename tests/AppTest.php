@@ -12,6 +12,7 @@
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\Exception\InvalidIdException;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\App;
 use Polymorphine\Container\Setup;
@@ -40,6 +41,12 @@ class AppTest extends TestCase
 
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
+    }
+
+    public function testInstanceWithDefinedInternalContainerId_ThrowsException()
+    {
+        $this->expectException(InvalidIdException::class);
+        $this->app([App::APP_ROUTER_ID => new Setup\Record\DirectRecord('Hello World!')]);
     }
 
     public function testFallbackNotFoundRoute()

@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Http;
 
+use Polymorphine\Container\Exception\InvalidIdException;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -33,17 +34,15 @@ abstract class App implements RequestHandlerInterface
      */
     public function __construct(array $records = [])
     {
-        $this->setup = $this->containerSetup($records);
+        $this->setup = new ContainerSetup($records);
+        $this->environmentSetup();
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $container = $this->setup->container();
-        $routing   = $this->routing($container);
+        $rootRoute = $this->setup->container()->get(static::APP_ROUTER_ID);
 
-        $this->setup->entry(static::APP_ROUTER_ID)->value($routing);
-
-        return $routing->forward($request) ?: $this->notFoundResponse();
+        return $rootRoute->forward($request) ?: $this->notFoundResponse();
     }
 
     public function config(string $id): RecordSetup
@@ -51,14 +50,22 @@ abstract class App implements RequestHandlerInterface
         return $this->setup->entry($id);
     }
 
+    protected function environmentSetup()
+    {
+        if ($this->setup->exists(static::APP_ROUTER_ID)) {
+            $message = 'Internal router key `%s` used as container entry - rename entry or %s APP_ROUTER_ID constant';
+            $override = static::APP_ROUTER_ID === self::APP_ROUTER_ID ? 'override' : 'change';
+            throw new InvalidIdException(sprintf($message, static::APP_ROUTER_ID, $override));
+        }
+
+        $this->setup->entry(static::APP_ROUTER_ID)->lazy(function (ContainerInterface $container) {
+            return $this->routing($container);
+        });
+    }
+
     protected function notFoundResponse()
     {
         return new NotFoundResponse();
-    }
-
-    protected function containerSetup(array $records)
-    {
-        return new ContainerSetup($records);
     }
 
     abstract protected function routing(ContainerInterface $c): Route;
