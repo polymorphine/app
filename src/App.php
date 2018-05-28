@@ -11,23 +11,27 @@
 
 namespace Polymorphine\Http;
 
-use Polymorphine\Container\Exception\InvalidIdException;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\Setup\Record;
 use Polymorphine\Container\Setup\RecordSetup;
+use Polymorphine\Container\Setup\Record;
+use Polymorphine\Container\Exception\InvalidIdException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 
 abstract class App implements RequestHandlerInterface
 {
-    public const APP_ROUTER_ID = 'app.router';
+    public const ROUTER_ID = 'app.router';
 
     private $setup;
+    private $container;
+    private $middleware   = [];
+    private $processQueue = [];
 
     /**
      * @param Record[] $records
@@ -38,27 +42,41 @@ abstract class App implements RequestHandlerInterface
         $this->environmentSetup();
     }
 
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    final public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $rootRoute = $this->setup->container()->get(static::APP_ROUTER_ID);
+        $this->container or $this->container = $this->setup->container();
 
+        while ($id = array_shift($this->processQueue)) {
+            return $this->process($this->container->get($id), $request);
+        }
+
+        $this->processQueue = $this->middleware;
+
+        $rootRoute = $this->container->get(static::ROUTER_ID);
         return $rootRoute->forward($request) ?: $this->notFoundResponse();
     }
 
-    public function config(string $id): RecordSetup
+    final public function config(string $id): RecordSetup
     {
+        return $this->setup->entry($id);
+    }
+
+    final public function middleware(string $id): RecordSetup
+    {
+        $this->middleware[]   = $id;
+        $this->processQueue[] = $id;
         return $this->setup->entry($id);
     }
 
     protected function environmentSetup()
     {
-        if ($this->setup->exists(static::APP_ROUTER_ID)) {
-            $message = 'Internal router key `%s` used as container entry - rename entry or %s APP_ROUTER_ID constant';
-            $override = static::APP_ROUTER_ID === self::APP_ROUTER_ID ? 'override' : 'change';
-            throw new InvalidIdException(sprintf($message, static::APP_ROUTER_ID, $override));
+        if ($this->setup->exists(static::ROUTER_ID)) {
+            $message  = 'Internal router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
+            $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
+            throw new InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
         }
 
-        $this->setup->entry(static::APP_ROUTER_ID)->lazy(function (ContainerInterface $container) {
+        $this->setup->entry(static::ROUTER_ID)->lazy(function (ContainerInterface $container) {
             return $this->routing($container);
         });
     }
@@ -69,4 +87,9 @@ abstract class App implements RequestHandlerInterface
     }
 
     abstract protected function routing(ContainerInterface $c): Route;
+
+    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request)
+    {
+        return $middleware->process($request, $this);
+    }
 }

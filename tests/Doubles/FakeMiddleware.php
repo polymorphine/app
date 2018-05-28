@@ -20,7 +20,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FakeMiddleware implements MiddlewareInterface
 {
-    private $bodyWrap;
+    public $bodyWrap;
+    public $inContext = false;
 
     public function __construct(string $bodyWrap = 'processed')
     {
@@ -29,9 +30,10 @@ class FakeMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $response = $handler->handle($request);
+        $this->inContext = true;
 
-        $body = $this->bodyWrap . ' ' . $response->getBody() . ' ' . $this->bodyWrap;
+        $response = $handler->handle($request);
+        $body     = $this->bodyWrap . ' ' . $response->getBody() . ' ' . $this->bodyWrap;
         if ($requestInfo = $request->getAttribute('middleware')) {
             $body = $requestInfo . ': ' . $body;
         }

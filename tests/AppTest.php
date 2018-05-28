@@ -13,6 +13,9 @@ namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Exception\InvalidIdException;
+use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\App;
 use Polymorphine\Container\Setup;
@@ -43,10 +46,24 @@ class AppTest extends TestCase
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
+    public function testRepeatedMiddlewareQueueProcessing()
+    {
+        $app = $this->middlewareContextsApp();
+
+        $expectedBody = 'outerContext innerContext /test: MAIN innerContext outerContext';
+        $responseBody = $app->handle(new Doubles\FakeServerRequest('GET', Uri::fromString('/test')))->getBody();
+        $this->assertSame($expectedBody, (string) $responseBody);
+
+        //Middleware processing is handled by recursive calls
+        //Queue should be restored after each processing
+        $responseBody = $app->handle(new Doubles\FakeServerRequest('GET', Uri::fromString('/test')))->getBody();
+        $this->assertSame($expectedBody, (string) $responseBody);
+    }
+
     public function testInstanceWithDefinedInternalContainerId_ThrowsException()
     {
         $this->expectException(InvalidIdException::class);
-        $this->app([App::APP_ROUTER_ID => new Setup\Record\DirectRecord('Hello World!')]);
+        $this->app([App::ROUTER_ID => new Setup\Record\DirectRecord('Hello World!')]);
     }
 
     public function testFallbackNotFoundRoute()
@@ -71,5 +88,19 @@ class AppTest extends TestCase
     private function app(array $records = [])
     {
         return new Doubles\MockedApp($records);
+    }
+
+    private function middlewareContextsApp()
+    {
+        $app = $this->app();
+
+        $app->routeFound = true;
+        $app->config('test')->value('MAIN');
+        $app->middleware('one')->value(new FakeMiddleware('outerContext'));
+        $app->middleware('two')->lazy(function (ContainerInterface $c) {
+            return new FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---');
+        });
+
+        return $app;
     }
 }
