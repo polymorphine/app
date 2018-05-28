@@ -72,7 +72,7 @@ class ResponseHeadersTest extends TestCase
     public function cookieData()
     {
         return [
-            ['myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000', [
+            ['myCookie=; Path=/; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000', [
                 'name'  => 'myCookie',
                 'value' => null
             ]],
@@ -89,7 +89,8 @@ class ResponseHeadersTest extends TestCase
                 'name'  => 'permanentCookie',
                 'value' => 'hash-3284682736487236',
                 'time'  => 2628000,
-                'http'  => true
+                'http'  => true,
+                'path'  => ''
             ]]
         ];
     }

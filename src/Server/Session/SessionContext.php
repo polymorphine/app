@@ -82,7 +82,8 @@ class SessionContext implements MiddlewareInterface
 
         if (!$this->sessionStarted) {
             $this->start();
-            $this->headers->cookie($sessionName)->value(session_id());
+            $path = ini_get('session.cookie_path') ?: '/';
+            $this->headers->cookie($sessionName)->path($path)->value(session_id());
         }
 
         $_SESSION = $data;

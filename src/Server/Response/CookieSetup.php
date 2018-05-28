@@ -67,7 +67,7 @@ class CookieSetup
         return $this;
     }
 
-    public function path(string $path): CookieSetup
+    public function path(string $path = ''): CookieSetup
     {
         $this->path = $path;
         return $this;
@@ -93,7 +93,7 @@ class CookieSetup
             $header .= '; Domain=' . (string) $this->domain;
         }
 
-        if ($this->path !== '/') {
+        if ($this->path) {
             $header .= '; Path=' . $this->path;
         }
 

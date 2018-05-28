@@ -50,7 +50,7 @@ class SessionContextTest extends TestCase
             return new FakeResponse();
         });
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$name . '=12345657890ABCD'
+            SessionGlobalState::$name . '=12345657890ABCD; Path=/'
         ]];
 
         $context->process($this->request(), $handler);
@@ -94,7 +94,7 @@ class SessionContextTest extends TestCase
         $context->process($this->request(true), $handler);
 
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$name . '=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
+            SessionGlobalState::$name . '=; Path=/; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
         ]];
 
         $this->assertSame([], SessionGlobalState::$data);
