@@ -17,37 +17,24 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class MiddlewareChain implements RequestHandlerInterface
+class MiddlewareChain implements MiddlewareInterface
 {
     private $middleware;
-    private $handler;
-    private $composedHandler;
 
-    public function __construct(RequestHandlerInterface $handler, array $middleware = [])
-    {
-        $this->handler = $handler;
-        $this->setMiddleware(...$middleware);
-    }
-
-    public function handle(ServerRequestInterface $request): ResponseInterface
-    {
-        $this->composedHandler or $this->composedHandler = $this->compose();
-
-        return $this->composedHandler->handle($request);
-    }
-
-    private function compose(): RequestHandlerInterface
-    {
-        $handler = $this->handler;
-        while ($middleware = array_pop($this->middleware)) {
-            $handler = new MiddlewareHandler($middleware, $handler);
-        }
-
-        return $handler;
-    }
-
-    private function setMiddleware(MiddlewareInterface ...$middleware)
+    public function __construct(MiddlewareInterface ...$middleware)
     {
         $this->middleware = $middleware;
+    }
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        return $this->compose($handler, $this->middleware)->handle($request);
+    }
+
+    private function compose(RequestHandlerInterface $handler, $middleware): RequestHandlerInterface
+    {
+        return empty($middleware)
+            ? $handler
+            : $this->compose(new MiddlewareHandler(array_pop($middleware), $handler), $middleware);
     }
 }

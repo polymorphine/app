@@ -11,27 +11,27 @@
 
 namespace Polymorphine\Http\Tests\Server\Handler;
 
-use Polymorphine\Http\Server\MiddlewareChain;
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Server\MiddlewareChain;
+use Psr\Http\Server\MiddlewareInterface;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
-use Psr\Http\Server\RequestHandlerInterface;
 
 
 class MiddlewareChainTest extends TestCase
 {
     public function testInstantiation()
     {
-        $chain = new MiddlewareChain($this->handler(), $this->middleware());
-        $this->assertInstanceOf(RequestHandlerInterface::class, $chain);
+        $chain = new MiddlewareChain(new FakeMiddleware('a'), new FakeMiddleware('b'), new FakeMiddleware('c'));
+        $this->assertInstanceOf(MiddlewareInterface::class, $chain);
     }
 
     public function testMiddlewareProcessingOrder()
     {
-        $chain    = new MiddlewareChain($this->handler(), $this->middleware());
-        $response = $chain->handle(new FakeServerRequest());
+        $chain    = new MiddlewareChain(...$this->middleware());
+        $response = $chain->process(new FakeServerRequest(), $this->handler());
         $this->assertSame('a b c response c b a', (string) $response->getBody());
     }
 
