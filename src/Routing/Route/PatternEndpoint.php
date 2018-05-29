@@ -21,6 +21,8 @@ use Closure;
 
 class PatternEndpoint extends Route
 {
+    use Route\Pattern\PatternSelection;
+
     private $method;
     private $callback;
     private $pattern;
@@ -57,12 +59,5 @@ class PatternEndpoint extends Route
     private function methodMatch(ServerRequestInterface $request): bool
     {
         return $this->method === $request->getMethod();
-    }
-
-    private static function selectPattern($path, $params)
-    {
-        return strpos($path, Pattern\DynamicTargetMask::PARAM_DELIM_RIGHT)
-            ? new Pattern\DynamicTargetMask($path, $params)
-            : Pattern\StaticUriMask::fromUriString($path);
     }
 }

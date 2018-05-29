@@ -20,6 +20,8 @@ use Psr\Http\Message\UriInterface;
 
 class PatternGateway extends Route
 {
+    use Route\Pattern\PatternSelection;
+
     private $pattern;
     private $route;
 
@@ -51,12 +53,5 @@ class PatternGateway extends Route
     public function gateway(string $path): Route
     {
         return new self($this->pattern, $this->route->gateway($path));
-    }
-
-    private static function selectPattern($pattern, $params)
-    {
-        return strpos($pattern, Pattern\DynamicTargetMask::PARAM_DELIM_RIGHT)
-            ? new Pattern\DynamicTargetMask($pattern, $params)
-            : Pattern\StaticUriMask::fromUriString($pattern);
     }
 }
