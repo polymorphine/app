@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Polymorphine\Http\Tests\Server\Session;
+namespace Polymorphine\Http\Tests\Context\Session;
 
-use Polymorphine\Http\Server\Session\SessionStorage;
+use Polymorphine\Http\Context\Session\SessionStorage;
 use PHPUnit\Framework\TestCase;
 
 

@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Session;
+namespace Polymorphine\Http\Context\Session;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Server\Response\ResponseHeaders;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;

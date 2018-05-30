@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Server\Handler;
+namespace Polymorphine\Http\Tests\Context;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server\MiddlewareChain;
+use Polymorphine\Http\Context\MiddlewareChain;
 use Psr\Http\Server\MiddlewareInterface;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;

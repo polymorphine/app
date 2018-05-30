@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Server\Session;
+namespace Polymorphine\Http\Context\Session;
 
 
 class SessionStorage

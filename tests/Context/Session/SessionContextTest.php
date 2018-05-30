@@ -9,11 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Server\Session;
+namespace Polymorphine\Http\Tests\Context\Session;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server\Session\SessionContext;
-use Polymorphine\Http\Server\Response\ResponseHeaders;
+use Polymorphine\Http\Context\Session\SessionContext;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Server\MiddlewareInterface;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;

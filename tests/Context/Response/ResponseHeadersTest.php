@@ -9,11 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Server\Response;
+namespace Polymorphine\Http\Tests\Context\Response;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server\Response\CookieSetup;
-use Polymorphine\Http\Server\Response\ResponseHeaders;
+use Polymorphine\Http\Context\Response\CookieSetup;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 
 require_once dirname(dirname(__DIR__)) . '/Fixtures/time-functions.php';
 
