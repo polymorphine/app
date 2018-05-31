@@ -14,22 +14,12 @@ namespace Polymorphine\Http\Context\Security;
 
 class CsrfToken
 {
-    private $name;
-    private $signature;
+    public $name;
+    public $hash;
 
-    public function __construct($name, $signature)
+    public function __construct($name, $hash)
     {
-        $this->name      = $name;
-        $this->signature = $signature;
-    }
-
-    public function name()
-    {
-        return $this->name;
-    }
-
-    public function signature()
-    {
-        return $this->signature;
+        $this->name = $name;
+        $this->hash = $hash;
     }
 }

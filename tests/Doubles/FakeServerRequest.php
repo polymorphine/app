@@ -23,6 +23,7 @@ class FakeServerRequest implements ServerRequestInterface
     public $method;
     public $attr    = [];
     public $cookies = [];
+    public $parsed  = [];
 
     public function __construct(string $method = 'GET', UriInterface $uri = null)
     {
@@ -135,6 +136,7 @@ class FakeServerRequest implements ServerRequestInterface
 
     public function getParsedBody()
     {
+        return $this->parsed;
     }
 
     public function withParsedBody($data)

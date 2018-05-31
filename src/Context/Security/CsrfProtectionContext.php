@@ -34,7 +34,8 @@ class CsrfProtectionContext implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $signatureRequired = in_array($request->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'], true);
+        $unsafeMethods     = ['POST', 'PUT', 'DELETE', 'PATCH', 'TRACE', 'CONNECT'];
+        $signatureRequired = in_array($request->getMethod(), $unsafeMethods, true);
         $validRequest      = !$signatureRequired || $this->tokenMatch($request->getParsedBody());
 
         return $validRequest ? $handler->handle($request) : new NotFoundResponse();
@@ -42,32 +43,36 @@ class CsrfProtectionContext implements MiddlewareInterface
 
     public function appSignature(): CsrfToken
     {
-        if ($this->token) { return $this->token; }
+        return $this->token ?: $this->token = $this->generateToken();
+    }
 
-        if (!$this->session->exists(self::SESSION_CSRF_KEY)) {
-            $this->session->set(self::SESSION_CSRF_KEY, uniqid());
-            $this->session->set(self::SESSION_CSRF_TOKEN, bin2hex(random_bytes(32)));
-        }
+    private function tokenMatch(array $payload): bool
+    {
+        if (!$token = $this->sessionToken()) { return false; }
 
-        return $this->token = new CsrfToken(
+        $isValid = isset($payload[$token->name]) && hash_equals($token->hash, $payload[$token->name]);
+
+        $this->session->remove(self::SESSION_CSRF_KEY);
+        $this->session->remove(self::SESSION_CSRF_TOKEN);
+
+        return $isValid;
+    }
+
+    private function sessionToken(): ?CsrfToken
+    {
+        if (!$this->session->exists(self::SESSION_CSRF_KEY)) { return null; }
+
+        return new CsrfToken(
             $this->session->get(self::SESSION_CSRF_KEY),
             $this->session->get(self::SESSION_CSRF_TOKEN)
         );
     }
 
-    private function tokenMatch(array $payload): bool
+    private function generateToken(): CsrfToken
     {
-        if (!$this->session->exists(self::SESSION_CSRF_KEY)) { return false; }
+        $this->session->set(self::SESSION_CSRF_KEY, uniqid());
+        $this->session->set(self::SESSION_CSRF_TOKEN, bin2hex(random_bytes(32)));
 
-        $token   = $this->appSignature();
-        $name    = $token->name();
-        $isValid = isset($payload[$name]) && hash_equals($token->signature(), $payload[$name]);
-
-        if (!$isValid) {
-            $this->session->remove(self::SESSION_CSRF_KEY);
-            $this->session->remove(self::SESSION_CSRF_TOKEN);
-        }
-
-        return $isValid;
+        return $this->sessionToken();
     }
 }
