@@ -40,7 +40,7 @@ trait MessageMethodsTrait
 
     public function getHeaders()
     {
-        return $this->headers;
+        return $this->headers ?: [];
     }
 
     public function hasHeader($name)

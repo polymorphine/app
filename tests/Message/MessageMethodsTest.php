@@ -98,6 +98,11 @@ class MessageMethodsTest extends TestCase
         $this->assertSame([], $this->message()->getHeader('not exists'));
     }
 
+    public function testGetHeadersFromMessageWithoutHeaders_ReturnsEmptyArray()
+    {
+        $this->assertSame([], $this->message()->getHeaders());
+    }
+
     public function testGetHeaderForValuePassedAsArray_ReturnsSameArray()
     {
         $value = ['header value'];
