@@ -16,10 +16,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\Context\Session\SessionStorage;
-use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 
-class CsrfProtectionContext implements MiddlewareInterface
+class CsrfPersistentTokenContext implements MiddlewareInterface
 {
     public const SESSION_CSRF_KEY   = 'csrf_key';
     public const SESSION_CSRF_TOKEN = 'csrf_token';
@@ -36,9 +35,10 @@ class CsrfProtectionContext implements MiddlewareInterface
     {
         $unsafeMethods     = ['POST', 'PUT', 'DELETE', 'PATCH', 'TRACE', 'CONNECT'];
         $signatureRequired = in_array($request->getMethod(), $unsafeMethods, true);
-        $validRequest      = !$signatureRequired || $this->tokenMatch($request->getParsedBody());
 
-        return $validRequest ? $handler->handle($request) : new NotFoundResponse();
+        $signatureRequired and $this->tokenMatch($request->getParsedBody());
+
+        return $handler->handle($request);
     }
 
     public function appSignature(): CsrfToken
@@ -46,16 +46,15 @@ class CsrfProtectionContext implements MiddlewareInterface
         return $this->token ?: $this->token = $this->generateToken();
     }
 
-    private function tokenMatch(array $payload): bool
+    private function tokenMatch(array $payload): void
     {
-        if (!$token = $this->sessionToken()) { return false; }
+        $token = $this->sessionToken();
+        $valid = $token && isset($payload[$token->name]) && hash_equals($token->hash, $payload[$token->name]);
 
-        $isValid = isset($payload[$token->name]) && hash_equals($token->hash, $payload[$token->name]);
+        if ($valid) { return; }
 
-        $this->session->remove(self::SESSION_CSRF_KEY);
-        $this->session->remove(self::SESSION_CSRF_TOKEN);
-
-        return $isValid;
+        $this->session->clear();
+        throw new CsrfTokenMismatchException();
     }
 
     private function sessionToken(): ?CsrfToken
