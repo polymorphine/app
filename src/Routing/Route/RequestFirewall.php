@@ -11,32 +11,38 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
+use Polymorphine\Http\Routing\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\Http\Routing\Route;
+use Psr\Http\Message\UriInterface;
 use Closure;
 
 
 class RequestFirewall extends Route
 {
     private $condition;
-    private $routes;
+    private $route;
 
-    public function __construct(Closure $condition, Route $routes)
+    public function __construct(Closure $condition, Route $route)
     {
         $this->condition = $condition;
-        $this->routes    = $routes;
+        $this->route     = $route;
     }
 
     public function forward(ServerRequestInterface $request): ?ResponseInterface
     {
         $match = $this->condition->__invoke($request);
 
-        return ($match) ? $this->routes->forward($request) : null;
+        return ($match) ? $this->route->forward($request) : null;
     }
 
     public function gateway(string $path): Route
     {
-        return $this->routes->gateway($path);
+        return $this->route->gateway($path);
+    }
+
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    {
+        return $this->route->uri($params, $prototype);
     }
 }

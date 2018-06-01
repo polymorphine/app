@@ -15,6 +15,7 @@ use Polymorphine\Http\Routing\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Closure;
+use Psr\Http\Message\UriInterface;
 
 
 /**
@@ -55,5 +56,10 @@ class CallbackGateway extends Route
     public function gateway(string $path): Route
     {
         return $this->route->gateway($path);
+    }
+
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    {
+        return $this->route->uri($params, $prototype);
     }
 }

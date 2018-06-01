@@ -53,6 +53,13 @@ class RequestFirewallTest extends TestCase
         $this->assertSame('path.forwarded', $route->gateway('path.forwarded')->path);
     }
 
+    public function testUriCallIsPassedToWrappedRoute()
+    {
+        $uri   = 'http://example.com/foo/bar?test=baz';
+        $route = $this->route(null, new Doubles\MockedRoute($uri));
+        $this->assertSame($uri, (string) $route->uri());
+    }
+
     private function route($closure = null, $route = null)
     {
         return new RequestFirewall(

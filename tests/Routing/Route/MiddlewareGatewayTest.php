@@ -44,10 +44,11 @@ class MiddlewareGatewayTest extends TestCase
         $this->assertSame('some.name', $route->path);
     }
 
-    public function testUri_ThrowsException()
+    public function testUriCallIsPassedToWrappedRoute()
     {
-        $this->expectException(EndpointCallException::class);
-        $this->middleware()->uri();
+        $uri   = 'http://example.com/foo/bar?test=baz';
+        $route = new MiddlewareGateway(new FakeMiddleware('wrap'), new MockedRoute($uri));
+        $this->assertSame($uri, (string) $route->uri());
     }
 
     private function middleware()

@@ -13,9 +13,10 @@ namespace Polymorphine\Http\Routing\Route;
 
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\RouteHandler;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Message\UriInterface;
 
 
 class MiddlewareGateway extends Route
@@ -37,5 +38,10 @@ class MiddlewareGateway extends Route
     public function gateway(string $path): Route
     {
         return $this->route->gateway($path);
+    }
+
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    {
+        return $this->route->uri($params, $prototype);
     }
 }
