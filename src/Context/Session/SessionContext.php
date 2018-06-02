@@ -24,6 +24,7 @@ class SessionContext implements MiddlewareInterface
     private $headers;
     private $session;
 
+    private $sessionName;
     private $sessionStarted = false;
 
     public function __construct(ResponseHeaders $headers)
@@ -33,16 +34,16 @@ class SessionContext implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $cookies     = $request->getCookieParams();
-        $sessionName = session_name();
+        $cookies = $request->getCookieParams();
 
-        $this->session = isset($cookies[$sessionName])
+        $this->sessionName = session_name();
+        $this->session = isset($cookies[$this->sessionName])
             ? $this->start()
             : $this->createStorage();
 
         $response = $handler->handle($request);
 
-        $this->commit($sessionName, $this->session->toArray());
+        $this->commit($this->session->toArray());
 
         return $response;
     }
@@ -73,28 +74,28 @@ class SessionContext implements MiddlewareInterface
         return $this->createStorage($_SESSION);
     }
 
-    private function commit(string $sessionName, array $data): void
+    private function commit(array $data): void
     {
         if (!$data) {
-            $this->destroy($sessionName);
+            $this->destroy();
             return;
         }
 
         if (!$this->sessionStarted) {
             $this->start();
             $path = ini_get('session.cookie_path') ?: '/';
-            $this->headers->cookie($sessionName)->path($path)->value(session_id());
+            $this->headers->cookie($this->sessionName)->path($path)->value(session_id());
         }
 
         $_SESSION = $data;
         session_write_close();
     }
 
-    private function destroy(string $sessionName): void
+    private function destroy(): void
     {
         if (!$this->sessionStarted) { return; }
 
-        $this->headers->cookie($sessionName)->remove();
+        $this->headers->cookie($this->sessionName)->remove();
         session_destroy();
     }
 }
