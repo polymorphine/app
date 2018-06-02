@@ -54,7 +54,7 @@ class SessionStorageTest extends TestCase
 
     public function testClearData()
     {
-        $storage = $this->storage(['foo' => 'bar', 'baz' => true], $manager = new FakeSessionManager());
+        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'bar', 'baz' => true]);
         $storage->clear();
         $storage->commit();
         $this->assertSame([], $manager->data);
@@ -64,6 +64,29 @@ class SessionStorageTest extends TestCase
     {
         $storage = $this->storage();
         $this->assertSame('default', $storage->get('foo', 'default'));
+    }
+
+    public function testSetMultiple()
+    {
+        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'bar', 'baz' => true]);
+        $storage->setMultiple(['foo' => 'Fizz', 'bar' => 'baz']);
+        $storage->commit();
+        $this->assertSame(['foo' => 'Fizz', 'baz' => true, 'bar' => 'baz'], $manager->data);
+    }
+
+    public function testGetMultiple()
+    {
+        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'Fizz', 'baz' => true, 'bar' => 'baz']);
+        $data    = $storage->getMultiple(['foo', 'bar', 'notThere'], 'defaultValue');
+        $this->assertSame(['foo' => 'Fizz', 'bar' => 'baz', 'notThere' => 'defaultValue'], $data);
+    }
+
+    public function testDeleteMultiple()
+    {
+        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'Fizz', 'bar' => 'Buzz', 'baz' => 'FizzBuzz']);
+        $storage->deleteMultiple(['foo', 'bar']);
+        $storage->commit();
+        $this->assertSame(['baz' => 'FizzBuzz'], $manager->data);
     }
 
     public function testGetAllData()
@@ -82,13 +105,13 @@ class SessionStorageTest extends TestCase
         $this->assertSame($data, $manager->data);
     }
 
-    public function testSettingNullRemovesData()
+    public function testSettingNullDoesNotRemoveData()
     {
         $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 500]);
         $this->assertTrue($storage->has('foo'));
         $storage->set('foo', null);
-        $this->assertFalse($storage->has('foo'));
+        $this->assertTrue($storage->has('foo'));
         $storage->commit();
-        $this->assertFalse(array_key_exists('foo', $manager->data));
+        $this->assertTrue(array_key_exists('foo', $manager->data));
     }
 }

@@ -16,6 +16,8 @@ use Psr\SimpleCache\CacheInterface;
 
 class SessionStorage implements CacheInterface
 {
+    //TODO: TTL
+
     private $session;
     private $data;
 
@@ -32,12 +34,12 @@ class SessionStorage implements CacheInterface
 
     public function set($key, $value, $ttl = null): void
     {
-        isset($value) ? $this->data[$key] = $value : $this->delete($key);
+        $this->data[$key] = $value;
     }
 
     public function has($key)
     {
-        return isset($this->data[$key]);
+        return array_key_exists($key, $this->data);
     }
 
     public function delete($key)
@@ -52,17 +54,25 @@ class SessionStorage implements CacheInterface
 
     public function getMultiple($keys, $default = null)
     {
-        // TODO: Implement getMultiple() method.
+        $data = [];
+        foreach ($keys as $key) {
+            $data[$key] = $this->get($key, $default);
+        }
+        return $data;
     }
 
     public function setMultiple($values, $ttl = null)
     {
-        // TODO: Implement setMultiple() method.
+        foreach ($values as $key => $value) {
+            $this->set($key, $value, $ttl);
+        }
     }
 
     public function deleteMultiple($keys)
     {
-        // TODO: Implement deleteMultiple() method.
+        foreach ($keys as $key) {
+            $this->delete($key);
+        }
     }
 
     public function commit(): void
