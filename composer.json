@@ -2,18 +2,20 @@
     "name": "polymorphine/http",
     "description": "PHP Front Controller for HTTP applications",
     "type": "library",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^7.1",
         "polymorphine/container": "@dev",
         "psr/http-message": "^1.0",
         "psr/container": "^1.0",
         "psr/http-server-handler": "^1.0",
-        "psr/http-server-middleware": "^1.0"
+        "psr/http-server-middleware": "^1.0",
+        "psr/simple-cache": "^1.0"
     },
     "require-dev": {
         "polymorphine/cs": "^1.1",
-        "phpunit/phpunit": "^7.0",
+        "phpunit/phpunit": "7.0",
         "php-coveralls/php-coveralls": "^2.0"
     },
     "license": "MIT",

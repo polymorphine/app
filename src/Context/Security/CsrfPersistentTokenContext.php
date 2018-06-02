@@ -59,7 +59,7 @@ class CsrfPersistentTokenContext implements MiddlewareInterface
 
     private function sessionToken(): ?CsrfToken
     {
-        if (!$this->session->exists(self::SESSION_CSRF_KEY)) { return null; }
+        if (!$this->session->has(self::SESSION_CSRF_KEY)) { return null; }
 
         return new CsrfToken(
             $this->session->get(self::SESSION_CSRF_KEY),

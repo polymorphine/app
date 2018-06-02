@@ -25,7 +25,7 @@ class CsrfPersistentTokenContextTest extends TestCase
 {
     public function testInstantiation()
     {
-        $session = new SessionStorage($this->token('foo', 'bar'));
+        $session = new SessionStorage(new FakeSessionManager(), $this->token('foo', 'bar'));
         $guard   = new CsrfPersistentTokenContext($session);
         $this->assertInstanceOf(CsrfPersistentTokenContext::class, $guard);
         $this->assertEquals('foo', $session->get(CsrfPersistentTokenContext::SESSION_CSRF_KEY));
@@ -111,23 +111,23 @@ class CsrfPersistentTokenContextTest extends TestCase
 
     public function testSessionIsClearedOnTokenMismatch()
     {
-        $session = new SessionStorage($this->token('foo', 'bar'));
+        $session = new SessionStorage($manager = new FakeSessionManager(), $this->token('foo', 'bar'));
         $guard = new CsrfPersistentTokenContext($session);
         $request = $this->request('POST', ['something' => 'name']);
         try {
             $guard->process($request, $this->handler());
             $this->fail('Exception should be thrown');
         } catch (CsrfTokenMismatchException $e) {
-            $this->assertFalse($session->exists(CsrfPersistentTokenContext::SESSION_CSRF_KEY));
-            $this->assertFalse($session->exists(CsrfPersistentTokenContext::SESSION_CSRF_TOKEN));
-            $session->commit($manager = new FakeSessionManager());
+            $this->assertFalse($session->has(CsrfPersistentTokenContext::SESSION_CSRF_KEY));
+            $this->assertFalse($session->has(CsrfPersistentTokenContext::SESSION_CSRF_TOKEN));
+            $session->commit();
             $this->assertSame([], $manager->data);
         }
     }
 
     public function testSessionTokenIsPreservedForValidRequest()
     {
-        $session = new SessionStorage($this->token('foo', 'bar'));
+        $session = new SessionStorage($manager = new FakeSessionManager(), $this->token('foo', 'bar'));
         $guard   = new CsrfPersistentTokenContext($session);
         $request = $this->request('POST', ['foo' => 'bar']);
         $guard->process($request, $this->handler());
@@ -165,7 +165,7 @@ class CsrfPersistentTokenContextTest extends TestCase
 
     private function guard(array $token = []): CsrfPersistentTokenContext
     {
-        return new CsrfPersistentTokenContext(new SessionStorage($token));
+        return new CsrfPersistentTokenContext(new SessionStorage(new FakeSessionManager(), $token));
     }
 
     private function handler()

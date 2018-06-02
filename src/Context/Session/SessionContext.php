@@ -43,7 +43,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
         $response = $handler->handle($request);
 
-        $this->session->commit($this);
+        $this->session->commit();
 
         return $response;
     }
@@ -91,7 +91,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
     protected function createStorage(array $data = []): SessionStorage
     {
-        return new SessionStorage($data);
+        return new SessionStorage($this, $data);
     }
 
     private function destroy(): void

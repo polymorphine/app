@@ -3,21 +3,24 @@
 
 namespace Polymorphine\Http\Tests\Context\Session;
 
-use Polymorphine\Http\Context\Session\SessionStorage;
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Context\Session\SessionManager;
+use Polymorphine\Http\Context\Session\SessionStorage;
 use Polymorphine\Http\Tests\Doubles\FakeSessionManager;
+use Psr\SimpleCache\CacheInterface;
 
 
 class SessionStorageTest extends TestCase
 {
-    private function storage(array $data = [])
+    private function storage(array $data = [], SessionManager $manager = null): CacheInterface
     {
-        return new SessionStorage($data);
+        return new SessionStorage($manager ?? new FakeSessionManager(), $data);
     }
 
     public function testInstantiation()
     {
         $this->assertInstanceOf(SessionStorage::class, $this->storage());
+        $this->assertInstanceOf(CacheInterface::class, $this->storage());
     }
 
     public function testGetData()
@@ -29,9 +32,9 @@ class SessionStorageTest extends TestCase
     public function testSetData()
     {
         $storage = $this->storage();
-        $this->assertFalse($storage->exists('foo'));
+        $this->assertFalse($storage->has('foo'));
         $storage->set('foo', 'bar');
-        $this->assertTrue($storage->exists('foo'));
+        $this->assertTrue($storage->has('foo'));
         $this->assertSame('bar', $storage->get('foo'));
     }
 
@@ -45,15 +48,15 @@ class SessionStorageTest extends TestCase
     public function testRemoveData()
     {
         $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
-        $storage->remove('foo');
+        $storage->delete('foo');
         $this->assertNull($storage->get('foo'));
     }
 
     public function testClearData()
     {
-        $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
+        $storage = $this->storage(['foo' => 'bar', 'baz' => true], $manager = new FakeSessionManager());
         $storage->clear();
-        $storage->commit($manager = new FakeSessionManager());
+        $storage->commit();
         $this->assertSame([], $manager->data);
     }
 
@@ -70,22 +73,22 @@ class SessionStorageTest extends TestCase
             'bar' => 'baz'
         ];
 
-        $storage = $this->storage($data);
+        $storage = new SessionStorage($manager = new FakeSessionManager(), $data);
 
         $data['fizz'] = 'buzz';
         $storage->set('fizz', 'buzz');
 
-        $storage->commit($manager = new FakeSessionManager());
+        $storage->commit();
         $this->assertSame($data, $manager->data);
     }
 
     public function testSettingNullRemovesData()
     {
-        $storage = $this->storage(['foo' => 500]);
-        $this->assertTrue($storage->exists('foo'));
+        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 500]);
+        $this->assertTrue($storage->has('foo'));
         $storage->set('foo', null);
-        $this->assertFalse($storage->exists('foo'));
-        $storage->commit($manager = new FakeSessionManager());
+        $this->assertFalse($storage->has('foo'));
+        $storage->commit();
         $this->assertFalse(array_key_exists('foo', $manager->data));
     }
 }

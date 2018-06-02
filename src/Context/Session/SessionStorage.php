@@ -11,32 +11,36 @@
 
 namespace Polymorphine\Http\Context\Session;
 
+use Psr\SimpleCache\CacheInterface;
 
-class SessionStorage
+
+class SessionStorage implements CacheInterface
 {
+    private $session;
     private $data;
 
-    public function __construct(array $data = [])
+    public function __construct(SessionManager $session, array $data = [])
     {
-        $this->data = $data;
+        $this->session = $session;
+        $this->data    = $data;
     }
 
-    public function get(string $key, $default = null)
+    public function get($key, $default = null)
     {
-        return $this->exists($key) ? $this->data[$key] : $default;
+        return $this->has($key) ? $this->data[$key] : $default;
     }
 
-    public function set(string $key, $value = null): void
+    public function set($key, $value, $ttl = null): void
     {
-        isset($value) ? $this->data[$key] = $value : $this->remove($key);
+        isset($value) ? $this->data[$key] = $value : $this->delete($key);
     }
 
-    public function exists(string $key): bool
+    public function has($key)
     {
         return isset($this->data[$key]);
     }
 
-    public function remove(string $key): void
+    public function delete($key)
     {
         unset($this->data[$key]);
     }
@@ -46,8 +50,23 @@ class SessionStorage
         $this->data = [];
     }
 
-    public function commit(SessionManager $sessionContext): void
+    public function getMultiple($keys, $default = null)
     {
-        $sessionContext->commit($this->data);
+        // TODO: Implement getMultiple() method.
+    }
+
+    public function setMultiple($values, $ttl = null)
+    {
+        // TODO: Implement setMultiple() method.
+    }
+
+    public function deleteMultiple($keys)
+    {
+        // TODO: Implement deleteMultiple() method.
+    }
+
+    public function commit(): void
+    {
+        $this->session->commit($this->data);
     }
 }
