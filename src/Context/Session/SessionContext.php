@@ -19,7 +19,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 
 
-class SessionContext implements MiddlewareInterface
+class SessionContext implements MiddlewareInterface, SessionManager
 {
     private $headers;
     private $session;
@@ -43,7 +43,7 @@ class SessionContext implements MiddlewareInterface
 
         $response = $handler->handle($request);
 
-        $this->commit($this->session->toArray());
+        $this->session->commit($this);
 
         return $response;
     }
@@ -57,12 +57,7 @@ class SessionContext implements MiddlewareInterface
         return $this->session;
     }
 
-    protected function createStorage(array $data = []): SessionStorage
-    {
-        return new SessionStorage($data);
-    }
-
-    private function start(): SessionStorage
+    public function start(): SessionStorage
     {
         if (session_status() !== PHP_SESSION_NONE) {
             throw new RuntimeException('Session started in another context');
@@ -74,7 +69,7 @@ class SessionContext implements MiddlewareInterface
         return $this->createStorage($_SESSION);
     }
 
-    private function commit(array $data): void
+    public function commit(array $data): void
     {
         if (!$data) {
             $this->destroy();
@@ -83,12 +78,20 @@ class SessionContext implements MiddlewareInterface
 
         if (!$this->sessionStarted) {
             $this->start();
-            $path = ini_get('session.cookie_path') ?: '/';
-            $this->headers->cookie($this->sessionName)->path($path)->value(session_id());
+            $cookie = $this->headers->cookie($this->sessionName);
+            $cookie->domain(ini_get('session.cookie_domain'))
+                   ->path(ini_get('session.cookie_path') ?: '/')
+                   ->httpOnly(true)
+                   ->value(session_id());
         }
 
         $_SESSION = $data;
         session_write_close();
+    }
+
+    protected function createStorage(array $data = []): SessionStorage
+    {
+        return new SessionStorage($data);
     }
 
     private function destroy(): void

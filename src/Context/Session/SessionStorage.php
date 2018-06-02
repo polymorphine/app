@@ -46,8 +46,8 @@ class SessionStorage
         $this->data = [];
     }
 
-    public function toArray(): array
+    public function commit(SessionManager $sessionContext): void
     {
-        return $this->data;
+        $sessionContext->commit($this->data);
     }
 }

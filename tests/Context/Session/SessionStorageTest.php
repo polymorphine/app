@@ -5,6 +5,7 @@ namespace Polymorphine\Http\Tests\Context\Session;
 
 use Polymorphine\Http\Context\Session\SessionStorage;
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Http\Tests\Doubles\FakeSessionManager;
 
 
 class SessionStorageTest extends TestCase
@@ -52,7 +53,8 @@ class SessionStorageTest extends TestCase
     {
         $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
         $storage->clear();
-        $this->assertSame([], $storage->toArray());
+        $storage->commit($manager = new FakeSessionManager());
+        $this->assertSame([], $manager->data);
     }
 
     public function testDefaultForMissingValues()
@@ -73,7 +75,8 @@ class SessionStorageTest extends TestCase
         $data['fizz'] = 'buzz';
         $storage->set('fizz', 'buzz');
 
-        $this->assertSame($data, $storage->toArray());
+        $storage->commit($manager = new FakeSessionManager());
+        $this->assertSame($data, $manager->data);
     }
 
     public function testSettingNullRemovesData()
@@ -82,6 +85,7 @@ class SessionStorageTest extends TestCase
         $this->assertTrue($storage->exists('foo'));
         $storage->set('foo', null);
         $this->assertFalse($storage->exists('foo'));
-        $this->assertFalse(array_key_exists('foo', $storage->toArray()));
+        $storage->commit($manager = new FakeSessionManager());
+        $this->assertFalse(array_key_exists('foo', $manager->data));
     }
 }

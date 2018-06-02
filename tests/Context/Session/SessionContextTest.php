@@ -50,7 +50,7 @@ class SessionContextTest extends TestCase
             return new FakeResponse();
         });
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$name . '=12345657890ABCD; Path=/'
+            SessionGlobalState::$name . '=12345657890ABCD; Path=/; HttpOnly'
         ]];
 
         $context->process($this->request(), $handler);

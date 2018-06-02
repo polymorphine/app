@@ -18,6 +18,7 @@ use Polymorphine\Http\Context\Security\CsrfTokenMismatchException;
 use Polymorphine\Http\Context\Session\SessionStorage;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeSessionManager;
 
 
 class CsrfPersistentTokenContextTest extends TestCase
@@ -119,7 +120,8 @@ class CsrfPersistentTokenContextTest extends TestCase
         } catch (CsrfTokenMismatchException $e) {
             $this->assertFalse($session->exists(CsrfPersistentTokenContext::SESSION_CSRF_KEY));
             $this->assertFalse($session->exists(CsrfPersistentTokenContext::SESSION_CSRF_TOKEN));
-            $this->assertSame([], $session->toArray());
+            $session->commit($manager = new FakeSessionManager());
+            $this->assertSame([], $manager->data);
         }
     }
 
