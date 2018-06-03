@@ -12,13 +12,13 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\ResourceEndpoint;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -101,44 +101,44 @@ class ResourceEndpointTest extends TestCase
     public function testUriMethod_ReturnsUriWithPath()
     {
         $resource = $this->resource('/foo/bar');
-        $this->assertSame('/foo/bar', (string) $resource->uri());
+        $this->assertSame('/foo/bar', (string) $resource->uri(new FakeUri()));
 
-        $uri = Uri::fromString('http://example.com:9000?query=string');
-        $this->assertSame('http://example.com:9000/foo/bar?query=string', (string) $resource->uri([], $uri));
+        $uri = FakeUri::fromString('http://example.com:9000?query=string');
+        $this->assertSame('http://example.com:9000/foo/bar?query=string', (string) $resource->uri($uri, []));
     }
 
     public function testUriMethodWithIdParam_ReturnsUriWithIdPath()
     {
         $resource = $this->resource('/some/path');
-        $this->assertSame('/some/path/239', (string) $resource->uri([239]));
+        $this->assertSame('/some/path/239', (string) $resource->uri(new FakeUri(), [239]));
 
-        $uri = Uri::fromString('http://example.com:9000?query=string');
-        $this->assertSame('http://example.com:9000/some/path/300?query=string', (string) $resource->uri(['id' => 300], $uri));
+        $uri = FakeUri::fromString('http://example.com:9000?query=string');
+        $this->assertSame('http://example.com:9000/some/path/300?query=string', (string) $resource->uri($uri, ['id' => 300]));
     }
 
     public function testUriWithInvalidIdParam_ThrowsException()
     {
         $this->expectException(UriParamsException::class);
-        $this->resource('/path/to/resource')->uri(['id' => '08ab']);
+        $this->resource('/path/to/resource')->uri(new FakeUri(), ['id' => '08ab']);
     }
 
     public function testUriPrototypeWithDefinedPath_ThrowsException()
     {
         $this->expectException(UnreachableEndpointException::class);
-        $this->resource('/foo/bar')->uri([], Uri::fromString('/other/path'));
+        $this->resource('/foo/bar')->uri(FakeUri::fromString('/other/path'), []);
     }
 
     public function testUriForRelativePathWithoutPrototypePath_throwsException()
     {
         $resource = $this->resource('bar/baz');
         $this->expectException(UnreachableEndpointException::class);
-        $resource->uri([], Uri::fromString('http://example.com'));
+        $resource->uri(FakeUri::fromString('http://example.com'), []);
     }
 
     public function testUriForRelativePath_ReturnsUriWithPathAppendedToPrototype()
     {
         $resource = $this->resource('bar/baz');
-        $uri      = $resource->uri(['id' => '3456'], Uri::fromString('http://example.com/'));
+        $uri      = $resource->uri(FakeUri::fromString('http://example.com/'), ['id' => '3456']);
         $this->assertSame('http://example.com/bar/baz/3456', (string) $uri);
     }
 
@@ -168,7 +168,7 @@ class ResourceEndpointTest extends TestCase
         $request = new FakeServerRequest();
 
         $request->method = $method ?? 'GET';
-        $request->uri    = Uri::fromString($path);
+        $request->uri    = FakeUri::fromString($path);
 
         return $request;
     }

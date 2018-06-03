@@ -31,7 +31,7 @@ class StaticQueryPattern implements Pattern
         return $this->queryMatch($request->getUri()->getQuery()) ? $request : null;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $prototype->withQuery($this->combinedQuery($prototype->getQuery()));
     }

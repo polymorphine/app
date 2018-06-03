@@ -43,7 +43,7 @@ class MockedRoute implements Route
         return $this;
     }
 
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    public function uri(UriInterface $prototype, array $params = []): UriInterface
     {
         return $this->id ? Uri::fromString($this->id) : Uri::fromString();
     }

@@ -32,7 +32,7 @@ class MockedPattern implements Pattern
         return ($uri === $this->path) ? $request->withAttribute('pattern', 'passed') : null;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return Uri::fromString($this->path);
     }

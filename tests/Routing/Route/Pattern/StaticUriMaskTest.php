@@ -11,11 +11,11 @@
 
 namespace Polymorphine\Http\Tests\Routing\Route\Pattern;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Route\Pattern\StaticUriMask;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -81,7 +81,7 @@ class StaticUriMaskTest extends TestCase
 
     public function testUri_returnsUri()
     {
-        $this->assertInstanceOf(UriInterface::class, $this->pattern('//example.com')->uri([], new Uri()));
+        $this->assertInstanceOf(UriInterface::class, $this->pattern('//example.com')->uri(new FakeUri(), []));
     }
 
     /**
@@ -93,9 +93,9 @@ class StaticUriMaskTest extends TestCase
      */
     public function testUriIsReturnedWithDefinedUriParts($pattern, $uriString, $expected)
     {
-        $uri  = Uri::fromString($uriString);
+        $uri  = FakeUri::fromString($uriString);
         $mask = $this->pattern($pattern);
-        $this->assertSame($expected, (string) $mask->uri([], $uri));
+        $this->assertSame($expected, (string) $mask->uri($uri, []));
     }
 
     public function patterns()
@@ -124,7 +124,7 @@ class StaticUriMaskTest extends TestCase
     public function testUriOverwritingPrototypeSegment_ThrowsException($pattern, $uriString)
     {
         $this->expectException(UnreachableEndpointException::class);
-        $this->pattern($pattern)->uri([], Uri::fromString($uriString));
+        $this->pattern($pattern)->uri(FakeUri::fromString($uriString), []);
     }
 
     public function prototypeConflict()
@@ -150,20 +150,20 @@ class StaticUriMaskTest extends TestCase
     public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
     {
         $pattern   = $this->pattern('bar/slug-string');
-        $prototype = Uri::fromString('/foo');
-        $this->assertSame('/foo/bar/slug-string', (string) $pattern->uri([], $prototype));
+        $prototype = FakeUri::fromString('/foo');
+        $this->assertSame('/foo/bar/slug-string', (string) $pattern->uri($prototype, []));
 
         $pattern   = $this->pattern('last/segments?query=string');
-        $prototype = Uri::fromString('/foo/bar');
-        $this->assertSame('/foo/bar/last/segments?query=string', (string) $pattern->uri([], $prototype));
+        $prototype = FakeUri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/last/segments?query=string', (string) $pattern->uri($prototype, []));
     }
 
     public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
     {
         $pattern   = $this->pattern('bar');
-        $prototype = new Uri();
+        $prototype = new FakeUri();
         $this->expectException(UnreachableEndpointException::class);
-        $pattern->uri([], $prototype);
+        $pattern->uri($prototype, []);
     }
 
     private function pattern(string $uri)
@@ -175,7 +175,7 @@ class StaticUriMaskTest extends TestCase
     {
         $request = new FakeServerRequest();
 
-        $request->uri = Uri::fromString($uri);
+        $request->uri = FakeUri::fromString($uri);
 
         return $request;
     }

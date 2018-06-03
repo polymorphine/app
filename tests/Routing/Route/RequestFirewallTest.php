@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Route;
@@ -57,7 +56,7 @@ class RequestFirewallTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = $this->route(null, new Doubles\MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri());
+        $this->assertSame($uri, (string) $route->uri(new Doubles\FakeUri()));
     }
 
     private function route($closure = null, $route = null)
@@ -72,7 +71,7 @@ class RequestFirewallTest extends TestCase
     {
         $request = new Doubles\FakeServerRequest();
 
-        $request->uri = Uri::fromString('//example.com' . $path);
+        $request->uri = Doubles\FakeUri::fromString('//example.com' . $path);
 
         return $request;
     }

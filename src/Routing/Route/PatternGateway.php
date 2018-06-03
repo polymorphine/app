@@ -43,11 +43,11 @@ class PatternGateway implements Route
         return $request ? $this->route->forward($request) : null;
     }
 
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    public function uri(UriInterface $prototype, array $params = []): UriInterface
     {
-        $uri = $this->route->uri($params, $prototype ?: new Uri());
+        $uri = $this->route->uri($prototype, $params);
 
-        return $this->pattern->uri($params, $uri);
+        return $this->pattern->uri($uri, $params);
     }
 
     public function gateway(string $path): Route

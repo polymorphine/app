@@ -54,7 +54,7 @@ class FirstMatchForwardGatewayTest extends TestCase
     public function testUriMethod_ThrowsException()
     {
         $this->expectException(EndpointCallException::class);
-        $this->route()->uri();
+        $this->route()->uri(new Doubles\FakeUri());
     }
 
     public function testGatewayMethodEndpointCall_ReturnsFoundRoute()

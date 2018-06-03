@@ -45,5 +45,5 @@ interface Pattern
      *
      * @return UriInterface
      */
-    public function uri(array $params, UriInterface $prototype): UriInterface;
+    public function uri(UriInterface $prototype, array $params): UriInterface;
 }

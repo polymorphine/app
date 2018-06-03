@@ -11,12 +11,12 @@
 
 namespace Polymorphine\Http\Tests\Routing\Route;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\GatewayCallException;
 use Polymorphine\Http\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedPattern;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -66,7 +66,7 @@ class PatternEndpointTest extends TestCase
 
     public function testUri_ReturnsUri()
     {
-        $this->assertInstanceOf(UriInterface::class, $this->route('/foo/bar')->uri([], new Uri()));
+        $this->assertInstanceOf(UriInterface::class, $this->route('/foo/bar')->uri(new FakeUri()));
     }
 
     public function testGateway_ThrowsException()
@@ -101,7 +101,7 @@ class PatternEndpointTest extends TestCase
         $request = new FakeServerRequest();
 
         $request->method = $method;
-        $request->uri    = Uri::fromString($path);
+        $request->uri    = FakeUri::fromString($path);
 
         return $request;
     }

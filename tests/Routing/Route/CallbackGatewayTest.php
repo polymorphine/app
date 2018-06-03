@@ -12,10 +12,10 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\CallbackGateway;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -52,7 +52,7 @@ class CallbackGatewayTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = new CallbackGateway($this->basicCallback(), new MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri());
+        $this->assertSame($uri, (string) $route->uri(new FakeUri()));
     }
 
     private function middleware(Closure $callback = null)

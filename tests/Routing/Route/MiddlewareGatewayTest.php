@@ -12,11 +12,11 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\MiddlewareGateway;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
 use Psr\Http\Message\ResponseInterface;
 
@@ -48,7 +48,7 @@ class MiddlewareGatewayTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = new MiddlewareGateway(new FakeMiddleware('wrap'), new MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri());
+        $this->assertSame($uri, (string) $route->uri(new FakeUri()));
     }
 
     private function middleware()

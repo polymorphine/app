@@ -41,8 +41,8 @@ class RequestFirewall implements Route
         return $this->route->gateway($path);
     }
 
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    public function uri(UriInterface $prototype, array $params = []): UriInterface
     {
-        return $this->route->uri($params, $prototype);
+        return $this->route->uri($prototype, $params);
     }
 }

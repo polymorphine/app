@@ -62,7 +62,7 @@ class DynamicTargetMask implements Pattern
         return $request;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         $this->parsedPath or $this->parsedPath = $this->parsePattern();
 

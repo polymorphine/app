@@ -12,12 +12,12 @@
 namespace Polymorphine\Http\Tests\Routing\Route\Pattern;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Polymorphine\Http\Routing\Route\Pattern\DynamicTargetMask;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -73,7 +73,7 @@ class DynamicTargetMaskTest extends TestCase
     public function testUriReplacesProvidedValues($pattern, $uri, $attr)
     {
         $pattern = $this->pattern($pattern);
-        $this->assertSame($uri, (string) $pattern->uri(array_values($attr), new Uri()));
+        $this->assertSame($uri, (string) $pattern->uri(new FakeUri(), array_values($attr)));
     }
 
     /**
@@ -86,7 +86,7 @@ class DynamicTargetMaskTest extends TestCase
     public function testUriNamedParamsCanBePassedOutOfOrder($pattern, $uri, $attr)
     {
         $pattern = $this->pattern($pattern);
-        $this->assertSame($uri, (string) $pattern->uri(array_reverse($attr, true), new Uri()));
+        $this->assertSame($uri, (string) $pattern->uri(new FakeUri(), array_reverse($attr, true)));
     }
 
     public function matchingRequests()
@@ -105,14 +105,14 @@ class DynamicTargetMaskTest extends TestCase
     {
         $pattern = $this->pattern('/some-{#number}/{$slug}');
         $this->expectException(UriParamsException::class);
-        $pattern->uri([22], new Uri());
+        $pattern->uri(new FakeUri(), [22]);
     }
 
     public function testUriInvalidTypeParams_ThrowsException()
     {
         $pattern = $this->pattern('/user/{#countryId}');
         $this->expectException(UriParamsException::class);
-        $pattern->uri(['Poland'], new Uri());
+        $pattern->uri(new FakeUri(), ['Poland']);
     }
 
     public function testQueryStringMatchIgnoresParamOrder()
@@ -160,7 +160,7 @@ class DynamicTargetMaskTest extends TestCase
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame(['bar' => 'bar', 'name' => 'slug-example'], $request->getAttributes());
 
-        $uri = $pattern->uri(['something', 'slug-string'], Uri::fromString('http://example.com'));
+        $uri = $pattern->uri(FakeUri::fromString('http://example.com'), ['something', 'slug-string']);
         $this->assertSame('http://example.com/foo/something?name=slug-string&fizz', (string) $uri);
     }
 
@@ -182,10 +182,10 @@ class DynamicTargetMaskTest extends TestCase
     {
         $pattern = $this->pattern('/foo/{%bar}?name={$name}&fizz=buzz');
 
-        $uri = $pattern->uri(['something', 'slug-string', 'unused-param'], Uri::fromString('https://www.example.com'));
+        $uri = $pattern->uri(FakeUri::fromString('https://www.example.com'), ['something', 'slug-string', 'unused-param']);
         $this->assertSame('https://www.example.com/foo/something?name=slug-string&fizz=buzz', (string) $uri);
 
-        $uri = $pattern->uri(['unused' => 'something', 'name' => 'slug-string', 'bar' => 'name'], Uri::fromString('https://www.example.com'));
+        $uri = $pattern->uri(FakeUri::fromString('https://www.example.com'), ['unused' => 'something', 'name' => 'slug-string', 'bar' => 'name']);
         $this->assertSame('https://www.example.com/foo/name?name=slug-string&fizz=buzz', (string) $uri);
     }
 
@@ -199,7 +199,7 @@ class DynamicTargetMaskTest extends TestCase
     {
         $pattern = $this->pattern($pattern);
         $this->expectException(UnreachableEndpointException::class);
-        $pattern->uri(['id' => 1500], Uri::fromString($uri));
+        $pattern->uri(FakeUri::fromString($uri), ['id' => 1500]);
     }
 
     public function prototypeConflict()
@@ -224,14 +224,14 @@ class DynamicTargetMaskTest extends TestCase
     public function testUriValidParamWithProvidedPattern()
     {
         $pattern = new DynamicTargetMask('/{lang}/foo', ['lang' => '(en|pl|fr)']);
-        $this->assertSame('/en/foo', (string) $pattern->uri(['en'], new Uri()));
+        $this->assertSame('/en/foo', (string) $pattern->uri(new FakeUri(), ['en']));
     }
 
     public function testUriInvalidParamWithProvidedPattern()
     {
         $pattern = new DynamicTargetMask('/{lang}/foo', ['lang' => '(en|pl|fr)']);
         $this->expectException(UriParamsException::class);
-        $pattern->uri(['es'], new Uri());
+        $pattern->uri(new FakeUri(), ['es']);
     }
 
     public function testRelativePathIsMatched()
@@ -245,20 +245,20 @@ class DynamicTargetMaskTest extends TestCase
     public function testUriFromRelativePathWithRootInPrototype_ReturnsUriWithAppendedPath()
     {
         $pattern   = $this->pattern('{#id}/{$slug}');
-        $prototype = Uri::fromString('/foo/bar');
-        $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
+        $prototype = FakeUri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri($prototype, ['34', 'slug-string']));
 
         $pattern   = $this->pattern('{#id}/{$slug}?query=string');
-        $prototype = Uri::fromString('/foo/bar');
-        $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri(['34', 'slug-string'], $prototype));
+        $prototype = FakeUri::fromString('/foo/bar');
+        $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri($prototype, ['34', 'slug-string']));
     }
 
     public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
     {
         $pattern   = $this->pattern('foo/{#id}');
-        $prototype = new Uri();
+        $prototype = new FakeUri();
         $this->expectException(UnreachableEndpointException::class);
-        $pattern->uri(['34'], $prototype);
+        $pattern->uri($prototype, ['34']);
     }
 
     private function pattern($pattern = '')
@@ -270,7 +270,7 @@ class DynamicTargetMaskTest extends TestCase
     {
         $request = new FakeServerRequest();
 
-        $request->uri = Uri::fromString('//example.com' . $path);
+        $request->uri = FakeUri::fromString('//example.com' . $path);
 
         return $request;
     }

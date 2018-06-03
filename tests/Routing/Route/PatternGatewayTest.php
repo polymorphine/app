@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern\StaticUriMask;
 use Polymorphine\Http\Routing\Route\PatternGateway;
 use Polymorphine\Http\Tests\Doubles;
@@ -53,13 +52,13 @@ class PatternGatewayTest extends TestCase
     {
         $subRoute = new Doubles\MockedRoute('/foo/bar');
 
-        $uri = $this->staticGate('https:?some=query', $subRoute)->uri();
+        $uri = $this->staticGate('https:?some=query', $subRoute)->uri(new Doubles\FakeUri());
         $this->assertSame('https', $uri->getScheme());
         $this->assertSame('', $uri->getHost());
         $this->assertSame('/foo/bar', $uri->getPath());
         $this->assertSame('some=query', $uri->getQuery());
 
-        $uri = $this->staticGate('//example.com', $subRoute)->uri();
+        $uri = $this->staticGate('//example.com', $subRoute)->uri(new Doubles\FakeUri());
         $this->assertSame('', $uri->getScheme());
         $this->assertSame('example.com', $uri->getHost());
         $this->assertSame('/foo/bar', $uri->getPath());
@@ -69,14 +68,14 @@ class PatternGatewayTest extends TestCase
     {
         $subRoute = new Doubles\MockedRoute('/foo/bar');
 
-        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https://example.com', $subRoute)->gateway('some.path')->uri());
-        $this->assertSame('http:/foo/bar', (string) $this->staticGate('http:', $subRoute)->gateway('some.path')->uri());
+        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https://example.com', $subRoute)->gateway('some.path')->uri(new Doubles\FakeUri()));
+        $this->assertSame('http:/foo/bar', (string) $this->staticGate('http:', $subRoute)->gateway('some.path')->uri(new Doubles\FakeUri()));
     }
 
     public function testComposedGateway_ReturnsRouteProducingUriWithDefinedSegments()
     {
         $subRoute = $this->staticGate('//example.com', new Doubles\MockedRoute('/foo/bar'));
-        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https:', $subRoute)->gateway('some.path')->uri());
+        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https:', $subRoute)->gateway('some.path')->uri(new Doubles\FakeUri()));
     }
 
     private function staticGate(string $uriPattern = 'https:', $subRoute = null)
@@ -90,7 +89,7 @@ class PatternGatewayTest extends TestCase
     private function request($uri = 'http://example.com/foo/bar?query=string')
     {
         $request      = new Doubles\FakeServerRequest();
-        $request->uri = Uri::fromString($uri);
+        $request->uri = Doubles\FakeUri::fromString($uri);
 
         return $request;
     }

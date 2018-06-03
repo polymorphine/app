@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route;
@@ -61,7 +60,7 @@ class ResourceEndpoint implements Route
         return $this->forwardWithId($method, $request, $path);
     }
 
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
+    public function uri(UriInterface $prototype, array $params = []): UriInterface
     {
         $id = ($params) ? $params['id'] ?? array_shift($params) : '';
 
@@ -74,11 +73,11 @@ class ResourceEndpoint implements Route
 
         if ($path[0] !== '/') {
             $path = $this->resolveRelativePath($path, $prototype);
-        } elseif ($prototype && $prototype->getPath()) {
+        } elseif ($prototype->getPath()) {
             throw new UnreachableEndpointException(sprintf('Path conflict for `%s` resource uri', $path));
         }
 
-        return $prototype ? $prototype->withPath($path) : Uri::fromString($path);
+        return $prototype->withPath($path);
     }
 
     protected function response($handler, $request)
@@ -121,9 +120,9 @@ class ResourceEndpoint implements Route
             : $this->forwardWithId(self::GET, $request, $path);
     }
 
-    private function resolveRelativePath($path, UriInterface $prototype = null)
+    private function resolveRelativePath($path, UriInterface $prototype)
     {
-        if (!$prototype || !$prototypePath = $prototype->getPath()) {
+        if (!$prototypePath = $prototype->getPath()) {
             throw new UnreachableEndpointException('Unresolved relative path');
         }
 

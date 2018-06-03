@@ -52,9 +52,9 @@ class PatternEndpoint implements Route
             : null;
     }
 
-    public function uri(array $params = [], UriInterface $responseUri = null): UriInterface
+    public function uri(UriInterface $prototype, array $params = []): UriInterface
     {
-        return $this->pattern->uri($params, $responseUri ?: new Uri());
+        return $this->pattern->uri($prototype, $params);
     }
 
     private function methodMatch(ServerRequestInterface $request): bool

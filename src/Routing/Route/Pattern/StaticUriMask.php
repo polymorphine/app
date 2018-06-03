@@ -43,7 +43,7 @@ class StaticUriMask implements Pattern
         return ($match) ? $this->matchQuery($this->uri->getQuery(), $request) : null;
     }
 
-    public function uri(array $params, UriInterface $prototype): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         $prototype = $this->setScheme($prototype);
         $prototype = $this->setUserInfo($prototype);
@@ -135,7 +135,7 @@ class StaticUriMask implements Pattern
     {
         if (!$query = $this->uri->getQuery()) { return $prototype; }
 
-        return $this->queryPattern($query)->uri($params, $prototype);
+        return $this->queryPattern($query)->uri($prototype, $params);
     }
 
     private function checkConflict(string $routeSegment, string $prototypeSegment)
