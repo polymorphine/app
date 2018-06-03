@@ -12,10 +12,12 @@
 namespace Polymorphine\Http\Context\Session;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Polymorphine\Http\Context\SessionManager;
+use Polymorphine\Http\Context\Session;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 use RuntimeException;
 
 
@@ -37,27 +39,22 @@ class SessionContext implements MiddlewareInterface, SessionManager
         $cookies = $request->getCookieParams();
 
         $this->sessionName = session_name();
-        $this->session = isset($cookies[$this->sessionName])
-            ? $this->start()
-            : $this->createStorage();
+        isset($cookies[$this->sessionName]) ? $this->startSession() : $this->createStorage();
 
         $response = $handler->handle($request);
-
-        $this->session->commit();
-
+        $this->session()->commit();
         return $response;
     }
 
-    public function session(): SessionStorage
+    public function session(): Session
     {
         if (!$this->session) {
             throw new RuntimeException('Session context not started');
         }
-
         return $this->session;
     }
 
-    public function start(): SessionStorage
+    public function startSession(): void
     {
         if (session_status() !== PHP_SESSION_NONE) {
             throw new RuntimeException('Session started in another context');
@@ -65,11 +62,10 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
         session_start();
         $this->sessionStarted = true;
-
-        return $this->createStorage($_SESSION);
+        $this->createStorage($_SESSION);
     }
 
-    public function commit(array $data): void
+    public function commitSession(array $data): void
     {
         if (!$data) {
             $this->destroy();
@@ -77,7 +73,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
         }
 
         if (!$this->sessionStarted) {
-            $this->start();
+            $this->startSession();
             $cookie = $this->headers->cookie($this->sessionName);
             $cookie->domain(ini_get('session.cookie_domain'))
                    ->path(ini_get('session.cookie_path') ?: '/')
@@ -89,9 +85,9 @@ class SessionContext implements MiddlewareInterface, SessionManager
         session_write_close();
     }
 
-    protected function createStorage(array $data = []): SessionStorage
+    protected function createStorage(array $data = []): void
     {
-        return new SessionStorage($this, $data);
+        $this->session = new SessionStorage($this, $data);
     }
 
     private function destroy(): void

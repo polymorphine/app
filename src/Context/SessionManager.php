@@ -9,12 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Session;
+namespace Polymorphine\Http\Context;
 
 
 interface SessionManager
 {
-    public function start(): SessionStorage;
-    public function session(): SessionStorage;
-    public function commit(array $data): void;
+    public function startSession(): void;
+    public function session(): Session;
+    public function commitSession(array $data): void;
 }

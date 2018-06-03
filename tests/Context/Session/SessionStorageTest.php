@@ -1,26 +1,29 @@
 <?php
 
+/*
+ * This file is part of Polymorphine/Http package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
 namespace Polymorphine\Http\Tests\Context\Session;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Context\Session\SessionManager;
+use Polymorphine\Http\Context\Session;
+use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Session\SessionStorage;
 use Polymorphine\Http\Tests\Doubles\FakeSessionManager;
-use Psr\SimpleCache\CacheInterface;
 
 
 class SessionStorageTest extends TestCase
 {
-    private function storage(array $data = [], SessionManager $manager = null): CacheInterface
-    {
-        return new SessionStorage($manager ?? new FakeSessionManager(), $data);
-    }
-
     public function testInstantiation()
     {
-        $this->assertInstanceOf(SessionStorage::class, $this->storage());
-        $this->assertInstanceOf(CacheInterface::class, $this->storage());
+        $this->assertInstanceOf(SessionStorage::class, $session = $this->storage());
+        $this->assertInstanceOf(Session::class, $session);
     }
 
     public function testGetData()
@@ -48,7 +51,7 @@ class SessionStorageTest extends TestCase
     public function testRemoveData()
     {
         $storage = $this->storage(['foo' => 'bar', 'baz' => true]);
-        $storage->delete('foo');
+        $storage->remove('foo');
         $this->assertNull($storage->get('foo'));
     }
 
@@ -66,30 +69,7 @@ class SessionStorageTest extends TestCase
         $this->assertSame('default', $storage->get('foo', 'default'));
     }
 
-    public function testSetMultiple()
-    {
-        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'bar', 'baz' => true]);
-        $storage->setMultiple(['foo' => 'Fizz', 'bar' => 'baz']);
-        $storage->commit();
-        $this->assertSame(['foo' => 'Fizz', 'baz' => true, 'bar' => 'baz'], $manager->data);
-    }
-
-    public function testGetMultiple()
-    {
-        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'Fizz', 'baz' => true, 'bar' => 'baz']);
-        $data    = $storage->getMultiple(['foo', 'bar', 'notThere'], 'defaultValue');
-        $this->assertSame(['foo' => 'Fizz', 'bar' => 'baz', 'notThere' => 'defaultValue'], $data);
-    }
-
-    public function testDeleteMultiple()
-    {
-        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'Fizz', 'bar' => 'Buzz', 'baz' => 'FizzBuzz']);
-        $storage->deleteMultiple(['foo', 'bar']);
-        $storage->commit();
-        $this->assertSame(['baz' => 'FizzBuzz'], $manager->data);
-    }
-
-    public function testGetAllData()
+    public function testCommitSession()
     {
         $data = [
             'foo' => 'bar',
@@ -113,5 +93,10 @@ class SessionStorageTest extends TestCase
         $this->assertTrue($storage->has('foo'));
         $storage->commit();
         $this->assertTrue(array_key_exists('foo', $manager->data));
+    }
+
+    private function storage(array $data = [], SessionManager $manager = null): Session
+    {
+        return new SessionStorage($manager ?? new FakeSessionManager(), $data);
     }
 }

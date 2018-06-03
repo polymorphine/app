@@ -11,23 +11,23 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Polymorphine\Http\Context\Session\SessionManager;
-use Polymorphine\Http\Context\Session\SessionStorage;
+use Polymorphine\Http\Context\Session;
+use Polymorphine\Http\Context\SessionManager;
 
 
 class FakeSessionManager implements SessionManager
 {
     public $data;
 
-    public function start(): SessionStorage
+    public function startSession(): void
     {
     }
 
-    public function session(): SessionStorage
+    public function session(): Session
     {
     }
 
-    public function commit(array $data): void
+    public function commitSession(array $data): void
     {
         $this->data = $data;
     }
