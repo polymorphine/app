@@ -20,8 +20,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class ResourceEndpoint extends Route
+class ResourceEndpoint implements Route
 {
+    use LockedGatewayMethod;
+
     public const INDEX  = 'INDEX';
     public const GET    = 'GET';
     public const POST   = 'POST';

@@ -19,9 +19,10 @@ use Psr\Http\Message\UriInterface;
 use Closure;
 
 
-class PatternEndpoint extends Route
+class PatternEndpoint implements Route
 {
     use Route\Pattern\PatternSelection;
+    use LockedGatewayMethod;
 
     private $method;
     private $callback;

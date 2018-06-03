@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-abstract class Route
+interface Route
 {
     public const PATH_SEPARATOR = '.';
 
@@ -28,7 +28,7 @@ abstract class Route
      *
      * @return null|ResponseInterface
      */
-    abstract public function forward(ServerRequestInterface $request): ?ResponseInterface;
+    public function forward(ServerRequestInterface $request): ?ResponseInterface;
 
     /**
      * Get subsequent Route by its $path.
@@ -45,10 +45,7 @@ abstract class Route
      *
      * @return Route
      */
-    public function gateway(string $path): Route
-    {
-        throw new Exception\GatewayCallException(sprintf('Gateway not found for path `%s`', $path));
-    }
+    public function gateway(string $path): Route;
 
     /**
      * Get endpoint call Uri.
@@ -79,8 +76,5 @@ abstract class Route
      *
      * @return UriInterface
      */
-    public function uri(array $params = [], UriInterface $prototype = null): UriInterface
-    {
-        throw new Exception\EndpointCallException('Uri not defined in gateway route');
-    }
+    public function uri(array $params = [], UriInterface $prototype = null): UriInterface;
 }

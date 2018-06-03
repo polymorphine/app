@@ -14,14 +14,14 @@ namespace Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Closure;
 use Psr\Http\Message\UriInterface;
+use Closure;
 
 
 /**
  * Route that forwards passed request in context of given Closure.
  */
-class CallbackGateway extends Route
+class CallbackGateway implements Route
 {
     private $callback;
     private $route;

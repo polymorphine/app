@@ -19,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 
-class MiddlewareGateway extends Route
+class MiddlewareGateway implements Route
 {
     private $middleware;
     private $route;

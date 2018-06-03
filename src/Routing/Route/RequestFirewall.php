@@ -18,7 +18,7 @@ use Psr\Http\Message\UriInterface;
 use Closure;
 
 
-class RequestFirewall extends Route
+class RequestFirewall implements Route
 {
     private $condition;
     private $route;

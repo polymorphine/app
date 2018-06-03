@@ -19,7 +19,7 @@ use Polymorphine\Http\Routing\Route;
 use Closure;
 
 
-class MockedRoute extends Route
+class MockedRoute implements Route
 {
     public $id;
     public $callback;

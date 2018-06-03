@@ -17,8 +17,10 @@ use Polymorphine\Http\Routing\Exception;
 use Polymorphine\Http\Routing\Route;
 
 
-class FirstMatchForwardGateway extends Route
+class FirstMatchForwardGateway implements Route
 {
+    use LockedEndpointMethod;
+
     private $routes = [];
 
     public function __construct(array $routes)
