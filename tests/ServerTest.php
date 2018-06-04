@@ -17,6 +17,7 @@ use Polymorphine\Http\Server;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
+use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
@@ -26,31 +27,6 @@ require_once __DIR__ . '/Fixtures/header-functions.php';
 
 class ServerTest extends TestCase
 {
-    public static $headers    = [];
-    public static $outputSent = false;
-
-    public static function set(string $headerLine, $remove = true)
-    {
-        [$name, $type] = explode(':', $headerLine, 2) + [false, 'STATUS'];
-        if ($type === 'STATUS') {
-            $name = $type;
-        }
-
-        if ($remove) { self::remove($name); }
-        self::$headers[strtolower($name)][] = $headerLine;
-    }
-
-    public static function remove(string $name)
-    {
-        unset(self::$headers[strtolower($name)]);
-    }
-
-    public static function reset()
-    {
-        self::$headers    = [];
-        self::$outputSent = false;
-    }
-
     public function testInstantiation()
     {
         $this->assertInstanceOf(Server::class, $this->server());
@@ -73,7 +49,7 @@ class ServerTest extends TestCase
     {
         $server = $this->server();
 
-        self::$outputSent = true;
+        HeadersState::$outputSent = true;
         $this->expectException(RuntimeException::class);
         $this->emit($server);
     }
@@ -98,7 +74,7 @@ class ServerTest extends TestCase
             'header-name'     => ['Header-Name: value1', 'Header-Name: value2'],
             'x-custom-header' => ['X-Custom-Header: very important']
         ];
-        $this->assertSame($expected, self::$headers);
+        $this->assertSame($expected, HeadersState::$headers);
     }
 
     public function testHeadersOverwriteSetOutsideServerInstance()
@@ -111,20 +87,20 @@ class ServerTest extends TestCase
             'Set-Cookie'      => ['my session cookie']
         ];
 
-        self::$headers['x-custom-header'] = ['X-Custom-Header: this one is removed'];
-        self::$headers['set-cookie']      = ['Set-Cookie: default session cookie'];
-        self::$headers['x-powered-by']    = ['X-Powered-By: PHPUnit Framework'];
+        HeadersState::$headers['x-custom-header'] = ['X-Custom-Header: this one is removed'];
+        HeadersState::$headers['set-cookie']      = ['Set-Cookie: default session cookie'];
+        HeadersState::$headers['x-powered-by']    = ['X-Powered-By: PHPUnit Framework'];
 
         $this->emit($server);
 
-        $this->assertSame(['X-Custom-Header: only this one', 'X-Custom-Header: one more'], self::$headers['x-custom-header']);
-        $this->assertSame(['Set-Cookie: my session cookie'], self::$headers['set-cookie']);
-        $this->assertSame(['X-Powered-By: PHPUnit Framework'], self::$headers['x-powered-by']);
+        $this->assertSame(['X-Custom-Header: only this one', 'X-Custom-Header: one more'], HeadersState::$headers['x-custom-header']);
+        $this->assertSame(['Set-Cookie: my session cookie'], HeadersState::$headers['set-cookie']);
+        $this->assertSame(['X-Powered-By: PHPUnit Framework'], HeadersState::$headers['x-powered-by']);
     }
 
     private function server(ResponseInterface $response = null, int $buffer = 0)
     {
-        self::reset();
+        HeadersState::reset();
         return new Server(new FakeRequestHandler(function () use ($response) { return $response ?: new FakeResponse(); }), $buffer);
     }
 

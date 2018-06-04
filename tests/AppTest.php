@@ -15,11 +15,17 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Exception\InvalidIdException;
 use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
+use Polymorphine\Http\Tests\Fixtures\HeadersState;
+use Polymorphine\Http\Tests\Fixtures\ShutdownState;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\App;
 use Polymorphine\Container\Setup;
 use Polymorphine\Http\Message\Response\NotFoundResponse;
+use Psr\Http\Server\RequestHandlerInterface;
+
+require_once __DIR__ . '/Fixtures/shutdown-functions.php';
+require_once __DIR__ . '/Fixtures/header-functions.php';
 
 
 class AppTest extends TestCase
@@ -27,6 +33,7 @@ class AppTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(App::class, $this->app());
+        $this->assertInstanceOf(RequestHandlerInterface::class, $this->app());
     }
 
     public function testConfig_ReturnsRegistryInput()
@@ -83,6 +90,29 @@ class AppTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(Doubles\FakeResponse::class, $response);
         $this->assertSame('Not Found', $response->body);
+    }
+
+    public function testShutdownRegisteredOnProduction()
+    {
+        ShutdownState::reset();
+        ShutdownState::$override = true;
+        $this->assertFalse(getenv(App::DEV_ENVIRONMENT));
+        $this->app();
+        $this->assertTrue(is_callable($callback = ShutdownState::$callback));
+        $callback();
+        $this->assertSame(503, ShutdownState::$status);
+        $this->assertSame([], HeadersState::$headers);
+        $this->assertTrue(ShutdownState::$outputBufferCleared);
+    }
+
+    public function testShutdownNotRegisteredOnDevelopment()
+    {
+        ShutdownState::reset();
+        ShutdownState::$override = true;
+        putenv(App::DEV_ENVIRONMENT . '=1');
+        $this->assertNotFalse(getenv(App::DEV_ENVIRONMENT));
+        $this->app();
+        $this->assertFalse(is_callable(ShutdownState::$callback));
     }
 
     private function app(array $records = [])

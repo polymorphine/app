@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Http;
 
-use Polymorphine\Http\Tests\ServerTest as Headers;
+use Polymorphine\Http\Tests\Fixtures\HeadersState as Headers;
 
 function header($headerLine, $remove = true)
 {
@@ -23,7 +23,7 @@ function headers_sent()
     return Headers::$outputSent;
 }
 
-function header_remove($name)
+function header_remove($name = null)
 {
     Headers::remove($name);
 }

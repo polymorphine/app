@@ -26,7 +26,8 @@ use Polymorphine\Http\Message\Response\NotFoundResponse;
 
 abstract class App implements RequestHandlerInterface
 {
-    public const ROUTER_ID = 'app.router';
+    public const ROUTER_ID       = 'app.router';
+    public const DEV_ENVIRONMENT = 'APP_DEV';
 
     private $setup;
     private $container;
@@ -38,6 +39,7 @@ abstract class App implements RequestHandlerInterface
      */
     public function __construct(array $records = [])
     {
+        $this->registerShutdown();
         $this->setup = new ContainerSetup($records);
         $this->environmentSetup();
     }
@@ -84,6 +86,19 @@ abstract class App implements RequestHandlerInterface
     protected function notFoundResponse()
     {
         return new NotFoundResponse();
+    }
+
+    protected function registerShutdown()
+    {
+        if (!ob_get_level()) { ob_start(); }
+        if (getenv(static::DEV_ENVIRONMENT) !== false) { return; }
+        register_shutdown_function(function () {
+            $error = error_get_last();
+            if ($error === null) { return; }
+            header_remove();
+            http_response_code(503);
+            ob_end_clean();
+        });
     }
 
     abstract protected function routing(ContainerInterface $c): Route;
