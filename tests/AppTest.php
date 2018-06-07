@@ -75,8 +75,7 @@ class AppTest extends TestCase
 
     public function testFallbackNotFoundRoute()
     {
-        $app = $this->app();
-
+        $app                 = $this->app();
         $app->routeFound     = false;
         $app->overrideParent = false;
 
@@ -84,6 +83,8 @@ class AppTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(NotFoundResponse::class, $response);
 
+        $app                 = $this->app();
+        $app->routeFound     = false;
         $app->overrideParent = true;
 
         $response = $app->handle(new Doubles\FakeServerRequest());

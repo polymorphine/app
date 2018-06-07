@@ -11,6 +11,8 @@
 
 namespace Polymorphine\Http;
 
+use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Routing\Router;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,8 +56,7 @@ abstract class App implements RequestHandlerInterface
 
         $this->processQueue = $this->middleware;
 
-        $rootRoute = $this->container->get(static::ROUTER_ID);
-        return $rootRoute->forward($request, $this->notFoundResponse());
+        return $this->container->get(static::ROUTER_ID)->dispatch($request);
     }
 
     final public function config(string $id): RecordSetup
@@ -79,13 +80,18 @@ abstract class App implements RequestHandlerInterface
         }
 
         $this->setup->entry(static::ROUTER_ID)->lazy(function (ContainerInterface $container) {
-            return $this->routing($container);
+            return new Router($this->routing($container), $this->baseUri(), $this->notFoundResponse());
         });
     }
 
     protected function notFoundResponse()
     {
         return new NotFoundResponse();
+    }
+
+    protected function baseUri()
+    {
+        return new Uri();
     }
 
     protected function registerShutdown()
