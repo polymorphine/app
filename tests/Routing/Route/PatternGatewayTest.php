@@ -87,7 +87,7 @@ class PatternGatewayTest extends TestCase
     private function staticGate(string $uriPattern = 'https:', $subRoute = null)
     {
         return new PatternGateway(
-            StaticUriMask::fromUriString($uriPattern),
+            new StaticUriMask($uriPattern),
             $subRoute ?: new Doubles\MockedRoute('default')
         );
     }

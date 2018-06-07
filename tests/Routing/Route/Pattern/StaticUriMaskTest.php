@@ -18,6 +18,7 @@ use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use InvalidArgumentException;
 
 
 class StaticUriMaskTest extends TestCase
@@ -25,6 +26,12 @@ class StaticUriMaskTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(StaticUriMask::class, $this->pattern('http:/some/path&query=foo'));
+    }
+
+    public function testInstantiationWithInvalidUriString_ThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->pattern('http:///example.com');
     }
 
     /**
@@ -168,15 +175,13 @@ class StaticUriMaskTest extends TestCase
 
     private function pattern(string $uri)
     {
-        return StaticUriMask::fromUriString($uri);
+        return new StaticUriMask($uri);
     }
 
     private function request(string $uri)
     {
-        $request = new FakeServerRequest();
-
+        $request      = new FakeServerRequest();
         $request->uri = FakeUri::fromString($uri);
-
         return $request;
     }
 }

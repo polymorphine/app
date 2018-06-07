@@ -56,7 +56,7 @@ class Uri implements UriInterface
             and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
     }
 
-    public static function fromString($uri = '')
+    public static function fromString(string $uri = '')
     {
         $segments = parse_url($uri);
         if ($segments === false) {

@@ -18,6 +18,6 @@ trait PatternSelection
     {
         return strpos($pattern, DynamicTargetMask::PARAM_DELIM_RIGHT)
             ? new DynamicTargetMask($pattern, $params)
-            : StaticUriMask::fromUriString($pattern);
+            : new StaticUriMask($pattern);
     }
 }

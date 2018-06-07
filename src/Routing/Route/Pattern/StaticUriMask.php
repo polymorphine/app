@@ -11,36 +11,33 @@
 
 namespace Polymorphine\Http\Routing\Route\Pattern;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use InvalidArgumentException;
 
 
 class StaticUriMask implements Pattern
 {
-    private $uri;
+    private $pattern;
+    private $uri = [];
 
-    public function __construct(UriInterface $uri)
+    public function __construct(string $pattern)
     {
-        $this->uri = $uri;
-    }
-
-    public static function fromUriString(string $uri)
-    {
-        return new self(Uri::fromString($uri));
+        $this->pattern = $pattern;
+        $this->uri = $this->groupUriSegments($pattern);
     }
 
     public function matchedRequest(ServerRequestInterface $request): ?ServerRequestInterface
     {
         $uri = $request->getUri();
 
-        $match = $this->match($this->uri->getScheme(), $uri->getScheme()) &&
-            $this->match($this->uri->getAuthority(), $uri->getAuthority()) &&
-            $this->matchPath($this->uri->getPath(), $uri->getPath());
+        $match = $this->match($this->uri['scheme'], $uri->getScheme()) &&
+            $this->match($this->uri['authority'], $uri->getAuthority()) &&
+            $this->matchPath($this->uri['path'], $uri->getPath());
 
-        return ($match) ? $this->matchQuery($this->uri->getQuery(), $request) : null;
+        return ($match) ? $this->matchQuery($this->uri['query'], $request) : null;
     }
 
     public function uri(UriInterface $prototype, array $params): UriInterface
@@ -81,7 +78,7 @@ class StaticUriMask implements Pattern
 
     private function setScheme(UriInterface $prototype)
     {
-        if (!$scheme = $this->uri->getScheme()) { return $prototype; }
+        if (!$scheme = $this->uri['scheme']) { return $prototype; }
         $this->checkConflict($scheme, $prototype->getScheme());
 
         return $prototype->withScheme($scheme);
@@ -89,17 +86,15 @@ class StaticUriMask implements Pattern
 
     private function setUserInfo(UriInterface $prototype)
     {
-        if (!$userInfo = $this->uri->getUserInfo()) { return $prototype; }
+        if (!$userInfo = $this->uri['userInfo']) { return $prototype; }
         $this->checkConflict($userInfo, $prototype->getUserInfo());
 
-        [$user, $pass] = explode(':', $this->uri->getUserInfo(), 2) + [null, null];
-
-        return $prototype->withUserInfo($user, $pass);
+        return $prototype->withUserInfo($this->uri['user'], $this->uri['pass']);
     }
 
     private function setHost(UriInterface $prototype)
     {
-        if (!$host = $this->uri->getHost()) { return $prototype; }
+        if (!$host = $this->uri['host']) { return $prototype; }
         $this->checkConflict($host, $prototype->getHost());
 
         return $prototype->withHost($host);
@@ -107,7 +102,7 @@ class StaticUriMask implements Pattern
 
     private function setPort(UriInterface $prototype)
     {
-        if (!$port = $this->uri->getPort()) { return $prototype; }
+        if (!$port = $this->uri['port']) { return $prototype; }
         $this->checkConflict($port, $prototype->getPort() ?: '');
 
         return $prototype->withPort($port);
@@ -115,7 +110,7 @@ class StaticUriMask implements Pattern
 
     private function setPath(UriInterface $prototype)
     {
-        if (!$path = $this->uri->getPath()) { return $prototype; }
+        if (!$path = $this->uri['path']) { return $prototype; }
 
         $prototypePath = $prototype->getPath();
         if ($path[0] === '/') {
@@ -133,7 +128,7 @@ class StaticUriMask implements Pattern
 
     private function setQuery(array $params, UriInterface $prototype)
     {
-        if (!$query = $this->uri->getQuery()) { return $prototype; }
+        if (!$query = $this->uri['query']) { return $prototype; }
 
         return $this->queryPattern($query)->uri($prototype, $params);
     }
@@ -142,7 +137,34 @@ class StaticUriMask implements Pattern
     {
         if ($prototypeSegment && $routeSegment !== $prototypeSegment) {
             $message = 'Uri conflict in `%s` prototype segment for `%s` uri';
-            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, (string) $this->uri));
+            throw new UnreachableEndpointException(sprintf($message, $prototypeSegment, $this->pattern));
         }
+    }
+
+    private function groupUriSegments(string $uri): array
+    {
+        $segments = parse_url($uri);
+        if ($segments === false) {
+            throw new InvalidArgumentException("Malformed URI string: '${uri}'");
+        }
+
+        return [
+            'scheme'    => $segments['scheme'] ?? '',
+            'user'      => $user = $segments['user'] ?? '',
+            'pass'      => $password = $segments['pass'] ?? '',
+            'host'      => $host = $segments['host'] ?? '',
+            'port'      => $port = (int) ($segments['port'] ?? 0),
+            'path'      => $segments['path'] ?? null,
+            'query'     => $segments['query'] ?? null,
+            'userInfo'  => $userInfo = $password ? $user . ':' . $password : $user,
+            'authority' => $this->joinAuthoritySegments($host, $port, $userInfo)
+        ];
+    }
+
+    private function joinAuthoritySegments($host, $port, $user): string
+    {
+        if (!$host) { return ''; }
+        $user and $host = $user . '@' . $host;
+        return $port ? $host . ':' . $port : $host;
     }
 }
