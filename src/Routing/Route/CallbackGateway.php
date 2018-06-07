@@ -27,8 +27,6 @@ class CallbackGateway implements Route
     private $route;
 
     /**
-     * CallbackGateway constructor.
-     *
      * $callback Closure takes two parameters: ServerRequestInterface
      * and forwarding Closure - function that will pass request from
      * $callback context to given routes.
@@ -45,12 +43,12 @@ class CallbackGateway implements Route
         $this->route    = $route;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        $forward = function (ServerRequestInterface $request) {
-            return $this->route->forward($request);
+        $forward = function (ServerRequestInterface $request) use ($notFound) {
+            return $this->route->forward($request, $notFound);
         };
-        return $this->callback->__invoke($request, $forward);
+        return $this->callback->__invoke($request, $forward) ?? $notFound;
     }
 
     public function gateway(string $path): Route
@@ -58,7 +56,7 @@ class CallbackGateway implements Route
         return $this->route->gateway($path);
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $this->route->uri($prototype, $params);
     }

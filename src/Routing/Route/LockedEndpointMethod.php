@@ -17,7 +17,7 @@ use Polymorphine\Http\Routing\Exception\EndpointCallException;
 
 trait LockedEndpointMethod
 {
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         throw new EndpointCallException('Uri not defined in gateway route');
     }

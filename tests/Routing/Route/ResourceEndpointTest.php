@@ -19,12 +19,18 @@ use Polymorphine\Http\Routing\Route\ResourceEndpoint;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 
 class ResourceEndpointTest extends TestCase
 {
+    private static $notFound;
+
+    public static function setUpBeforeClass()
+    {
+        self::$notFound = new FakeResponse();
+    }
+
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $resource = $this->resource('/some/path'));
@@ -38,9 +44,9 @@ class ResourceEndpointTest extends TestCase
      * @param Route                  $resource
      * @param string                 $message
      */
-    public function testNotMatchingRequest_ReturnsNull(ServerRequestInterface $request, Route $resource, string $message)
+    public function testNotMatchingRequest_ReturnsNotFoundResponseInstance(ServerRequestInterface $request, Route $resource, string $message)
     {
-        $this->assertNull($resource->forward($request), $message);
+        $this->assertSame(self::$notFound, $resource->forward($request, self::$notFound), $message);
     }
 
     public function notMatchingRequests()
@@ -64,9 +70,9 @@ class ResourceEndpointTest extends TestCase
      * @param ServerRequestInterface $request
      * @param Route                  $resource
      */
-    public function testMatchingRequest_ReturnsResponse(ServerRequestInterface $request, Route $resource)
+    public function testMatchingRequest_ReturnsEndpointDefinedResponse(ServerRequestInterface $request, Route $resource)
     {
-        $this->assertInstanceOf(ResponseInterface::class, $resource->forward($request));
+        $this->assertNotSame(self::$notFound, $resource->forward($request, self::$notFound));
     }
 
     public function matchingRequests()
@@ -85,23 +91,23 @@ class ResourceEndpointTest extends TestCase
 
     public function testMatchingIdRequestIsForwardedWithIdAttribute()
     {
-        $response = $this->resource('/foo')->forward($this->request('/foo/345'));
+        $response = $this->resource('/foo')->forward($this->request('/foo/345'), self::$notFound);
         $this->assertSame(['id' => '345'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('/foo', ['PATCH'])->forward($this->request('/foo/666/slug/3000', 'PATCH'));
+        $response = $this->resource('/foo', ['PATCH'])->forward($this->request('/foo/666/slug/3000', 'PATCH'), self::$notFound);
         $this->assertSame(['id' => '666'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'));
+        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'), self::$notFound);
         $this->assertSame(['id' => '554'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('some/path')->forward($this->request('/some/path/500/slug-string-1000', 'PATCH'));
+        $response = $this->resource('some/path')->forward($this->request('/some/path/500/slug-string-1000', 'PATCH'), self::$notFound);
         $this->assertSame(['id' => '500'], $response->fromRequest->getAttributes());
     }
 
     public function testUriMethod_ReturnsUriWithPath()
     {
         $resource = $this->resource('/foo/bar');
-        $this->assertSame('/foo/bar', (string) $resource->uri(new FakeUri()));
+        $this->assertSame('/foo/bar', (string) $resource->uri(new FakeUri(), []));
 
         $uri = FakeUri::fromString('http://example.com:9000?query=string');
         $this->assertSame('http://example.com:9000/foo/bar?query=string', (string) $resource->uri($uri, []));

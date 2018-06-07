@@ -33,34 +33,38 @@ class ResourceEndpoint implements Route
     private $path;
     private $handlers;
 
+    /**
+     * @param string     $path
+     * @param callable[] $handlers
+     */
     public function __construct(string $path, array $handlers)
     {
         $this->path     = $path;
         $this->handlers = $handlers;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
         $path = ($this->path[0] !== '/')
             ? $this->relativeRequestPath($request->getUri()->getPath())
             : $this->path;
 
-        if (!$path) { return null; }
+        if (!$path) { return $notFound; }
 
         $method = $request->getMethod();
 
         if ($method === self::GET) {
-            return $this->forwardGetMethod($request, $path);
+            return $this->dispatchGetMethod($request, $path) ?? $notFound;
         }
 
         if ($method === self::POST) {
-            return $this->forwardPostMethod($request, $path);
+            return $this->dispatchPostMethod($request, $path) ?? $notFound;
         }
 
-        return $this->forwardWithId($method, $request, $path);
+        return $this->dispatchItemMethod($method, $request, $path) ?? $notFound;
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         $id = ($params) ? $params['id'] ?? array_shift($params) : '';
 
@@ -80,17 +84,18 @@ class ResourceEndpoint implements Route
         return $prototype->withPath($path);
     }
 
-    protected function response($handler, $request)
-    {
-        return $handler($request);
-    }
-
     protected function validId(string $id)
     {
         return is_numeric($id);
     }
 
-    private function forwardWithId($name, ServerRequestInterface $request, $path)
+    protected function handlerResponse($name, ServerRequestInterface $request)
+    {
+        $handler = $this->handlers[$name] ?? null;
+        return $handler ? $handler($request) : null;
+    }
+
+    private function dispatchItemMethod($name, ServerRequestInterface $request, $path)
     {
         $requestPath = $request->getUri()->getPath();
         if (strpos($requestPath, $path) !== 0) { return null; }
@@ -98,26 +103,21 @@ class ResourceEndpoint implements Route
         [$id, ] = explode('/', substr($requestPath, strlen($path) + 1), 2) + [false, false];
         if (!$this->validId($id)) { return null; }
 
-        return $this->forwardToHandler($name, $request->withAttribute('id', $id));
+        return $this->handlerResponse($name, $request->withAttribute('id', $id));
     }
 
-    private function forwardToHandler($name, ServerRequestInterface $request)
-    {
-        return isset($this->handlers[$name]) ? $this->response($this->handlers[$name], $request) : null;
-    }
-
-    private function forwardPostMethod(ServerRequestInterface $request, $path)
+    private function dispatchPostMethod(ServerRequestInterface $request, $path)
     {
         if ($path !== $request->getUri()->getPath()) { return null; }
 
-        return $this->forwardToHandler(self::POST, $request);
+        return $this->handlerResponse(self::POST, $request);
     }
 
-    private function forwardGetMethod(ServerRequestInterface $request, string $path)
+    private function dispatchGetMethod(ServerRequestInterface $request, string $path)
     {
         return ($path === $request->getUri()->getPath())
-            ? $this->forwardToHandler(self::INDEX, $request)
-            : $this->forwardWithId(self::GET, $request, $path);
+            ? $this->handlerResponse(self::INDEX, $request)
+            : $this->dispatchItemMethod(self::GET, $request, $path);
     }
 
     private function resolveRelativePath($path, UriInterface $prototype)

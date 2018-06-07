@@ -18,12 +18,18 @@ use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedPattern;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
 
 class PatternEndpointTest extends TestCase
 {
+    private static $notFound;
+
+    public static function setUpBeforeClass()
+    {
+        self::$notFound = new FakeResponse();
+    }
+
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $this->route());
@@ -35,38 +41,38 @@ class PatternEndpointTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
     }
 
-    public function testNotMatchingRequest_ReturnsNull()
+    public function testNotMatchingRequest_ReturnsNotFoundResponseInstance()
     {
         $route = $this->route('/page/3', 'GET', $this->dummyCallback());
-        $this->assertNull($route->forward($this->request('/page/3', 'POST')));
-        $this->assertNull($route->forward($this->request('/page/4', 'GET')));
+        $this->assertSame(self::$notFound, $route->forward($this->request('/page/3', 'POST'), self::$notFound));
+        $this->assertSame(self::$notFound, $route->forward($this->request('/page/4', 'GET'), self::$notFound));
     }
 
-    public function testMatchingRequest_ReturnsResponse()
+    public function testMatchingRequest_ReturnsEndpointResponse()
     {
         $response = $this->route('/page/3', 'GET', $this->dummyCallback())
-                         ->forward($this->request('/page/3', 'GET'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
+                         ->forward($this->request('/page/3', 'GET'), self::$notFound);
+        $this->assertNotSame(self::$notFound, $response);
 
         $response = $this->route('/page/576/foo-bar-45', 'UPDATE', $this->dummyCallback())
-                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
+                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'), self::$notFound);
+        $this->assertNotSame(self::$notFound, $response);
     }
 
     public function testRequestIsForwardedWithMatchedAttributes()
     {
         $response = $this->route('/page/3', 'GET')
-                         ->forward($this->request('/page/3', 'GET'));
+                         ->forward($this->request('/page/3', 'GET'), self::$notFound);
         $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
 
         $response = $this->route('/page/576/foo-bar-45', 'UPDATE')
-                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'));
+                         ->forward($this->request('/page/576/foo-bar-45', 'UPDATE'), self::$notFound);
         $this->assertSame(['pattern' => 'passed'], $response->fromRequest->attr);
     }
 
     public function testUri_ReturnsUri()
     {
-        $this->assertInstanceOf(UriInterface::class, $this->route('/foo/bar')->uri(new FakeUri()));
+        $this->assertInstanceOf(UriInterface::class, $this->route('/foo/bar')->uri(new FakeUri(), []));
     }
 
     public function testGateway_ThrowsException()
@@ -88,21 +94,17 @@ class PatternEndpointTest extends TestCase
     private function dummyCallback()
     {
         return function ($request) {
-            $response = new FakeResponse();
-
+            $response              = new FakeResponse();
             $response->fromRequest = $request;
-
             return $response;
         };
     }
 
     private function request($path, $method)
     {
-        $request = new FakeServerRequest();
-
+        $request         = new FakeServerRequest();
         $request->method = $method;
         $request->uri    = FakeUri::fromString($path);
-
         return $request;
     }
 }

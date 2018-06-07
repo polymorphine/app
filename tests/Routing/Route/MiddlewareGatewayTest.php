@@ -14,11 +14,11 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\MiddlewareGateway;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
-use Psr\Http\Message\ResponseInterface;
 
 
 class MiddlewareGatewayTest extends TestCase
@@ -31,10 +31,11 @@ class MiddlewareGatewayTest extends TestCase
 
     public function testMiddlewareForwardsRequest()
     {
+        $notFound = new FakeResponse();
         $request  = new FakeServerRequest('POST');
-        $response = $this->middleware()->forward($request->withAttribute('middleware', 'processed'));
+        $response = $this->middleware()->forward($request->withAttribute('middleware', 'processed'), $notFound);
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertNotSame($notFound, $response);
         $this->assertSame('processed: wrap response wrap', (string) $response->getBody());
     }
 
@@ -48,7 +49,7 @@ class MiddlewareGatewayTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = new MiddlewareGateway(new FakeMiddleware('wrap'), new MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri(new FakeUri()));
+        $this->assertSame($uri, (string) $route->uri(new FakeUri(), []));
     }
 
     private function middleware()

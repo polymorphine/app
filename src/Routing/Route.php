@@ -22,13 +22,14 @@ interface Route
 
     /**
      * Forward $request and handle it from matching endpoint Route or Routes
-     * Return null if no matching Route is found.
+     * Returns instance of response passed as parameter if no matching Route is found.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface $notFound
      *
-     * @return null|ResponseInterface
+     * @return ResponseInterface
      */
-    public function forward(ServerRequestInterface $request): ?ResponseInterface;
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface;
 
     /**
      * Get subsequent Route by its $path.
@@ -76,5 +77,5 @@ interface Route
      *
      * @return UriInterface
      */
-    public function uri(UriInterface $prototype, array $params = []): UriInterface;
+    public function uri(UriInterface $prototype, array $params): UriInterface;
 }

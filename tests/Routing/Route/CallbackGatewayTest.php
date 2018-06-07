@@ -14,16 +14,23 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\CallbackGateway;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Closure;
 
 
 class CallbackGatewayTest extends TestCase
 {
+    private static $notFound;
+
+    public static function setUpBeforeClass()
+    {
+        self::$notFound = new FakeResponse();
+    }
+
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $route = $this->middleware());
@@ -32,14 +39,14 @@ class CallbackGatewayTest extends TestCase
 
     public function testClosurePreventsForwardingRequest()
     {
-        $request = new FakeServerRequest();
-        $this->assertNull($this->middleware()->forward($request));
+        $request  = new FakeServerRequest();
+        $this->assertSame(self::$notFound, $this->middleware()->forward($request, self::$notFound));
     }
 
     public function testMiddlewareForwardsRequest()
     {
         $request = new FakeServerRequest('POST');
-        $this->assertInstanceOf(ResponseInterface::class, $this->middleware()->forward($request));
+        $this->assertNotSame(self::$notFound, $this->middleware()->forward($request, self::$notFound));
     }
 
     public function testGatewayCallsRouteWithSameParameter()
@@ -52,7 +59,7 @@ class CallbackGatewayTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = new CallbackGateway($this->basicCallback(), new MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri(new FakeUri()));
+        $this->assertSame($uri, (string) $route->uri(new FakeUri(), []));
     }
 
     private function middleware(Closure $callback = null)

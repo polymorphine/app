@@ -31,10 +31,10 @@ class MockedRoute implements Route
         $this->callback = $callback;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        if ($this->callback) { return $this->callback->__invoke($request); }
-        return $this->id ? new FakeResponse($this->id) : null;
+        if ($this->callback) { return $this->callback->__invoke($request) ?? $notFound; }
+        return $this->id ? new FakeResponse($this->id) : $notFound;
     }
 
     public function gateway(string $path): Route
@@ -43,7 +43,7 @@ class MockedRoute implements Route
         return $this;
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $this->id ? Uri::fromString($this->id) : Uri::fromString();
     }

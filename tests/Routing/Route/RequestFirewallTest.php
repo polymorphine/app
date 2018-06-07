@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\RequestFirewall;
@@ -21,28 +20,35 @@ use Polymorphine\Http\Tests\Doubles;
 
 class RequestFirewallTest extends TestCase
 {
+    private static $notFound;
+
+    public static function setUpBeforeClass()
+    {
+        self::$notFound = new Doubles\FakeResponse();
+    }
+
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $this->route());
     }
 
-    public function testNotMatchingPath_ReturnsNull()
+    public function testNotMatchingPath_ReturnsNotFoundResponseInstance()
     {
         $route = $this->route(function () { return false; });
-        $this->assertNull($route->forward($this->request()));
-        $this->assertNull($route->forward($this->request('/bar/foo')));
-        $this->assertNull($route->forward($this->request('anything')));
+        $this->assertSame(self::$notFound, $route->forward($this->request(), self::$notFound));
+        $this->assertSame(self::$notFound, $route->forward($this->request('/bar/foo'), self::$notFound));
+        $this->assertSame(self::$notFound, $route->forward($this->request('anything'), self::$notFound));
     }
 
     public function testMatchingPathForwardsRequest()
     {
         $route = $this->route();
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward($this->request('/foo/bar')));
-        $this->assertSame('default', $route->forward($this->request('/foo/bar'))->body);
+        $this->assertNotSame(self::$notFound, $route->forward($this->request('/foo/bar'), self::$notFound));
+        $this->assertSame('default', $route->forward($this->request('/foo/bar'), self::$notFound)->body);
 
         $route    = $this->route(function ($request) { return $request instanceof Doubles\FakeServerRequest; });
-        $response = $route->forward($this->request('anything'));
-        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $response = $route->forward($this->request('anything'), self::$notFound);
+        $this->assertNotSame(self::$notFound, $response);
         $this->assertSame('default', $response->body);
     }
 
@@ -56,7 +62,7 @@ class RequestFirewallTest extends TestCase
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
         $route = $this->route(null, new Doubles\MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri(new Doubles\FakeUri()));
+        $this->assertSame($uri, (string) $route->uri(new Doubles\FakeUri(), []));
     }
 
     private function route($closure = null, $route = null)

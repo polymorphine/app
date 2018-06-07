@@ -11,24 +11,24 @@
 
 namespace Polymorphine\Http\Routing;
 
-use Polymorphine\Http\Message\Response\NotFoundResponse;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 
 class RouteHandler implements RequestHandlerInterface
 {
     private $route;
+    private $notFound;
 
-    public function __construct(Route $route)
+    public function __construct(Route $route, ResponseInterface $notFound)
     {
-        $this->route = $route;
+        $this->route    = $route;
+        $this->notFound = $notFound;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = $this->route->forward($request);
-        return $response ?: new NotFoundResponse();
+        return $this->route->forward($request, $this->notFound);
     }
 }

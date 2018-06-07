@@ -30,9 +30,9 @@ class MiddlewareGateway implements Route
         $this->route      = $route;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        return $this->middleware->process($request, new RouteHandler($this->route));
+        return $this->middleware->process($request, new RouteHandler($this->route, $notFound));
     }
 
     public function gateway(string $path): Route
@@ -40,7 +40,7 @@ class MiddlewareGateway implements Route
         return $this->route->gateway($path);
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $this->route->uri($prototype, $params);
     }

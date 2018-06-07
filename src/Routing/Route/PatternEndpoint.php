@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Routing\Route;
 
 use Polymorphine\Http\Routing\Route;
-use Polymorphine\Http\Message\Uri;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -45,14 +44,14 @@ class PatternEndpoint implements Route
         return new self('GET', self::selectPattern($path, $params), $callback);
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
         return ($this->methodMatch($request) && $request = $this->pattern->matchedRequest($request))
             ? $this->callback->__invoke($request)
-            : null;
+            : $notFound;
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $this->pattern->uri($prototype, $params);
     }

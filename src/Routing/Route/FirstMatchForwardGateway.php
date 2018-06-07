@@ -23,17 +23,20 @@ class FirstMatchForwardGateway implements Route
 
     private $routes = [];
 
+    /**
+     * @param Route[] $routes
+     */
     public function __construct(array $routes)
     {
         $this->routes = $routes;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        $response = null;
+        $response = $notFound;
         foreach ($this->routes as $route) {
-            $response = $this->response($route, $request);
-            if ($response) { break; }
+            $response = $route->forward($request, $notFound);
+            if ($response !== $notFound) { break; }
         }
 
         return $response;
@@ -52,11 +55,6 @@ class FirstMatchForwardGateway implements Route
         }
 
         return $path ? $this->route($this->routes[$id], $path) : $this->routes[$id];
-    }
-
-    private function response(Route $route, ServerRequestInterface $request)
-    {
-        return $route->forward($request);
     }
 
     private function route(Route $route, string $path)

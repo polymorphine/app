@@ -12,7 +12,6 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 use Polymorphine\Http\Routing\Exception\EndpointCallException;
 use Polymorphine\Http\Routing\Exception\GatewayCallException;
 use Polymorphine\Http\Routing\Route;
@@ -22,39 +21,46 @@ use Polymorphine\Http\Tests\Doubles;
 
 class FirstMatchForwardGatewayTest extends TestCase
 {
+    private static $notFound;
+
+    public static function setUpBeforeClass()
+    {
+        self::$notFound = new Doubles\FakeResponse();
+    }
+
     public function testInstantiation()
     {
         $this->assertInstanceOf(Route::class, $this->route());
     }
 
-    public function testForwardingNotMatchingRequest_ReturnsNull()
+    public function testForwardingNotMatchingRequest_ReturnsNotFoundInstance()
     {
-        $this->assertNull($this->route()->forward(new Doubles\FakeServerRequest()));
-        $this->assertNull($this->route(['name' => new Doubles\MockedRoute('')])->forward(new Doubles\FakeServerRequest()));
+        $this->assertSame(self::$notFound, $this->route()->forward(new Doubles\FakeServerRequest(), self::$notFound));
+        $this->assertSame(self::$notFound, $this->route(['name' => new Doubles\MockedRoute('')])->forward(new Doubles\FakeServerRequest(), self::$notFound));
     }
 
-    public function testForwardingMatchingRequest_ReturnsResponse()
+    public function testForwardingMatchingRequest_ReturnsEndpointResponse()
     {
         $route = new Doubles\MockedRoute('', function () { return new Doubles\FakeResponse(); });
         $route = $this->route(['name' => $route]);
-        $this->assertInstanceOf(ResponseInterface::class, $route->forward(new Doubles\FakeServerRequest()));
+        $this->assertNotSame(self::$notFound, $route->forward(new Doubles\FakeServerRequest(), self::$notFound));
     }
 
-    public function testForwardingMatchingRequest_ReturnsCorrectResponse()
+    public function testForwardingMatchingRequest_ReturnsMatchingEndpointResponse()
     {
         $routeA   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\FakeResponse('A') : null; });
         $routeB   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\FakeResponse('B') : null; });
         $route    = $this->route(['A' => $routeA, 'B' => $routeB]);
         $requestA = new Doubles\FakeServerRequest('POST');
         $requestB = new Doubles\FakeServerRequest('GET');
-        $this->assertSame('A', $route->forward($requestA)->body);
-        $this->assertSame('B', $route->forward($requestB)->body);
+        $this->assertSame('A', $route->forward($requestA, self::$notFound)->body);
+        $this->assertSame('B', $route->forward($requestB, self::$notFound)->body);
     }
 
     public function testUriMethod_ThrowsException()
     {
         $this->expectException(EndpointCallException::class);
-        $this->route()->uri(new Doubles\FakeUri());
+        $this->route()->uri(new Doubles\FakeUri(), []);
     }
 
     public function testGatewayMethodEndpointCall_ReturnsFoundRoute()

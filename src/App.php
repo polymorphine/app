@@ -55,7 +55,7 @@ abstract class App implements RequestHandlerInterface
         $this->processQueue = $this->middleware;
 
         $rootRoute = $this->container->get(static::ROUTER_ID);
-        return $rootRoute->forward($request) ?: $this->notFoundResponse();
+        return $rootRoute->forward($request, $this->notFoundResponse());
     }
 
     final public function config(string $id): RecordSetup

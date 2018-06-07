@@ -29,11 +29,11 @@ class RequestFirewall implements Route
         $this->route     = $route;
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        $match = $this->condition->__invoke($request);
-
-        return ($match) ? $this->route->forward($request) : null;
+        return $this->condition->__invoke($request)
+            ? $this->route->forward($request, $notFound)
+            : $notFound;
     }
 
     public function gateway(string $path): Route
@@ -41,7 +41,7 @@ class RequestFirewall implements Route
         return $this->route->gateway($path);
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         return $this->route->uri($prototype, $params);
     }

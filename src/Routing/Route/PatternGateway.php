@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,14 +35,14 @@ class PatternGateway implements Route
         return new self(self::selectPattern($pattern, $params), $route);
     }
 
-    public function forward(ServerRequestInterface $request): ?ResponseInterface
+    public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
         $request = $this->pattern->matchedRequest($request);
 
-        return $request ? $this->route->forward($request) : null;
+        return $request ? $this->route->forward($request, $notFound) : $notFound;
     }
 
-    public function uri(UriInterface $prototype, array $params = []): UriInterface
+    public function uri(UriInterface $prototype, array $params): UriInterface
     {
         $uri = $this->route->uri($prototype, $params);
 
