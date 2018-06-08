@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Polymorphine\Http\Routing\Route;
+use Polymorphine\Routing\Route;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;

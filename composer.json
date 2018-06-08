@@ -7,6 +7,7 @@
     "require": {
         "php": "^7.1",
         "polymorphine/container": "@dev",
+        "polymorphine/routing": "@dev",
         "psr/http-message": "^1.0",
         "psr/container": "^1.0",
         "psr/http-server-handler": "^1.0",

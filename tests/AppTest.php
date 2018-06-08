@@ -12,17 +12,17 @@
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Container\Exception\InvalidIdException;
+use Polymorphine\Http\App;
 use Polymorphine\Http\Message\Uri;
+use Polymorphine\Http\Message\Response\NotFoundResponse;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Polymorphine\Http\Tests\Fixtures\ShutdownState;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Polymorphine\Http\App;
 use Polymorphine\Container\Setup;
-use Polymorphine\Http\Message\Response\NotFoundResponse;
+use Polymorphine\Container\Exception\InvalidIdException;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/Fixtures/shutdown-functions.php';
 require_once __DIR__ . '/Fixtures/header-functions.php';
