@@ -11,8 +11,8 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
-use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Routing\Exception\EndpointCallException;
+use Psr\Http\Message\UriInterface;
 
 
 trait LockedEndpointMethod

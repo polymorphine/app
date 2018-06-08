@@ -14,11 +14,11 @@ namespace Polymorphine\Http\Tests\Routing\Route;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\MiddlewareGateway;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
-use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
-use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
-use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Doubles\MockedRoute;
+use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 
 
 class MiddlewareGatewayTest extends TestCase

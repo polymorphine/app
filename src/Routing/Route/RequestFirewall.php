@@ -12,8 +12,8 @@
 namespace Polymorphine\Http\Routing\Route;
 
 use Polymorphine\Http\Routing\Route;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Closure;
 

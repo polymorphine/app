@@ -12,10 +12,13 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\RequestFirewall;
-use Polymorphine\Http\Tests\Doubles;
+use Polymorphine\Http\Tests\Doubles\MockedRoute;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
+use Psr\Http\Message\ServerRequestInterface;
 
 
 class RequestFirewallTest extends TestCase
@@ -24,7 +27,7 @@ class RequestFirewallTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$notFound = new Doubles\FakeResponse();
+        self::$notFound = new FakeResponse();
     }
 
     public function testInstantiation()
@@ -46,7 +49,7 @@ class RequestFirewallTest extends TestCase
         $this->assertNotSame(self::$notFound, $route->forward($this->request('/foo/bar'), self::$notFound));
         $this->assertSame('default', $route->forward($this->request('/foo/bar'), self::$notFound)->body);
 
-        $route    = $this->route(function ($request) { return $request instanceof Doubles\FakeServerRequest; });
+        $route    = $this->route(function ($request) { return $request instanceof FakeServerRequest; });
         $response = $route->forward($this->request('anything'), self::$notFound);
         $this->assertNotSame(self::$notFound, $response);
         $this->assertSame('default', $response->body);
@@ -61,23 +64,23 @@ class RequestFirewallTest extends TestCase
     public function testUriCallIsPassedToWrappedRoute()
     {
         $uri   = 'http://example.com/foo/bar?test=baz';
-        $route = $this->route(null, new Doubles\MockedRoute($uri));
-        $this->assertSame($uri, (string) $route->uri(new Doubles\FakeUri(), []));
+        $route = $this->route(null, new MockedRoute($uri));
+        $this->assertSame($uri, (string) $route->uri(new FakeUri(), []));
     }
 
     private function route($closure = null, $route = null)
     {
         return new RequestFirewall(
             $closure ?: function (ServerRequestInterface $request) { return strpos($request->getRequestTarget(), '/foo/bar') === 0; },
-            $route ?: new Doubles\MockedRoute('default')
+            $route ?: new MockedRoute('default')
         );
     }
 
     private function request($path = '/')
     {
-        $request = new Doubles\FakeServerRequest();
+        $request = new FakeServerRequest();
 
-        $request->uri = Doubles\FakeUri::fromString('//example.com' . $path);
+        $request->uri = FakeUri::fromString('//example.com' . $path);
 
         return $request;
     }

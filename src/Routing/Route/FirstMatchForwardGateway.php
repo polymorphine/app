@@ -11,10 +11,10 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\Http\Routing\Exception;
 use Polymorphine\Http\Routing\Route;
+use Polymorphine\Http\Routing\Exception\GatewayCallException;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 
 class FirstMatchForwardGateway implements Route
@@ -47,11 +47,11 @@ class FirstMatchForwardGateway implements Route
         [$id, $path] = explode(self::PATH_SEPARATOR, $path, 2) + [false, false];
 
         if (!$id) {
-            throw new Exception\GatewayCallException('Invalid gateway path - non empty string required');
+            throw new GatewayCallException('Invalid gateway path - non empty string required');
         }
 
         if (!isset($this->routes[$id])) {
-            throw new Exception\GatewayCallException(sprintf('Gateway `%s` not found', $id));
+            throw new GatewayCallException(sprintf('Gateway `%s` not found', $id));
         }
 
         return $path ? $this->route($this->routes[$id], $path) : $this->routes[$id];

@@ -11,9 +11,9 @@
 
 namespace Polymorphine\Http\Routing\Route\Pattern;
 
-use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
-use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route\Pattern;
+use Polymorphine\Http\Routing\Exception\UriParamsException;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 

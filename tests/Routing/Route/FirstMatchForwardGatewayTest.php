@@ -12,11 +12,14 @@
 namespace Polymorphine\Http\Tests\Routing\Route;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Routing\Exception\EndpointCallException;
-use Polymorphine\Http\Routing\Exception\GatewayCallException;
 use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Route\FirstMatchForwardGateway;
-use Polymorphine\Http\Tests\Doubles;
+use Polymorphine\Http\Routing\Exception\EndpointCallException;
+use Polymorphine\Http\Routing\Exception\GatewayCallException;
+use Polymorphine\Http\Tests\Doubles\MockedRoute;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 
 
 class FirstMatchForwardGatewayTest extends TestCase
@@ -25,7 +28,7 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$notFound = new Doubles\FakeResponse();
+        self::$notFound = new FakeResponse();
     }
 
     public function testInstantiation()
@@ -35,24 +38,24 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testForwardingNotMatchingRequest_ReturnsNotFoundInstance()
     {
-        $this->assertSame(self::$notFound, $this->route()->forward(new Doubles\FakeServerRequest(), self::$notFound));
-        $this->assertSame(self::$notFound, $this->route(['name' => new Doubles\MockedRoute('')])->forward(new Doubles\FakeServerRequest(), self::$notFound));
+        $this->assertSame(self::$notFound, $this->route()->forward(new FakeServerRequest(), self::$notFound));
+        $this->assertSame(self::$notFound, $this->route(['name' => new MockedRoute('')])->forward(new FakeServerRequest(), self::$notFound));
     }
 
     public function testForwardingMatchingRequest_ReturnsEndpointResponse()
     {
-        $route = new Doubles\MockedRoute('', function () { return new Doubles\FakeResponse(); });
+        $route = new MockedRoute('', function () { return new FakeResponse(); });
         $route = $this->route(['name' => $route]);
-        $this->assertNotSame(self::$notFound, $route->forward(new Doubles\FakeServerRequest(), self::$notFound));
+        $this->assertNotSame(self::$notFound, $route->forward(new FakeServerRequest(), self::$notFound));
     }
 
     public function testForwardingMatchingRequest_ReturnsMatchingEndpointResponse()
     {
-        $routeA   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'POST') ? new Doubles\FakeResponse('A') : null; });
-        $routeB   = new Doubles\MockedRoute('', function ($request) { return ($request->method === 'GET') ? new Doubles\FakeResponse('B') : null; });
+        $routeA   = new MockedRoute('', function ($request) { return ($request->method === 'POST') ? new FakeResponse('A') : null; });
+        $routeB   = new MockedRoute('', function ($request) { return ($request->method === 'GET') ? new FakeResponse('B') : null; });
         $route    = $this->route(['A' => $routeA, 'B' => $routeB]);
-        $requestA = new Doubles\FakeServerRequest('POST');
-        $requestB = new Doubles\FakeServerRequest('GET');
+        $requestA = new FakeServerRequest('POST');
+        $requestB = new FakeServerRequest('GET');
         $this->assertSame('A', $route->forward($requestA, self::$notFound)->body);
         $this->assertSame('B', $route->forward($requestB, self::$notFound)->body);
     }
@@ -60,13 +63,13 @@ class FirstMatchForwardGatewayTest extends TestCase
     public function testUriMethod_ThrowsException()
     {
         $this->expectException(EndpointCallException::class);
-        $this->route()->uri(new Doubles\FakeUri(), []);
+        $this->route()->uri(new FakeUri(), []);
     }
 
     public function testGatewayMethodEndpointCall_ReturnsFoundRoute()
     {
-        $routeA = new Doubles\MockedRoute('A');
-        $routeB = new Doubles\MockedRoute('B');
+        $routeA = new MockedRoute('A');
+        $routeB = new MockedRoute('B');
         $route  = $this->route(['A' => $routeA, 'B' => $routeB]);
         $this->assertSame('A', $route->gateway('A')->id);
         $this->assertSame('B', $route->gateway('B')->id);
@@ -74,8 +77,8 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testGatewayMethodGatewayCall_AsksNextGateway()
     {
-        $routeA = new Doubles\MockedRoute('A');
-        $routeB = new Doubles\MockedRoute('B');
+        $routeA = new MockedRoute('A');
+        $routeB = new MockedRoute('B');
         $route  = $this->route(['AFound' => $routeA, 'BFound' => $routeB]);
         $this->assertSame('PathA', $route->gateway('AFound.PathA')->path);
         $this->assertSame('PathB', $route->gateway('BFound.PathB')->path);
@@ -96,10 +99,8 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     private function route(array $routes = [])
     {
-        $dummy = new Doubles\MockedRoute('DUMMY');
-
+        $dummy           = new MockedRoute('DUMMY');
         $dummy->callback = function () { return null; };
-
         return new FirstMatchForwardGateway(['example' => $dummy] + $routes);
     }
 }

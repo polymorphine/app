@@ -11,11 +11,11 @@
 
 namespace Polymorphine\Http\Routing\Route;
 
+use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Polymorphine\Http\Routing\Exception\UriParamsException;
-use Polymorphine\Http\Routing\Route;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
 

@@ -12,9 +12,9 @@
 namespace Polymorphine\Http\Routing\Route\Pattern;
 
 use Polymorphine\Http\Routing\Route\Pattern;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
 
 
 class StaticQueryPattern implements Pattern

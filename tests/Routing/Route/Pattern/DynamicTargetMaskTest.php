@@ -12,10 +12,10 @@
 namespace Polymorphine\Http\Tests\Routing\Route\Pattern;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
-use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Polymorphine\Http\Routing\Route\Pattern\DynamicTargetMask;
+use Polymorphine\Http\Routing\Exception\UnreachableEndpointException;
+use Polymorphine\Http\Routing\Exception\UriParamsException;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Psr\Http\Message\ServerRequestInterface;
