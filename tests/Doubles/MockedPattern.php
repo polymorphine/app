@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Polymorphine\Http\Message\Uri;
 use Polymorphine\Http\Routing\Route\Pattern;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -34,6 +33,6 @@ class MockedPattern implements Pattern
 
     public function uri(UriInterface $prototype, array $params): UriInterface
     {
-        return Uri::fromString($this->path);
+        return FakeUri::fromString($this->path);
     }
 }

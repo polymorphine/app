@@ -11,8 +11,8 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 

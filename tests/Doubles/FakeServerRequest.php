@@ -14,7 +14,6 @@ namespace Polymorphine\Http\Tests\Doubles;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use Polymorphine\Http\Message\Uri;
 
 
 class FakeServerRequest implements ServerRequestInterface
@@ -38,7 +37,7 @@ class FakeServerRequest implements ServerRequestInterface
 
     public function getUri()
     {
-        return $this->uri ?: Uri::fromString('//example.com/foo/bar');
+        return $this->uri ?: FakeUri::fromString('//example.com/foo/bar');
     }
 
     public function getRequestTarget()

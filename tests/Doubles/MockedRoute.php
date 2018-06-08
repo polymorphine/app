@@ -11,11 +11,10 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Polymorphine\Http\Message\Uri;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Polymorphine\Http\Routing\Route;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 use Closure;
 
 

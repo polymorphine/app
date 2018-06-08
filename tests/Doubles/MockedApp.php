@@ -11,10 +11,10 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\Http\Routing\Route;
 use Polymorphine\Http\App;
+use Polymorphine\Http\Routing\Route;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
 
 
 class MockedApp extends App
