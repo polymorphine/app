@@ -39,7 +39,7 @@ class CallbackGatewayTest extends TestCase
 
     public function testClosurePreventsForwardingRequest()
     {
-        $request  = new FakeServerRequest();
+        $request = new FakeServerRequest();
         $this->assertSame(self::$notFound, $this->middleware()->forward($request, self::$notFound));
     }
 

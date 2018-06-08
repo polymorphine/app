@@ -38,8 +38,11 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testForwardingNotMatchingRequest_ReturnsNotFoundInstance()
     {
-        $this->assertSame(self::$notFound, $this->route()->forward(new FakeServerRequest(), self::$notFound));
-        $this->assertSame(self::$notFound, $this->route(['name' => new MockedRoute('')])->forward(new FakeServerRequest(), self::$notFound));
+        $route = $this->route();
+        $this->assertSame(self::$notFound, $route->forward(new FakeServerRequest(), self::$notFound));
+
+        $route = $this->route(['name' => new MockedRoute('')]);
+        $this->assertSame(self::$notFound, $route->forward(new FakeServerRequest(), self::$notFound));
     }
 
     public function testForwardingMatchingRequest_ReturnsEndpointResponse()
@@ -51,8 +54,10 @@ class FirstMatchForwardGatewayTest extends TestCase
 
     public function testForwardingMatchingRequest_ReturnsMatchingEndpointResponse()
     {
-        $routeA   = new MockedRoute('', function ($request) { return ($request->method === 'POST') ? new FakeResponse('A') : null; });
-        $routeB   = new MockedRoute('', function ($request) { return ($request->method === 'GET') ? new FakeResponse('B') : null; });
+        $callback = function ($request) { return ($request->method === 'POST') ? new FakeResponse('A') : null; };
+        $routeA   = new MockedRoute('', $callback);
+        $callback = function ($request) { return ($request->method === 'GET') ? new FakeResponse('B') : null; };
+        $routeB   = new MockedRoute('', $callback);
         $route    = $this->route(['A' => $routeA, 'B' => $routeB]);
         $requestA = new FakeServerRequest('POST');
         $requestB = new FakeServerRequest('GET');

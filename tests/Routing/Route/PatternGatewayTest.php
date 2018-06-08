@@ -47,14 +47,18 @@ class PatternGatewayTest extends TestCase
 
     public function testNotMatchingPattern_ReturnsNotFoundResponseInstance()
     {
-        $this->assertSame(self::$notFound, $this->staticGate('https:/some/path')->forward($this->request('http:/some/path'), self::$notFound));
-        $this->assertSame(self::$notFound, $this->staticGate('example.com/foo/bar')->forward($this->request('http://example.com/foo/baz'), self::$notFound));
+        $request = $this->request('http:/some/path');
+        $this->assertSame(self::$notFound, $this->staticGate('https:/some/path')->forward($request, self::$notFound));
+        $request = $this->request('http://example.com/foo/bazzzz');
+        $this->assertSame(self::$notFound, $this->staticGate('example.com/foo/ba')->forward($request, self::$notFound));
     }
 
     public function testMatchingPattern_ReturnsForwardedRouteResponse()
     {
-        $this->assertNotSame(self::$notFound, $this->staticGate('//example.com')->forward($this->request('http://example.com/some/path'), self::$notFound));
-        $this->assertNotSame(self::$notFound, $this->staticGate('http:?query=string')->forward($this->request('http://www.example.com?query=string'), self::$notFound));
+        $request = $this->request('http://example.com/some/path');
+        $this->assertNotSame(self::$notFound, $this->staticGate('//example.com')->forward($request, self::$notFound));
+        $request = $this->request('http://www.example.com?foo=bar');
+        $this->assertNotSame(self::$notFound, $this->staticGate('http:?foo=bar')->forward($request, self::$notFound));
     }
 
     public function testUri_ReturnsUriWithPatternDefinedSegments()
@@ -77,14 +81,17 @@ class PatternGatewayTest extends TestCase
     {
         $subRoute = new MockedRoute('/foo/bar');
 
-        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https://example.com', $subRoute)->gateway('some.path')->uri(new FakeUri(), []));
-        $this->assertSame('http:/foo/bar', (string) $this->staticGate('http:', $subRoute)->gateway('some.path')->uri(new FakeUri(), []));
+        $uri = $this->staticGate('https://example.com', $subRoute)->gateway('some.path')->uri(new FakeUri(), []);
+        $this->assertSame('https://example.com/foo/bar', (string) $uri);
+        $uri = $this->staticGate('http:', $subRoute)->gateway('some.path')->uri(new FakeUri(), []);
+        $this->assertSame('http:/foo/bar', (string) $uri);
     }
 
     public function testComposedGateway_ReturnsRouteProducingUriWithDefinedSegments()
     {
         $subRoute = $this->staticGate('//example.com', new MockedRoute('/foo/bar'));
-        $this->assertSame('https://example.com/foo/bar', (string) $this->staticGate('https:', $subRoute)->gateway('some.path')->uri(new FakeUri(), []));
+        $uri      = $this->staticGate('https:', $subRoute)->gateway('some.path')->uri(new FakeUri(), []);
+        $this->assertSame('https://example.com/foo/bar', (string) $uri);
     }
 
     private function staticGate(string $uriPattern = 'https:', $subRoute = null)

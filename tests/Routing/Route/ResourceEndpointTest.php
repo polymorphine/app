@@ -44,8 +44,11 @@ class ResourceEndpointTest extends TestCase
      * @param Route                  $resource
      * @param string                 $message
      */
-    public function testNotMatchingRequest_ReturnsNotFoundResponseInstance(ServerRequestInterface $request, Route $resource, string $message)
-    {
+    public function testNotMatchingRequest_ReturnsNotFoundResponseInstance(
+        ServerRequestInterface $request,
+        Route $resource,
+        string $message
+    ) {
         $this->assertSame(self::$notFound, $resource->forward($request, self::$notFound), $message);
     }
 
@@ -70,8 +73,10 @@ class ResourceEndpointTest extends TestCase
      * @param ServerRequestInterface $request
      * @param Route                  $resource
      */
-    public function testMatchingRequest_ReturnsEndpointDefinedResponse(ServerRequestInterface $request, Route $resource)
-    {
+    public function testMatchingRequest_ReturnsEndpointDefinedResponse(
+        ServerRequestInterface $request,
+        Route $resource
+    ) {
         $this->assertNotSame(self::$notFound, $resource->forward($request, self::$notFound));
     }
 
@@ -91,16 +96,20 @@ class ResourceEndpointTest extends TestCase
 
     public function testMatchingIdRequestIsForwardedWithIdAttribute()
     {
-        $response = $this->resource('/foo')->forward($this->request('/foo/345'), self::$notFound);
+        $request  = $this->request('/foo/345');
+        $response = $this->resource('/foo')->forward($request, self::$notFound);
         $this->assertSame(['id' => '345'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('/foo', ['PATCH'])->forward($this->request('/foo/666/slug/3000', 'PATCH'), self::$notFound);
+        $request  = $this->request('/foo/666/slug/3000', 'PATCH');
+        $response = $this->resource('/foo', ['PATCH'])->forward($request, self::$notFound);
         $this->assertSame(['id' => '666'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('baz')->forward($this->request('/foo/bar/baz/554', 'PATCH'), self::$notFound);
+        $request  = $this->request('/foo/bar/baz/554', 'PATCH');
+        $response = $this->resource('baz')->forward($request, self::$notFound);
         $this->assertSame(['id' => '554'], $response->fromRequest->getAttributes());
 
-        $response = $this->resource('some/path')->forward($this->request('/some/path/500/slug-string-1000', 'PATCH'), self::$notFound);
+        $request  = $this->request('/some/path/500/slug-string-1000', 'PATCH');
+        $response = $this->resource('some/path')->forward($request, self::$notFound);
         $this->assertSame(['id' => '500'], $response->fromRequest->getAttributes());
     }
 

@@ -117,33 +117,36 @@ class DynamicTargetMaskTest extends TestCase
 
     public function testQueryStringMatchIgnoresParamOrder()
     {
-        $request = $this->pattern('/path/and?user={#id}&foo={$bar}')
-                        ->matchedRequest($this->request('/path/and?foo=bar-BAZ&user=938'));
-        $this->assertInstanceOf(ServerRequestInterface::class, $request);
-        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $request->getAttributes());
+        $pattern = $this->pattern('/path/and?user={#id}&foo={$bar}');
+        $request = $this->request('/path/and?foo=bar-BAZ&user=938');
+        $matched = $pattern->matchedRequest($request);
+        $this->assertInstanceOf(ServerRequestInterface::class, $matched);
+        $this->assertSame(['id' => '938', 'bar' => 'bar-BAZ'], $matched->getAttributes());
     }
 
     public function testQueryStringIsIgnoredWhenNotSpecifiedInRoute()
     {
-        $request = $this->pattern('/path/{%directory}')
-                        ->matchedRequest($this->request('/path/something?foo=bar-BAZ&user=938'));
-        $this->assertInstanceOf(ServerRequestInterface::class, $request);
-        $this->assertSame(['directory' => 'something'], $request->getAttributes());
+        $pattern = $this->pattern('/path/{%directory}');
+        $request = $this->request('/path/something?foo=bar-BAZ&user=938');
+        $matched = $pattern->matchedRequest($request);
+        $this->assertInstanceOf(ServerRequestInterface::class, $matched);
+        $this->assertSame(['directory' => 'something'], $matched->getAttributes());
     }
 
     public function testNotSpecifiedQueryParamsAreIgnored()
     {
-        $request = $this->pattern('/path/only?name={$slug}&user=938')
-                        ->matchedRequest($this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r'));
-        $this->assertInstanceOf(ServerRequestInterface::class, $request);
-        $this->assertSame(['slug' => 'shudd3r'], $request->getAttributes());
+        $pattern = $this->pattern('/path/only?name={$slug}&user=938');
+        $request = $this->request('/path/only?foo=bar-BAZ&user=938&name=shudd3r');
+        $matched = $pattern->matchedRequest($request);
+        $this->assertInstanceOf(ServerRequestInterface::class, $matched);
+        $this->assertSame(['slug' => 'shudd3r'], $matched->getAttributes());
     }
 
     public function testMissingQueryParamWontMatchRequest()
     {
-        $request = $this->pattern('/path/only?name={$slug}&user=938')
-                        ->matchedRequest($this->request('/path/only?foo=bar-BAZ&name=shudd3r'));
-        $this->assertNull($request);
+        $pattern = $this->pattern('/path/only?name={$slug}&user=938');
+        $request = $this->request('/path/only?foo=bar-BAZ&name=shudd3r');
+        $this->assertNull($pattern->matchedRequest($request));
     }
 
     public function testPatternQueryKeyWithoutValue()
@@ -182,10 +185,12 @@ class DynamicTargetMaskTest extends TestCase
     {
         $pattern = $this->pattern('/foo/{%bar}?name={$name}&fizz=buzz');
 
-        $uri = $pattern->uri(FakeUri::fromString('https://www.example.com'), ['something', 'slug-string', 'unused-param']);
+        $params = ['something', 'slug-string', 'unused-param'];
+        $uri    = $pattern->uri(FakeUri::fromString('https://www.example.com'), $params);
         $this->assertSame('https://www.example.com/foo/something?name=slug-string&fizz=buzz', (string) $uri);
 
-        $uri = $pattern->uri(FakeUri::fromString('https://www.example.com'), ['unused' => 'something', 'name' => 'slug-string', 'bar' => 'name']);
+        $params = ['unused' => 'something', 'name' => 'slug-string', 'bar' => 'name'];
+        $uri    = $pattern->uri(FakeUri::fromString('https://www.example.com'), $params);
         $this->assertSame('https://www.example.com/foo/name?name=slug-string&fizz=buzz', (string) $uri);
     }
 
@@ -246,11 +251,13 @@ class DynamicTargetMaskTest extends TestCase
     {
         $pattern   = $this->pattern('{#id}/{$slug}');
         $prototype = FakeUri::fromString('/foo/bar');
-        $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri($prototype, ['34', 'slug-string']));
+        $params    = ['34', 'slug-string'];
+        $this->assertSame('/foo/bar/34/slug-string', (string) $pattern->uri($prototype, $params));
 
         $pattern   = $this->pattern('{#id}/{$slug}?query=string');
         $prototype = FakeUri::fromString('/foo/bar');
-        $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri($prototype, ['34', 'slug-string']));
+        $params    = ['34', 'slug-string'];
+        $this->assertSame('/foo/bar/34/slug-string?query=string', (string) $pattern->uri($prototype, $params));
     }
 
     public function testUriFromRelativePathWithNoRootInPrototype_ThrowsException()
@@ -268,10 +275,8 @@ class DynamicTargetMaskTest extends TestCase
 
     private function request($path)
     {
-        $request = new FakeServerRequest();
-
+        $request      = new FakeServerRequest();
         $request->uri = FakeUri::fromString('//example.com' . $path);
-
         return $request;
     }
 }

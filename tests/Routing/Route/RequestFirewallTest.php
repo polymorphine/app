@@ -70,18 +70,16 @@ class RequestFirewallTest extends TestCase
 
     private function route($closure = null, $route = null)
     {
-        return new RequestFirewall(
-            $closure ?: function (ServerRequestInterface $request) { return strpos($request->getRequestTarget(), '/foo/bar') === 0; },
-            $route ?: new MockedRoute('default')
-        );
+        $closure = $closure ?: function (ServerRequestInterface $request) {
+            return strpos($request->getRequestTarget(), '/foo/bar') === 0;
+        };
+        return new RequestFirewall($closure, $route ?: new MockedRoute('default'));
     }
 
     private function request($path = '/')
     {
-        $request = new FakeServerRequest();
-
+        $request      = new FakeServerRequest();
         $request->uri = FakeUri::fromString('//example.com' . $path);
-
         return $request;
     }
 }
