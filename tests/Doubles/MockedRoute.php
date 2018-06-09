@@ -36,7 +36,7 @@ class MockedRoute implements Route
         return $this->id ? new FakeResponse($this->id) : $notFound;
     }
 
-    public function gateway(string $path): Route
+    public function route(string $path): Route
     {
         $this->path = $path;
         return $this;

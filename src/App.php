@@ -50,13 +50,13 @@ abstract class App implements RequestHandlerInterface
     {
         $this->container or $this->container = $this->setup->container();
 
-        while ($id = array_shift($this->processQueue)) {
-            return $this->process($this->container->get($id), $request);
+        while ($middlewareId = array_shift($this->processQueue)) {
+            return $this->process($this->container->get($middlewareId), $request);
         }
 
         $this->processQueue = $this->middleware;
 
-        return $this->container->get(static::ROUTER_ID)->dispatch($request);
+        return $this->container->get(static::ROUTER_ID)->handle($request);
     }
 
     final public function config(string $id): RecordSetup
