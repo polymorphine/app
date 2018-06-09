@@ -47,7 +47,6 @@ class SessionContextTest extends TestCase
 
         $handler = $this->handler(function () use ($context) {
             $context->session()->set('foo', 'bar');
-            return new FakeResponse();
         });
         $cookie = ['Set-Cookie' => [
             SessionGlobalState::$name . '=12345657890ABCD; Path=/; HttpOnly'
@@ -135,9 +134,8 @@ class SessionContextTest extends TestCase
         return $request;
     }
 
-    private function handler(Closure $response = null)
+    private function handler(callable $process = null)
     {
-        $response = $response ?? function () { return new FakeResponse(); };
-        return new FakeRequestHandler($response);
+        return new FakeRequestHandler(new FakeResponse(), $process);
     }
 }

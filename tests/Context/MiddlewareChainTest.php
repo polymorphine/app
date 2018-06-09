@@ -37,7 +37,7 @@ class MiddlewareChainTest extends TestCase
 
     private function handler()
     {
-        return new FakeRequestHandler(function () { return new FakeResponse('response'); });
+        return new FakeRequestHandler(new FakeResponse('response'));
     }
 
     private function middleware()
