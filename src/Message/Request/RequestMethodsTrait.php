@@ -20,9 +20,10 @@ trait RequestMethodsTrait
 {
     use MessageMethodsTrait;
 
-    private $method;
+    /** @var UriInterface */
     private $uri;
     private $target;
+    private $method;
 
     public function getRequestTarget()
     {
@@ -31,7 +32,7 @@ trait RequestMethodsTrait
 
     public function withRequestTarget($requestTarget)
     {
-        $clone         = clone $this;
+        $clone = clone $this;
         $clone->target = $this->validRequestTarget($requestTarget);
 
         return $clone;
@@ -44,7 +45,7 @@ trait RequestMethodsTrait
 
     public function withMethod($method)
     {
-        $clone         = clone $this;
+        $clone = clone $this;
         $clone->method = $this->validMethod($method);
 
         return $clone;
@@ -57,7 +58,7 @@ trait RequestMethodsTrait
 
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
-        $clone      = clone $this;
+        $clone = clone $this;
         $clone->uri = $uri;
         $clone->resolveHostHeader($preserveHost);
 
@@ -67,7 +68,6 @@ trait RequestMethodsTrait
     private function validRequestTarget($target)
     {
         $invalidTarget = (!$target || !is_string($target) || $target !== '*' && !parse_url($target));
-
         return $invalidTarget ? null : $target;
     }
 
@@ -84,16 +84,16 @@ trait RequestMethodsTrait
     {
         $uriHost = $this->uri->getHost();
         if ($preserveHost && $this->hasHeader('host') || !$uriHost) { return; }
+
         $this->setHeader('Host', [$uriHost]);
     }
 
     private function resolveTargetFromUri()
     {
         $target = $this->uri->getPath();
-        if ($query = $this->uri->getQuery()) {
-            $target .= '?' . $query;
-        }
+        $query  = $this->uri->getQuery();
 
-        return $target ?: '/';
+        if (!$target && !$query) { return '/'; }
+        return $query ? $target . '?' . $query : $target;
     }
 }

@@ -38,22 +38,14 @@ class Uri implements UriInterface
 
     public function __construct(array $segments = [])
     {
-        isset($segments['scheme'])
-            and $this->scheme = $this->validScheme($segments['scheme']);
-        isset($segments['user'])
-            and $this->userInfo = $this->encode($segments['user'], self::CHARSET_HOST);
-        isset($segments['pass'])
-            and $this->userInfo .= ':' . $this->encode($segments['pass'], self::CHARSET_HOST . ':');
-        isset($segments['host'])
-            and $this->host = $this->normalizedHost($segments['host']);
-        isset($segments['port'])
-            and $this->port = $this->validPortRange((int) $segments['port']);
-        isset($segments['path'])
-            and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
-        isset($segments['query'])
-            and $this->query = $this->encode($segments['query'], self::CHARSET_QUERY);
-        isset($segments['fragment'])
-            and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
+        isset($segments['scheme']) and $this->scheme = $this->validScheme($segments['scheme']);
+        isset($segments['user']) and $this->userInfo = $this->encode($segments['user'], self::CHARSET_HOST);
+        isset($segments['pass']) and $this->userInfo .= $this->appendPassword($segments['pass']);
+        isset($segments['host']) and $this->host = $this->normalizedHost($segments['host']);
+        isset($segments['port']) and $this->port = $this->validPortRange((int) $segments['port']);
+        isset($segments['path']) and $this->path = $this->encode($segments['path'], self::CHARSET_PATH);
+        isset($segments['query']) and $this->query = $this->encode($segments['query'], self::CHARSET_QUERY);
+        isset($segments['fragment']) and $this->fragment = $this->encode($segments['fragment'], self::CHARSET_QUERY);
     }
 
     public static function fromString(string $uri = '')
@@ -68,9 +60,7 @@ class Uri implements UriInterface
 
     public function __toString(): string
     {
-        isset($this->uri) or $this->uri = $this->buildUriString();
-
-        return $this->uri;
+        return $this->uri ?? $this->uri = $this->buildUriString();
     }
 
     public function __clone()
@@ -96,7 +86,6 @@ class Uri implements UriInterface
     public function getPort()
     {
         $default = $this->port && $this->scheme && $this->supportedSchemes[$this->scheme]['port'] === $this->port;
-
         return ($default) ? null : $this->port;
     }
 
@@ -131,8 +120,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI scheme must be a string');
         }
 
-        $clone         = clone $this;
+        $clone = clone $this;
         $clone->scheme = $clone->validScheme($scheme);
+
         return $clone;
     }
 
@@ -146,10 +136,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI password must be a string or null');
         }
 
-        empty($password) or $password = ':' . $this->encode($password, self::CHARSET_HOST . ':');
+        $clone = clone $this;
+        $clone->userInfo = $this->encode($user, self::CHARSET_HOST) . $this->appendPassword($password);
 
-        $clone           = clone $this;
-        $clone->userInfo = $this->encode($user, self::CHARSET_HOST) . $password;
         return $clone;
     }
 
@@ -159,8 +148,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI host must be a string');
         }
 
-        $clone       = clone $this;
+        $clone = clone $this;
         $clone->host = $this->normalizedHost($host);
+
         return $clone;
     }
 
@@ -170,8 +160,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('Invalid port parameter - expected int<1-65535> or null');
         }
 
-        $clone       = clone $this;
+        $clone = clone $this;
         $clone->port = is_null($port) ? null : $clone->validPortRange($port);
+
         return $clone;
     }
 
@@ -181,8 +172,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI path must be a string');
         }
 
-        $clone       = clone $this;
+        $clone = clone $this;
         $clone->path = $this->encode($path, self::CHARSET_PATH);
+
         return $clone;
     }
 
@@ -192,8 +184,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI query must be a string');
         }
 
-        $clone        = clone $this;
+        $clone = clone $this;
         $clone->query = $this->encode($query, self::CHARSET_QUERY);
+
         return $clone;
     }
 
@@ -203,8 +196,9 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('URI fragment must be a string.');
         }
 
-        $clone           = clone $this;
+        $clone = clone $this;
         $clone->fragment = $this->encode($fragment, self::CHARSET_QUERY);
+
         return $clone;
     }
 
@@ -226,20 +220,18 @@ class Uri implements UriInterface
     {
         $authority = '//' . $this->getAuthority();
         if (!$this->path) { return $authority; }
-
         return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
     }
 
     private function filteredPath()
     {
-        if (empty($this->path)) { return ''; }
-
+        if (!$this->path) { return ''; }
         return ($this->path[0] === '/') ? '/' . ltrim($this->path, '/') : $this->path;
     }
 
     private function validScheme(string $scheme)
     {
-        if (empty($scheme)) { return ''; }
+        if (!$scheme) { return ''; }
 
         $scheme = strtolower($scheme);
         if (!isset($this->supportedSchemes[$scheme])) {
@@ -261,26 +253,26 @@ class Uri implements UriInterface
     private function normalizedHost($host)
     {
         $host = $this->encode($host, self::CHARSET_HOST, false);
-
         return $this->uppercaseEncoded(strtolower($host));
+    }
+
+    private function appendPassword(?string $password)
+    {
+        return $password ? ':' . $this->encode($password, self::CHARSET_HOST . ':') : '';
     }
 
     private function encode($string, $charset, $normalize = true)
     {
         $string = preg_replace('/%(?![0-9a-fA-F]{2})/', '%25', $string);
         $regexp = '/[' . $charset . ']+/u';
-        $encode = function ($matches) {
-            return rawurlencode($matches[0]);
-        };
+        $encode = function ($matches) { return rawurlencode($matches[0]); };
         $string = preg_replace_callback($regexp, $encode, $string);
-
         return $normalize ? $this->uppercaseEncoded($string) : $string;
     }
 
     private function uppercaseEncoded($string)
     {
         $upperEncoded = function ($matches) { return strtoupper($matches[0]); };
-
         return preg_replace_callback('/%(?=[A-Za-z0-9]{2}).{2}/', $upperEncoded, $string);
     }
 }

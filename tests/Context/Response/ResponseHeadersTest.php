@@ -28,9 +28,7 @@ class ResponseHeadersTest extends TestCase
     public function testGettingCollectionData()
     {
         $headers = [
-            'Set-Cookie' => [
-                'fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly'
-            ],
+            'Set-Cookie'   => ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly'],
             'X-Foo-Header' => ['foo'],
             'X-Bar-Header' => ['bar']
         ];
@@ -52,20 +50,21 @@ class ResponseHeadersTest extends TestCase
      * @dataProvider cookieData
      *
      * @param string $headerLine
-     * @param array  $c
+     * @param array  $cookieData
      */
-    public function testCookieHeaders(string $headerLine, array $c)
+    public function testCookieHeaders(string $headerLine, array $cookieData)
     {
         $collection = $this->collection();
-        $cookie     = $collection->cookie($c['name']);
 
-        isset($c['time']) and $cookie   = ($c['time'] !== 2628000) ? $cookie->expires($c['time']) : $cookie->permanent();
-        isset($c['domain']) and $cookie = $cookie->domain($c['domain']);
-        isset($c['path']) and $cookie   = $cookie->path($c['path']);
-        isset($c['secure']) and $cookie = $cookie->secure($c['secure']);
-        isset($c['http']) and $cookie   = $cookie->httpOnly($c['http']);
+        $cookie = $collection->cookie($cookieData['name']);
+        isset($cookieData['time']) and $cookie = $cookie->expires($cookieData['time']);
+        isset($cookieData['perm']) and $cookie = $cookie->permanent();
+        isset($cookieData['domain']) and $cookie = $cookie->domain($cookieData['domain']);
+        isset($cookieData['path']) and $cookie = $cookie->path($cookieData['path']);
+        isset($cookieData['secure']) and $cookie = $cookie->secure($cookieData['secure']);
+        isset($cookieData['http']) and $cookie = $cookie->httpOnly($cookieData['http']);
 
-        $c['value'] ? $cookie->value($c['value']) : $cookie->remove();
+        $cookieData['value'] ? $cookie->value($cookieData['value']) : $cookie->remove();
         $this->assertEquals($this->collection(['Set-Cookie' => [$headerLine]]), $collection);
     }
 
@@ -88,7 +87,7 @@ class ResponseHeadersTest extends TestCase
             ['permanentCookie=hash-3284682736487236; Expires=Sunday, 30-Apr-2023 00:00:00 UTC; MaxAge=157680000; HttpOnly', [
                 'name'  => 'permanentCookie',
                 'value' => 'hash-3284682736487236',
-                'time'  => 2628000,
+                'perm'  => true,
                 'http'  => true,
                 'path'  => ''
             ]]

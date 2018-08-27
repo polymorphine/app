@@ -32,7 +32,7 @@ class Response implements ResponseInterface
     ) {
         $this->status  = $this->validStatusCode($statusCode);
         $this->body    = $body;
-        $this->reason  = isset($params['reason']) ? $this->validReasonPhrase($params['reason']) : $this->resolveReasonPhrase();
+        $this->reason  = $this->validReasonPhrase($params['reason'] ?? '');
         $this->version = isset($params['version']) ? $this->validProtocolVersion($params['version']) : '1.1';
         $this->loadHeaders($headers);
     }
@@ -44,7 +44,7 @@ class Response implements ResponseInterface
 
     public function withStatus($code, $reasonPhrase = '')
     {
-        $clone         = clone $this;
+        $clone = clone $this;
         $clone->status = $this->validStatusCode($code);
         $clone->reason = $clone->validReasonPhrase($reasonPhrase);
 
@@ -61,7 +61,6 @@ class Response implements ResponseInterface
         if (!is_int($code) || $code < 100 || $code >= 600) {
             throw new InvalidArgumentException('Invalid status code argument - integer <100-599> expected');
         }
-
         return $code;
     }
 
@@ -70,7 +69,6 @@ class Response implements ResponseInterface
         if (!is_string($reason)) {
             throw new InvalidArgumentException('Invalid HTTP Response reason phrase - string expected');
         }
-
         return $this->resolveReasonPhrase($reason);
     }
 
@@ -79,7 +77,6 @@ class Response implements ResponseInterface
         if (empty($reason) && isset($this->statusCodes[$this->status])) {
             $reason = $this->statusCodes[$this->status];
         }
-
         return $reason;
     }
 }

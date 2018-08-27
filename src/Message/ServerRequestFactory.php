@@ -53,7 +53,7 @@ class ServerRequestFactory
         $uri     = $this->resolveUri();
         $body    = Stream::fromResourceUri('php://input');
         $headers = $this->resolveHeaders();
-        $params  = [
+        $params = [
             'server'     => $this->server,
             'cookie'     => $this->cookie,
             'query'      => $this->get,
@@ -85,7 +85,7 @@ class ServerRequestFactory
         $port   = $this->server['SERVER_PORT'] ?? null;
 
         [$uri, $fragment] = explode('#', $this->server['REQUEST_URI'] ?? '/', 2) + ['', ''];
-        [$path, $query]   = explode('?', $uri, 2) + ['', ''];
+        [$path, $query] = explode('?', $uri, 2) + ['', ''];
 
         return new Uri([
             'scheme'   => $scheme,
@@ -137,7 +137,6 @@ class ServerRequestFactory
         if (!function_exists('apache_request_headers')) { return false; }
 
         $headers = apache_request_headers();
-
         return $headers['Authorization'] ?? $headers['authorization'] ?? false;
     }
 
@@ -177,7 +176,6 @@ class ServerRequestFactory
         }
 
         $createFile = function ($file) { return new Request\UploadedFile($file); };
-
         return array_map($createFile, $normalizedFiles);
     }
 }

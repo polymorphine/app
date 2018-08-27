@@ -20,30 +20,32 @@ use Closure;
 
 class MockedRoute implements Route
 {
-    public $id;
-    public $callback;
     public $path;
+    public $callback;
+    public $selected;
 
-    public function __construct(string $id, Closure $callback = null)
+    public function __construct(string $path, Closure $callback = null)
     {
-        $this->id       = $id;
+        $this->path     = $path;
         $this->callback = $callback;
     }
 
     public function forward(ServerRequestInterface $request, ResponseInterface $notFound): ResponseInterface
     {
-        if ($this->callback) { return $this->callback->__invoke($request) ?? $notFound; }
-        return $this->id ? new FakeResponse($this->id) : $notFound;
+        if ($this->callback) {
+            return $this->callback->__invoke($request) ?? $notFound;
+        }
+        return $this->path ? new FakeResponse($this->path) : $notFound;
     }
 
-    public function route(string $path): Route
+    public function select(string $path): Route
     {
-        $this->path = $path;
+        $this->selected = $path;
         return $this;
     }
 
     public function uri(UriInterface $prototype, array $params): UriInterface
     {
-        return $this->id ? $prototype->withPath($this->id) : $prototype;
+        return $this->path ? $prototype->withPath($this->path) : $prototype;
     }
 }

@@ -13,6 +13,7 @@ namespace Polymorphine\Http\Context\Security;
 
 use RuntimeException;
 
+
 class CsrfTokenMismatchException extends RuntimeException
 {
 }

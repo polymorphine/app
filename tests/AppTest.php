@@ -75,7 +75,7 @@ class AppTest extends TestCase
 
     public function testFallbackNotFoundRoute()
     {
-        $app                 = $this->app();
+        $app = $this->app();
         $app->routeFound     = false;
         $app->overrideParent = false;
 
@@ -83,7 +83,7 @@ class AppTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(NotFoundResponse::class, $response);
 
-        $app                 = $this->app();
+        $app = $this->app();
         $app->routeFound     = false;
         $app->overrideParent = true;
 
@@ -124,7 +124,6 @@ class AppTest extends TestCase
     private function middlewareContextsApp()
     {
         $app = $this->app();
-
         $app->routeFound = true;
         $app->config('test')->value('MAIN');
         $app->middleware('one')->value(new FakeMiddleware('outerContext'));

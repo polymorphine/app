@@ -63,7 +63,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withCookieParams(array $cookies)
     {
-        $clone         = clone $this;
+        $clone = clone $this;
         $clone->cookie = $cookies;
 
         return $clone;
@@ -76,7 +76,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withQueryParams(array $query)
     {
-        $clone        = clone $this;
+        $clone = clone $this;
         $clone->query = $query;
 
         return $clone;
@@ -89,7 +89,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withUploadedFiles(array $uploadedFiles)
     {
-        $clone        = clone $this;
+        $clone = clone $this;
         $clone->files = $this->validUploadedFiles($uploadedFiles);
 
         return $clone;
@@ -102,7 +102,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withParsedBody($data)
     {
-        $clone             = clone $this;
+        $clone = clone $this;
         $clone->parsedBody = empty($data) ? null : $data;
 
         return $clone;
@@ -120,7 +120,7 @@ class ServerRequest implements ServerRequestInterface
 
     public function withAttribute($name, $value)
     {
-        $clone                    = clone $this;
+        $clone = clone $this;
         $clone->attributes[$name] = $value;
 
         return $clone;
@@ -137,7 +137,7 @@ class ServerRequest implements ServerRequestInterface
     private function validUploadedFiles(array $files)
     {
         if (!$this->validFilesTree($files)) {
-            throw new InvalidArgumentException('Invalid uploaded files argument - expected associative array tree with UploadedFileInterface leafs');
+            throw new InvalidArgumentException('Expected associative array tree with UploadedFileInterface leaves');
         }
 
         return $files;
@@ -162,6 +162,7 @@ class ServerRequest implements ServerRequestInterface
     {
         $content = $this->getHeaderLine('Content-Type');
 
-        return strpos($content, 'application/x-www-form-urlencoded') === 0 || strpos($content, 'multipart/form-data') === 0;
+        $urlEncoded = strpos($content, 'application/x-www-form-urlencoded') === 0;
+        return $urlEncoded || strpos($content, 'multipart/form-data') === 0;
     }
 }

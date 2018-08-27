@@ -12,14 +12,14 @@
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Message\Stream;
 use Polymorphine\Http\Server;
+use Polymorphine\Http\Message\Stream;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 
 require_once __DIR__ . '/Fixtures/header-functions.php';

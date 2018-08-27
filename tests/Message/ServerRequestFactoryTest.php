@@ -128,8 +128,8 @@ class ServerRequestFactoryTest extends TestCase
     public function testSingleUploadedFileSuperglobalStructure()
     {
         $files['test'] = $this->fileData('test.txt');
-        $request       = $this->factory(['files' => $files])->create();
-        $file          = $request->getUploadedFiles();
+        $request = $this->factory(['files' => $files])->create();
+        $file    = $request->getUploadedFiles();
         $this->assertInstanceOf(UploadedFileInterface::class, $file['test']);
         $this->assertSame('test.txt', $file['test']->getClientFilename());
     }
@@ -137,8 +137,8 @@ class ServerRequestFactoryTest extends TestCase
     public function testMultipleUploadedFileSuperglobalStructure()
     {
         $files['test'] = $this->fileData(['testA.txt', 'testB.txt']);
-        $request       = $this->factory(['files' => $files])->create();
-        $file          = $request->getUploadedFiles();
+        $request = $this->factory(['files' => $files])->create();
+        $file    = $request->getUploadedFiles();
         $this->assertInstanceOf(UploadedFileInterface::class, $file['test'][0]);
         $this->assertSame('testB.txt', $file['test'][1]->getClientFilename());
     }

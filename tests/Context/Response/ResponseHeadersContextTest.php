@@ -33,11 +33,10 @@ class ResponseHeadersContextTest extends TestCase
         ];
 
         $middleware = new ResponseHeadersContext(new ResponseHeaders($headers));
-        $handler = new FakeRequestHandler(new FakeResponse('test'));
-        $response = $middleware->process(new FakeServerRequest(), $handler);
+        $handler    = new FakeRequestHandler(new FakeResponse('test'));
+        $response   = $middleware->process(new FakeServerRequest(), $handler);
 
         $this->assertSame('test', (string) $response->getBody());
-
         $this->assertSame($headers, $response->getHeaders());
     }
 }

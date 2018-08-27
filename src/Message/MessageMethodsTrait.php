@@ -32,7 +32,7 @@ trait MessageMethodsTrait
 
     public function withProtocolVersion($version)
     {
-        $clone          = clone $this;
+        $clone = clone $this;
         $clone->version = $this->validProtocolVersion($version);
 
         return $clone;
@@ -61,7 +61,6 @@ trait MessageMethodsTrait
     public function getHeaderLine($name)
     {
         $header = $this->getHeader($name);
-
         return empty($header) ? '' : implode(', ', $header);
     }
 
@@ -84,7 +83,7 @@ trait MessageMethodsTrait
         $name  = $this->headerNames[$index];
         $value = $this->validHeaderValues($value);
 
-        $clone                 = clone $this;
+        $clone = clone $this;
         $clone->headers[$name] = array_merge($clone->headers[$name], $value);
 
         return $clone;
@@ -105,7 +104,7 @@ trait MessageMethodsTrait
 
     public function withBody(StreamInterface $body)
     {
-        $clone       = clone $this;
+        $clone = clone $this;
         $clone->body = $body;
 
         return $clone;
@@ -147,7 +146,8 @@ trait MessageMethodsTrait
             $headerValues = [$headerValues];
         }
         if (!is_array($headerValues) || !$this->legalHeaderStrings($headerValues)) {
-            throw new InvalidArgumentException('Invalid HTTP header value argument - expected legal strings[] or string');
+            $message = 'Invalid HTTP header value argument - expected legal strings[] or string';
+            throw new InvalidArgumentException($message);
         }
 
         return array_values($headerValues);
@@ -186,7 +186,8 @@ trait MessageMethodsTrait
         }
 
         if (!in_array($version, $this->supportedProtocolVersions, true)) {
-            throw new InvalidArgumentException('Unsupported HTTP protocol version - expected <' . implode('|', $this->supportedProtocolVersions) . '> string.');
+            $message = 'Unsupported HTTP protocol version - expected <%s> string';
+            throw new InvalidArgumentException(sprintf($message, implode('|', $this->supportedProtocolVersions)));
         }
 
         return $version;

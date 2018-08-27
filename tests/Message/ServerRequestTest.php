@@ -97,10 +97,10 @@ class ServerRequestTest extends TestCase
 
     public function testAttributeMutation_ReturnsNewInstance()
     {
-        $original       = $this->request();
+        $original = $this->request();
         [$name, $value] = ['name', 'value'];
-        $derived1       = $original->withAttribute($name, $value);
-        $derived2       = $original->withAttribute($name, $value);
+        $derived1 = $original->withAttribute($name, $value);
+        $derived2 = $original->withAttribute($name, $value);
         $this->assertEquals($derived1, $derived2);
         $this->assertNotSame($derived1, $derived2);
 
@@ -153,7 +153,7 @@ class ServerRequestTest extends TestCase
     public function testUploadedFileNestedStructureIsValid()
     {
         $files = [
-            'first'  => new Doubles\FakeUploadedFile(),
+            'first' => new Doubles\FakeUploadedFile(),
             'second' => [
                 'subcategory1' => new Doubles\FakeUploadedFile(),
                 'subcategory2' => new Doubles\FakeUploadedFile()

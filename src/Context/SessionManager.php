@@ -15,6 +15,8 @@ namespace Polymorphine\Http\Context;
 interface SessionManager
 {
     public function startSession(): void;
+
     public function session(): Session;
+
     public function commitSession(array $data): void;
 }

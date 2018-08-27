@@ -14,12 +14,11 @@ namespace Polymorphine\Http\Tests\Context\Session;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Context\Session\SessionContext;
 use Polymorphine\Http\Context\Response\ResponseHeaders;
-use Psr\Http\Server\MiddlewareInterface;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Fixtures\SessionGlobalState;
-use Closure;
+use Psr\Http\Server\MiddlewareInterface;
 use RuntimeException;
 
 require_once dirname(dirname(__DIR__)) . '/Fixtures/session-functions.php';

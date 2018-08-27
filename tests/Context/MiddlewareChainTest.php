@@ -13,11 +13,11 @@ namespace Polymorphine\Http\Tests\Context;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Context\MiddlewareChain;
-use Psr\Http\Server\MiddlewareInterface;
-use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Psr\Http\Server\MiddlewareInterface;
 
 
 class MiddlewareChainTest extends TestCase

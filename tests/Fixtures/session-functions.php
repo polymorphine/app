@@ -45,7 +45,8 @@ function session_write_close()
     SessionGlobalState::$status = PHP_SESSION_NONE;
     SessionGlobalState::$id     = '';
     SessionGlobalState::$data   = $_SESSION;
-    $_SESSION                          = null;
+
+    $_SESSION = null;
 }
 
 function session_destroy()
