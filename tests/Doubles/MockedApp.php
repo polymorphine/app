@@ -21,26 +21,25 @@ use Psr\Http\Message\UriInterface;
 
 class MockedApp extends App
 {
-    public $routeFound = false;
+    public $routeFound = true;
 
-    /** @var ResponseInterface */
-    public $notFound;
+    public $notFoundResponse;
 
     protected function routing(ContainerInterface $c): Route
     {
-        return new MockedRoute(
-            '',
-            $this->routeFound ? function (ServerRequestInterface $request) use ($c) {
-                $body = $request->getUri() . ': ' . $c->get('test');
+        $callback = function (ServerRequestInterface $request) use ($c) {
+            if (!$this->routeFound) { return $this->notFoundResponse(); }
 
-                return new FakeResponse($body);
-            } : null
-        );
+            $body = $request->getUri() . ': ' . $c->get('test');
+            return new FakeResponse($body);
+        };
+
+        return new Route\Endpoint\CallbackEndpoint($callback);
     }
 
     protected function notFoundResponse(): ResponseInterface
     {
-        return $this->notFound ?: new FakeResponse();
+        return $this->notFoundResponse ?: new FakeResponse();
     }
 
     protected function baseUri(): UriInterface

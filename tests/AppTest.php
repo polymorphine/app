@@ -18,7 +18,7 @@ use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Polymorphine\Http\Tests\Fixtures\ShutdownState;
 use Polymorphine\Container\Setup;
-use Polymorphine\Container\Exception\InvalidIdException;
+use Polymorphine\Container\Exception;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
@@ -43,19 +43,14 @@ class AppTest extends TestCase
 
     public function testRoutingContainerIntegration()
     {
-        $app = $this->app([
-            'test' => new Setup\Record\DirectRecord('Hello World!')
-        ]);
-        $app->routeFound = true;
-
+        $app      = $this->app(['test' => new Setup\Record\DirectRecord('Hello World!')]);
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
     public function testRepeatedHandleCallsWithMiddlewareProcessing_ReturnsEqualResponse()
     {
-        $app = $this->middlewareContextsApp();
-
+        $app      = $this->middlewareContextsApp();
         $request  = new Doubles\FakeServerRequest('GET', FakeUri::fromString('/test'));
         $response = $app->handle($request);
 
@@ -66,20 +61,20 @@ class AppTest extends TestCase
 
     public function testInstanceWithDefinedInternalContainerId_ThrowsException()
     {
-        $this->expectException(InvalidIdException::class);
+        $this->expectException(Exception\InvalidIdException::class);
         $this->app([App::ROUTER_ID => new Setup\Record\DirectRecord('Hello World!')]);
     }
 
     public function testFallbackNotFoundRoute()
     {
         $app = $this->app();
-        $app->routeFound = false;
-        $app->notFound   = new Doubles\FakeResponse();
+        $app->routeFound       = false;
+        $app->notFoundResponse = new Doubles\FakeResponse();
 
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(Doubles\FakeResponse::class, $response);
-        $this->assertSame($app->notFound, $response);
+        $this->assertSame($app->notFoundResponse, $response);
     }
 
     public function testShutdownRegisteredOnProduction()
@@ -113,7 +108,6 @@ class AppTest extends TestCase
     private function middlewareContextsApp()
     {
         $app = $this->app();
-        $app->routeFound = true;
         $app->config('test')->value('MAIN');
         $app->middleware('one')->value(new FakeMiddleware('outerContext'));
         $app->middleware('two')->lazy(function (ContainerInterface $c) {
