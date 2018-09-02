@@ -11,14 +11,13 @@
 
 namespace Polymorphine\Http;
 
-use Polymorphine\Http\Message\Uri;
-use Polymorphine\Http\Message\Response\NotFoundResponse;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Container\Setup\Record;
 use Polymorphine\Container\Exception\InvalidIdException;
 use Polymorphine\Routing\Router;
 use Polymorphine\Routing\Route;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -71,10 +70,16 @@ abstract class App implements RequestHandlerInterface
         return $this->setup->entry($id);
     }
 
+    abstract protected function routing(ContainerInterface $c): Route;
+
+    abstract protected function notFoundResponse(): ResponseInterface;
+
+    abstract protected function baseUri(): UriInterface;
+
     protected function environmentSetup()
     {
         if ($this->setup->exists(static::ROUTER_ID)) {
-            $message  = 'Internal router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
+            $message  = 'Reserved router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
             $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
             throw new InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
         }
@@ -82,16 +87,6 @@ abstract class App implements RequestHandlerInterface
         $this->setup->entry(static::ROUTER_ID)->lazy(function (ContainerInterface $container) {
             return new Router($this->routing($container), $this->baseUri(), $this->notFoundResponse());
         });
-    }
-
-    protected function notFoundResponse()
-    {
-        return new NotFoundResponse();
-    }
-
-    protected function baseUri()
-    {
-        return new Uri();
     }
 
     protected function registerShutdown()
@@ -106,8 +101,6 @@ abstract class App implements RequestHandlerInterface
             ob_end_clean();
         });
     }
-
-    abstract protected function routing(ContainerInterface $c): Route;
 
     private function process(MiddlewareInterface $middleware, ServerRequestInterface $request)
     {

@@ -13,14 +13,18 @@ namespace Polymorphine\Http\Tests\Doubles;
 
 use Polymorphine\Http\App;
 use Polymorphine\Routing\Route;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\UriInterface;
 
 
 class MockedApp extends App
 {
-    public $routeFound     = false;
-    public $overrideParent = false;
+    public $routeFound = false;
+
+    /** @var ResponseInterface */
+    public $notFound;
 
     protected function routing(ContainerInterface $c): Route
     {
@@ -34,8 +38,13 @@ class MockedApp extends App
         );
     }
 
-    protected function notFoundResponse()
+    protected function notFoundResponse(): ResponseInterface
     {
-        return $this->overrideParent ? new FakeResponse('Not Found') : parent::notFoundResponse();
+        return $this->notFound ?: new FakeResponse();
+    }
+
+    protected function baseUri(): UriInterface
+    {
+        return new FakeUri();
     }
 }

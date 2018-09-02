@@ -13,9 +13,8 @@ namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\App;
-use Polymorphine\Http\Message\Uri;
-use Polymorphine\Http\Message\Response\NotFoundResponse;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
+use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Polymorphine\Http\Tests\Fixtures\ShutdownState;
 use Polymorphine\Container\Setup;
@@ -53,18 +52,16 @@ class AppTest extends TestCase
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
 
-    public function testRepeatedMiddlewareQueueProcessing()
+    public function testRepeatedHandleCallsWithMiddlewareProcessing_ReturnsEqualResponse()
     {
         $app = $this->middlewareContextsApp();
 
-        $expectedBody = 'outerContext innerContext /test: MAIN innerContext outerContext';
-        $responseBody = $app->handle(new Doubles\FakeServerRequest('GET', Uri::fromString('/test')))->getBody();
-        $this->assertSame($expectedBody, (string) $responseBody);
+        $request  = new Doubles\FakeServerRequest('GET', FakeUri::fromString('/test'));
+        $response = $app->handle($request);
 
-        //Middleware processing is handled by recursive calls
-        //Queue should be restored after each processing
-        $responseBody = $app->handle(new Doubles\FakeServerRequest('GET', Uri::fromString('/test')))->getBody();
-        $this->assertSame($expectedBody, (string) $responseBody);
+        $expectedBody = 'outerContext innerContext /test: MAIN innerContext outerContext';
+        $this->assertSame($expectedBody, (string) $response->getBody());
+        $this->assertEquals($response, $app->handle($request));
     }
 
     public function testInstanceWithDefinedInternalContainerId_ThrowsException()
@@ -76,21 +73,13 @@ class AppTest extends TestCase
     public function testFallbackNotFoundRoute()
     {
         $app = $this->app();
-        $app->routeFound     = false;
-        $app->overrideParent = false;
-
-        $response = $app->handle(new Doubles\FakeServerRequest());
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertInstanceOf(NotFoundResponse::class, $response);
-
-        $app = $this->app();
-        $app->routeFound     = false;
-        $app->overrideParent = true;
+        $app->routeFound = false;
+        $app->notFound   = new Doubles\FakeResponse();
 
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(Doubles\FakeResponse::class, $response);
-        $this->assertSame('Not Found', $response->body);
+        $this->assertSame($app->notFound, $response);
     }
 
     public function testShutdownRegisteredOnProduction()
