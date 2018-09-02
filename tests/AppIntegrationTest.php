@@ -27,7 +27,7 @@ require_once __DIR__ . '/Fixtures/shutdown-functions.php';
 require_once __DIR__ . '/Fixtures/header-functions.php';
 
 
-class AppTest extends TestCase
+class AppIntegrationTest extends TestCase
 {
     public function testInstantiation()
     {
