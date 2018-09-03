@@ -48,7 +48,7 @@ class SessionContextTest extends TestCase
             $context->session()->set('foo', 'bar');
         });
         $cookie = ['Set-Cookie' => [
-            SessionGlobalState::$name . '=12345657890ABCD; Path=/; HttpOnly'
+            SessionGlobalState::$name . '=DEFAULT_SESSION_ID; Path=/; HttpOnly'
         ]];
 
         $context->process($this->request(), $handler);
@@ -67,13 +67,32 @@ class SessionContextTest extends TestCase
         $handler = $this->handler(function () use ($context) {
             $session = $context->session();
             $session->set('foo', $session->get('foo') . '-baz');
-            return new FakeResponse();
         });
 
         $context->process($this->request(true), $handler);
 
         $this->assertSame(['foo' => 'bar-baz'], SessionGlobalState::$data);
         $this->assertSame([], $headers->data());
+    }
+
+    public function testSessionRegenerateId()
+    {
+        SessionGlobalState::$data = ['foo' => 'bar'];
+
+        $headers = new ResponseHeaders();
+        $context = new SessionContext($headers);
+
+        $handler = $this->handler(function () use ($context) {
+            $context->regenerateId();
+        });
+        $cookie = ['Set-Cookie' => [
+            SessionGlobalState::$name . '=REGENERATED_SESSION_ID; Path=/; HttpOnly'
+        ]];
+
+        $context->process($this->request(true), $handler);
+
+        $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
+        $this->assertSame($cookie, $headers->data());
     }
 
     public function testSessionDestroy()
@@ -84,9 +103,7 @@ class SessionContextTest extends TestCase
         $context = new SessionContext($headers);
 
         $handler = $this->handler(function () use ($context) {
-            $session = $context->session();
-            $session->clear();
-            return new FakeResponse();
+            $context->session()->clear();
         });
 
         $context->process($this->request(true), $handler);

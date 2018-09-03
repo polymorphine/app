@@ -18,5 +18,7 @@ interface SessionManager
 
     public function session(): Session;
 
+    public function regenerateId(): void;
+
     public function commitSession(array $data): void;
 }

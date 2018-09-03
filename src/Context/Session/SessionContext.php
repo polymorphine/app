@@ -11,13 +11,13 @@
 
 namespace Polymorphine\Http\Context\Session;
 
+use Polymorphine\Http\Context\SessionManager;
+use Polymorphine\Http\Context\Session;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Polymorphine\Http\Context\SessionManager;
-use Polymorphine\Http\Context\Session;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
 use RuntimeException;
 
 
@@ -39,7 +39,8 @@ class SessionContext implements MiddlewareInterface, SessionManager
         $cookies = $request->getCookieParams();
 
         $this->sessionName = session_name();
-        isset($cookies[$this->sessionName]) ? $this->startSession() : $this->createStorage();
+        if (isset($cookies[$this->sessionName])) { $this->startSession(); }
+        $this->createStorage($_SESSION ?? []);
 
         $response = $handler->handle($request);
         $this->session()->commit();
@@ -62,7 +63,13 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
         session_start();
         $this->sessionStarted = true;
-        $this->createStorage($_SESSION);
+    }
+
+    public function regenerateId(): void
+    {
+        if (!$this->sessionStarted) { return; }
+        session_regenerate_id(true);
+        $this->setSessionCookie();
     }
 
     public function commitSession(array $data): void
@@ -74,11 +81,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
         if (!$this->sessionStarted) {
             $this->startSession();
-            $cookie = $this->headers->cookie($this->sessionName);
-            $cookie->domain(ini_get('session.cookie_domain'))
-                   ->path(ini_get('session.cookie_path') ?: '/')
-                   ->httpOnly(true)
-                   ->value(session_id());
+            $this->setSessionCookie();
         }
 
         $_SESSION = $data;
@@ -88,6 +91,15 @@ class SessionContext implements MiddlewareInterface, SessionManager
     protected function createStorage(array $data = []): void
     {
         $this->session = new SessionStorage($this, $data);
+    }
+
+    protected function setSessionCookie(): void
+    {
+        $cookie = $this->headers->cookie($this->sessionName);
+        $cookie->domain(ini_get('session.cookie_domain'))
+               ->path(ini_get('session.cookie_path') ?: '/')
+               ->httpOnly(true)
+               ->value(session_id());
     }
 
     private function destroy(): void

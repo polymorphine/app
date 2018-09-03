@@ -22,7 +22,7 @@ interface Session
 
     public function remove(string $key): void;
 
-    public function clear();
+    public function clear(): void;
 
     public function commit();
 }

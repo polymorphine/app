@@ -27,6 +27,10 @@ class FakeSessionManager implements SessionManager
     {
     }
 
+    public function regenerateId(): void
+    {
+    }
+
     public function commitSession(array $data): void
     {
         $this->data = $data;
