@@ -11,13 +11,11 @@
 
 namespace Polymorphine\Http;
 
+use Polymorphine\Routing\Router;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Container\Setup\Record;
 use Polymorphine\Container\Exception\InvalidIdException;
-use Polymorphine\Routing\Router;
-use Polymorphine\Routing\Route;
-use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -70,11 +68,7 @@ abstract class App implements RequestHandlerInterface
         return $this->setup->entry($id);
     }
 
-    abstract protected function routing(ContainerInterface $c): Route;
-
-    abstract protected function notFoundResponse(): ResponseInterface;
-
-    abstract protected function baseUri(): UriInterface;
+    abstract protected function routing(ContainerInterface $c): Router;
 
     protected function environmentSetup()
     {
@@ -85,7 +79,7 @@ abstract class App implements RequestHandlerInterface
         }
 
         $this->setup->entry(static::ROUTER_ID)->lazy(function (ContainerInterface $container) {
-            return new Router($this->routing($container), $this->baseUri(), $this->notFoundResponse());
+            return $this->routing($container);
         });
     }
 

@@ -13,10 +13,10 @@ namespace Polymorphine\Http\Tests\Doubles;
 
 use Polymorphine\Http\App;
 use Polymorphine\Routing\Route;
+use Polymorphine\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\UriInterface;
 
 
 class MockedApp extends App
@@ -25,25 +25,20 @@ class MockedApp extends App
 
     public $notFoundResponse;
 
-    protected function routing(ContainerInterface $c): Route
+    protected function routing(ContainerInterface $c): Router
     {
-        $callback = function (ServerRequestInterface $request) use ($c) {
+        $route = new Route\Endpoint\CallbackEndpoint(function (ServerRequestInterface $request) use ($c) {
             if (!$this->routeFound) { return $this->notFoundResponse(); }
 
             $body = $request->getUri() . ': ' . $c->get('test');
             return new FakeResponse($body);
-        };
+        });
 
-        return new Route\Endpoint\CallbackEndpoint($callback);
+        return new Router($route, new FakeUri(), new FakeResponse());
     }
 
-    protected function notFoundResponse(): ResponseInterface
+    private function notFoundResponse(): ResponseInterface
     {
         return $this->notFoundResponse ?: new FakeResponse();
-    }
-
-    protected function baseUri(): UriInterface
-    {
-        return new FakeUri();
     }
 }
