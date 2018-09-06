@@ -14,6 +14,7 @@ namespace Polymorphine\Http\Context\Session;
 use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Session;
 use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\Http\Context\Security\CsrfPersistentTokenContext;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,6 +25,8 @@ use RuntimeException;
 class SessionContext implements MiddlewareInterface, SessionManager
 {
     private $headers;
+
+    /** @var Session */
     private $session;
 
     private $sessionName;
@@ -70,6 +73,8 @@ class SessionContext implements MiddlewareInterface, SessionManager
         if (!$this->sessionStarted) { return; }
         session_regenerate_id(true);
         $this->setSessionCookie();
+        $this->session->remove(CsrfPersistentTokenContext::SESSION_CSRF_KEY);
+        $this->session->remove(CsrfPersistentTokenContext::SESSION_CSRF_TOKEN);
     }
 
     public function commitSession(array $data): void
