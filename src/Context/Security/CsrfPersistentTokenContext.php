@@ -43,7 +43,13 @@ class CsrfPersistentTokenContext implements MiddlewareInterface
 
     public function appSignature(): CsrfToken
     {
-        return $this->token ?: $this->token = $this->generateToken();
+        return $this->token ?: $this->token = $this->sessionToken() ?? $this->generateToken();
+    }
+
+    public function resetToken(): void
+    {
+        $this->session->remove(static::SESSION_CSRF_KEY);
+        $this->token = null;
     }
 
     private function tokenMatch(array $payload): void

@@ -14,6 +14,7 @@ namespace Polymorphine\Http\Tests\Context\Security;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Context\CallbackHandler;
 use Polymorphine\Http\Context\Security\CsrfPersistentTokenContext;
+use Polymorphine\Http\Context\Security\CsrfToken;
 use Polymorphine\Http\Context\Security\CsrfTokenMismatchException;
 use Polymorphine\Http\Context\Session\SessionStorage;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
@@ -145,12 +146,22 @@ class CsrfPersistentTokenContextTest extends TestCase
         $guard = $this->guard($this->token('name', 'hash'));
         $token = $guard->appSignature();
 
-        $this->assertNotEquals('name', $token->name);
-        $this->assertNotEquals('hash', $token->hash);
+        $this->assertEquals('name', $token->name);
+        $this->assertEquals('hash', $token->hash);
 
-        $token2 = $guard->appSignature();
-        $this->assertEquals($token->name, $token2->name);
-        $this->assertEquals($token->hash, $token2->hash);
+        $this->assertSame($token, $guard->appSignature());
+    }
+
+    public function testResetTokenRemovesToken()
+    {
+        $guard = $this->guard();
+        $token = $guard->appSignature();
+        $guard->resetToken();
+
+        $newToken = $guard->appSignature();
+        $this->assertInstanceOf(CsrfToken::class, $newToken);
+        $this->assertInstanceOf(CsrfToken::class, $token);
+        $this->assertNotEquals($token, $newToken);
     }
 
     public function unsafeMethods()
