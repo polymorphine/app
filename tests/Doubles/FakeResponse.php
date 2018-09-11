@@ -54,6 +54,7 @@ class FakeResponse implements ResponseInterface
 
     public function getHeader($name)
     {
+        return $this->headers[$name];
     }
 
     public function getHeaderLine($name)
@@ -62,7 +63,7 @@ class FakeResponse implements ResponseInterface
 
     public function withHeader($name, $value)
     {
-        $this->headers[$name] = $value;
+        $this->headers[$name] = [$value];
         return $this;
     }
 

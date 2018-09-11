@@ -12,18 +12,15 @@
 namespace Polymorphine\Http\Tests\Context\Session;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Context\Session;
-use Polymorphine\Http\Context\SessionManager;
-use Polymorphine\Http\Context\Session\SessionStorage;
-use Polymorphine\Http\Tests\Doubles\FakeSessionManager;
+use Polymorphine\Http\Context\Session\SessionData;
+use Polymorphine\Http\Tests\Doubles\FakeSession;
 
 
-class SessionStorageTest extends TestCase
+class SessionDataTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(SessionStorage::class, $session = $this->storage());
-        $this->assertInstanceOf(Session::class, $session);
+        $this->assertInstanceOf(SessionData::class, $session = $this->storage());
     }
 
     public function testGetData()
@@ -57,7 +54,7 @@ class SessionStorageTest extends TestCase
 
     public function testClearData()
     {
-        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 'bar', 'baz' => true]);
+        $storage = new SessionData($manager = new FakeSession(), ['foo' => 'bar', 'baz' => true]);
         $storage->clear();
         $storage->commit();
         $this->assertSame([], $manager->data);
@@ -76,7 +73,7 @@ class SessionStorageTest extends TestCase
             'bar' => 'baz'
         ];
 
-        $storage = new SessionStorage($manager = new FakeSessionManager(), $data);
+        $storage = new SessionData($manager = new FakeSession(), $data);
 
         $data['fizz'] = 'buzz';
         $storage->set('fizz', 'buzz');
@@ -87,7 +84,7 @@ class SessionStorageTest extends TestCase
 
     public function testSettingNullDoesNotRemoveData()
     {
-        $storage = new SessionStorage($manager = new FakeSessionManager(), ['foo' => 500]);
+        $storage = new SessionData($manager = new FakeSession(), ['foo' => 500]);
         $this->assertTrue($storage->has('foo'));
         $storage->set('foo', null);
         $this->assertTrue($storage->has('foo'));
@@ -95,8 +92,8 @@ class SessionStorageTest extends TestCase
         $this->assertTrue(array_key_exists('foo', $manager->data));
     }
 
-    private function storage(array $data = [], SessionManager $manager = null): Session
+    private function storage(array $data = [], $manager = null): SessionData
     {
-        return new SessionStorage($manager ?? new FakeSessionManager(), $data);
+        return new SessionData($manager ?? new FakeSession(), $data);
     }
 }

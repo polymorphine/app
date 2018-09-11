@@ -67,7 +67,7 @@ class Response implements ResponseInterface
     private function validReasonPhrase($reason)
     {
         if (!is_string($reason)) {
-            throw new InvalidArgumentException('Invalid HTTP Response reason phrase - string expected');
+            throw new InvalidArgumentException('Invalid HTTP ResponseHeaders reason phrase - string expected');
         }
         return $this->resolveReasonPhrase($reason);
     }

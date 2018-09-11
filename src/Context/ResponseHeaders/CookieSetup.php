@@ -9,8 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Response;
+namespace Polymorphine\Http\Context\ResponseHeaders;
 
+use Polymorphine\Http\Context\ResponseHeaders;
 use DateTime;
 
 

@@ -9,16 +9,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Security;
+namespace Polymorphine\Http\Context\CsrfProtection;
 
+use Polymorphine\Http\Context\CsrfProtection;
+use Polymorphine\Http\Context\Session\SessionData;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Polymorphine\Http\Context\Session\SessionStorage;
 
 
-class CsrfPersistentTokenContext implements MiddlewareInterface
+class CsrfPersistentTokenContext implements MiddlewareInterface, CsrfProtection
 {
     public const SESSION_CSRF_KEY   = 'csrf_key';
     public const SESSION_CSRF_TOKEN = 'csrf_token';
@@ -26,7 +27,7 @@ class CsrfPersistentTokenContext implements MiddlewareInterface
     private $session;
     private $token;
 
-    public function __construct(SessionStorage $session)
+    public function __construct(SessionData $session)
     {
         $this->session = $session;
     }
@@ -60,7 +61,7 @@ class CsrfPersistentTokenContext implements MiddlewareInterface
         if ($valid) { return; }
 
         $this->session->clear();
-        throw new CsrfTokenMismatchException();
+        throw new Exception\CsrfTokenMismatchException();
     }
 
     private function sessionToken(): ?CsrfToken

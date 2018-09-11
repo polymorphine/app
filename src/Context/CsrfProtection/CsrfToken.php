@@ -9,11 +9,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Security;
-
-use RuntimeException;
+namespace Polymorphine\Http\Context\CsrfProtection;
 
 
-class CsrfTokenMismatchException extends RuntimeException
+class CsrfToken
 {
+    public $name;
+    public $hash;
+
+    public function __construct($name, $hash)
+    {
+        $this->name = $name;
+        $this->hash = $hash;
+    }
 }

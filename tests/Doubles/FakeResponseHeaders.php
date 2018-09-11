@@ -9,17 +9,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Response;
+namespace Polymorphine\Http\Tests\Doubles;
+
+use Polymorphine\Http\Context\ResponseHeaders;
+use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 
-class ResponseHeaders
+class FakeResponseHeaders implements ResponseHeaders
 {
-    private $headers;
-
-    public function __construct(array $defaultHeaders = [])
-    {
-        $this->headers = $defaultHeaders;
-    }
+    public $data = [];
 
     public function cookie(string $name): CookieSetup
     {
@@ -28,11 +26,6 @@ class ResponseHeaders
 
     public function add(string $name, string $header): void
     {
-        $this->headers[$name][] = $header;
-    }
-
-    public function data(): array
-    {
-        return $this->headers;
+        $this->data[$name][] = $header;
     }
 }

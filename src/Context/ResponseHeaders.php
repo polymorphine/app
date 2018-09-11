@@ -11,16 +11,12 @@
 
 namespace Polymorphine\Http\Context;
 
-use Polymorphine\Http\Context\Session\SessionData;
+use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 
-interface Session
+interface ResponseHeaders
 {
-    public function start(): void;
+    public function cookie(string $name): CookieSetup;
 
-    public function data(): SessionData;
-
-    public function resetContext(): void;
-
-    public function commit(array $data): void;
+    public function add(string $name, string $header): void;
 }

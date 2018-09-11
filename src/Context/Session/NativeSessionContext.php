@@ -11,9 +11,8 @@
 
 namespace Polymorphine\Http\Context\Session;
 
-use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Session;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\Http\Context\ResponseHeaders;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,12 +20,12 @@ use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 
 
-class SessionContext implements MiddlewareInterface, SessionManager
+class NativeSessionContext implements MiddlewareInterface, Session
 {
     private $headers;
 
-    /** @var Session */
-    private $session;
+    /** @var SessionData */
+    private $sessionData;
 
     private $sessionName;
     private $sessionStarted = false;
@@ -41,23 +40,23 @@ class SessionContext implements MiddlewareInterface, SessionManager
         $cookies = $request->getCookieParams();
 
         $this->sessionName = session_name();
-        if (isset($cookies[$this->sessionName])) { $this->startSession(); }
+        if (isset($cookies[$this->sessionName])) { $this->start(); }
         $this->createStorage($_SESSION ?? []);
 
         $response = $handler->handle($request);
-        $this->session()->commit();
+        $this->data()->commit();
         return $response;
     }
 
-    public function session(): Session
+    public function data(): SessionData
     {
-        if (!$this->session) {
+        if (!$this->sessionData) {
             throw new RuntimeException('Session context not started');
         }
-        return $this->session;
+        return $this->sessionData;
     }
 
-    public function startSession(): void
+    public function start(): void
     {
         if (session_status() !== PHP_SESSION_NONE) {
             throw new RuntimeException('Session started in another context');
@@ -67,14 +66,14 @@ class SessionContext implements MiddlewareInterface, SessionManager
         $this->sessionStarted = true;
     }
 
-    public function regenerateId(): void
+    public function resetContext(): void
     {
         if (!$this->sessionStarted) { return; }
         session_regenerate_id(true);
         $this->setSessionCookie();
     }
 
-    public function commitSession(array $data): void
+    public function commit(array $data): void
     {
         if (!$data) {
             $this->destroy();
@@ -82,7 +81,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
         }
 
         if (!$this->sessionStarted) {
-            $this->startSession();
+            $this->start();
             $this->setSessionCookie();
         }
 
@@ -92,7 +91,7 @@ class SessionContext implements MiddlewareInterface, SessionManager
 
     protected function createStorage(array $data = []): void
     {
-        $this->session = new SessionStorage($this, $data);
+        $this->sessionData = new SessionData($this, $data);
     }
 
     protected function setSessionCookie(): void

@@ -9,32 +9,43 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Response;
+namespace Polymorphine\Http\Context\ResponseHeaders;
 
+use Polymorphine\Http\Context\ResponseHeaders;
 use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 
-class ResponseHeadersContext implements MiddlewareInterface
+class ResponseHeadersContext implements MiddlewareInterface, ResponseHeaders
 {
     private $headers;
 
-    public function __construct(ResponseHeaders $headers)
+    public function __construct(array $defaultHeaders = [])
     {
-        $this->headers = $headers;
+        $this->headers = $defaultHeaders;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
 
-        foreach ($this->headers->data() as $name => $headerLines) {
+        foreach ($this->headers as $name => $headerLines) {
             $response = $this->addHeaderLines($response, $name, $headerLines);
         }
 
         return $response;
+    }
+
+    public function cookie(string $name): CookieSetup
+    {
+        return new CookieSetup($name, $this);
+    }
+
+    public function add(string $name, string $header): void
+    {
+        $this->headers[$name][] = $header;
     }
 
     private function addHeaderLines(ResponseInterface $response, string $name, array $headerLines): ResponseInterface

@@ -11,16 +11,15 @@
 
 namespace Polymorphine\Http\Context\Session;
 
-use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Session;
 
 
-class SessionStorage implements Session
+class SessionData
 {
     private $manager;
     private $data;
 
-    public function __construct(SessionManager $manager, array $data = [])
+    public function __construct(Session $manager, array $data = [])
     {
         $this->manager = $manager;
         $this->data    = $data;
@@ -53,6 +52,6 @@ class SessionStorage implements Session
 
     public function commit(): void
     {
-        $this->manager->commitSession($this->data);
+        $this->manager->commit($this->data);
     }
 }

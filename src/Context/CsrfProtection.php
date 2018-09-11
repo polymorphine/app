@@ -11,14 +11,12 @@
 
 namespace Polymorphine\Http\Context;
 
+use Polymorphine\Http\Context\CsrfProtection\CsrfToken;
 
-interface SessionManager
+
+interface CsrfProtection
 {
-    public function startSession(): void;
+    public function appSignature(): CsrfToken;
 
-    public function session(): Session;
-
-    public function regenerateId(): void;
-
-    public function commitSession(array $data): void;
+    public function resetToken(): void;
 }

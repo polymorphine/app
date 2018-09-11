@@ -9,41 +9,63 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Context\Response;
+namespace Polymorphine\Http\Tests\Context\ResponseHeaders;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Context\Response\CookieSetup;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\Http\Context\ResponseHeaders;
+use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
+use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\Http\Tests\Doubles\FakeResponse;
+use Psr\Http\Server\MiddlewareInterface;
 
-require_once dirname(dirname(__DIR__)) . '/Fixtures/time-functions.php';
 
-
-class ResponseHeadersTest extends TestCase
+class ResponseHeadersContextTest extends TestCase
 {
     public function testInstantiation()
     {
         $this->assertInstanceOf(ResponseHeaders::class, $this->collection());
+        $this->assertInstanceOf(MiddlewareInterface::class, $this->collection());
     }
 
-    public function testGettingCollectionData()
+    public function testProcessing()
     {
         $headers = [
+            'Set-Cookie' => [
+                'fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly',
+                'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000'
+            ],
+            'X-Foo-Header' => ['foo'],
+            'X-Bar-Header' => ['bar']
+        ];
+
+        $handler  = new FakeRequestHandler(new FakeResponse('test'));
+        $response = $this->collection($headers)->process(new FakeServerRequest(), $handler);
+
+        $this->assertSame('test', (string) $response->getBody());
+        $this->assertSame($headers, $response->getHeaders());
+    }
+
+    public function testAddHeaderToCollection()
+    {
+        $expectedHeaders = [
             'Set-Cookie'   => ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly'],
             'X-Foo-Header' => ['foo'],
             'X-Bar-Header' => ['bar']
         ];
 
-        $collection = $this->collection($headers);
+        $collection = $this->collection($expectedHeaders);
 
-        $headers['Set-Cookie'][] = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
+        $expectedHeaders['Set-Cookie'][] = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
         $collection->add('Set-Cookie', 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000');
 
-        $this->assertSame($headers, $collection->data());
+        $handler  = new FakeRequestHandler(new FakeResponse('test'));
+        $response = $this->collection($expectedHeaders)->process(new FakeServerRequest(), $handler);
+        $this->assertSame($expectedHeaders, $response->getHeaders());
     }
 
     public function testCookieSetupInstance()
     {
-        $this->assertInstanceOf(CookieSetup::class, $this->collection()->cookie('test'));
+        $this->assertInstanceOf(ResponseHeaders\CookieSetup::class, $this->collection()->cookie('test'));
     }
 
     /**
@@ -96,6 +118,6 @@ class ResponseHeadersTest extends TestCase
 
     private function collection(array $headers = [])
     {
-        return new ResponseHeaders($headers);
+        return new ResponseHeaders\ResponseHeadersContext($headers);
     }
 }
