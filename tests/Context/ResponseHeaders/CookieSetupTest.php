@@ -76,24 +76,29 @@ class CookieSetupTest extends TestCase
         ];
     }
 
-    public function testSameSiteOnceSetCannotBeChanged()
+    /**
+     * @dataProvider sameSiteDoubleCalls
+     * @param string $firstCall
+     * @param string $secondCall
+     */
+    public function testCookieWithSameSiteDirective_WhenSameSiteCalled_ThrowsException(string $firstCall, string $secondCall)
     {
-        $cookie = $this->cookie('LaxFirst');
-        $cookie->sameSiteLax()->sameSiteStrict()->value('Lax');
-        $header = 'LaxFirst=Lax; Path=/; SameSite=Lax';
-        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
-
-        $cookie = $this->cookie('StrictFirst');
-        $cookie->sameSiteStrict()->sameSiteLax()->value('Strict');
-        $header = 'StrictFirst=Strict; Path=/; SameSite=Strict';
-        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+        $cookie = $this->cookie('CheckLogic');
+        $cookie = ($firstCall === 'Lax') ? $cookie->sameSiteLax() : $cookie->sameSiteStrict();
+        $this->expectException(LogicException::class);
+        ($secondCall === 'Lax') ? $cookie->sameSiteLax() : $cookie->sameSiteStrict();
     }
 
-    public function testSecureAndHostNamePrefixSetsSecureDirective()
+    public function sameSiteDoubleCalls()
+    {
+        return [['Lax', 'Strict'], ['Strict', 'Lax'], ['Strict', 'Strict'], ['Lax', 'Lax']];
+    }
+
+    public function testSecureAndHostNamePrefixWillSetSecureDirectiveImplicitly()
     {
         $cookie = $this->cookie('__SECURE-name');
-        $cookie->value('test');
-        $header = '__SECURE-name=test; Path=/; Secure';
+        $cookie->path('/test')->domain('example.com')->value('test');
+        $header = '__SECURE-name=test; Domain=example.com; Path=/test; Secure';
         $this->assertSame([$header], $this->headers->data['Set-Cookie']);
 
         $cookie = $this->cookie('__host-name');

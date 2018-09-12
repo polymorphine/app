@@ -96,15 +96,13 @@ class CookieSetup
 
     public function sameSiteStrict()
     {
-        if ($this->sameSite) { return $this; }
-        $this->sameSite = 'Strict';
+        $this->setSameSiteDirective('Strict');
         return $this;
     }
 
     public function sameSiteLax()
     {
-        if ($this->sameSite) { return $this; }
-        $this->sameSite = 'Lax';
+        $this->setSameSiteDirective('Lax');
         return $this;
     }
 
@@ -141,6 +139,14 @@ class CookieSetup
         }
 
         return $header;
+    }
+
+    private function setSameSiteDirective(string $value): void
+    {
+        if ($this->sameSite) {
+            throw new LogicException('SameSite cookie directive already set and cannot be changed');
+        }
+        $this->sameSite = $value;
     }
 
     private function parsePrefix(string $name): void
