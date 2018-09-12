@@ -14,6 +14,7 @@ namespace Polymorphine\Http\Tests\Context\ResponseHeaders;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 use Polymorphine\Http\Tests\Doubles\FakeResponseHeaders;
+use LogicException;
 
 
 class CookieSetupTest extends TestCase
@@ -21,14 +22,9 @@ class CookieSetupTest extends TestCase
     /** @var FakeResponseHeaders */
     private $headers;
 
-    public function setUp()
-    {
-        $this->headers = new FakeResponseHeaders();
-    }
-
     public function testInstantiation()
     {
-        $this->assertInstanceOf(CookieSetup::class, new CookieSetup('new', $this->headers));
+        $this->assertInstanceOf(CookieSetup::class, $this->cookie('new'));
     }
 
     /**
@@ -39,7 +35,7 @@ class CookieSetupTest extends TestCase
      */
     public function testCookieHeaders(string $headerLine, array $data)
     {
-        $cookie = new CookieSetup($data['name'], $this->headers);
+        $cookie = $this->cookie($data['name']);
         isset($data['time']) and $cookie = $cookie->expires($data['time']);
         isset($data['perm']) and $cookie = $cookie->permanent();
         isset($data['domain']) and $cookie = $cookie->domain($data['domain']);
@@ -82,15 +78,48 @@ class CookieSetupTest extends TestCase
 
     public function testSameSiteOnceSetCannotBeChanged()
     {
-        $cookie = new CookieSetup('LaxFirst', $this->headers);
+        $cookie = $this->cookie('LaxFirst');
         $cookie->sameSiteLax()->sameSiteStrict()->value('Lax');
         $header = 'LaxFirst=Lax; Path=/; SameSite=Lax';
         $this->assertSame([$header], $this->headers->data['Set-Cookie']);
 
-        $this->headers->data = [];
-        $cookie = new CookieSetup('StrictFirst', $this->headers);
+        $cookie = $this->cookie('StrictFirst');
         $cookie->sameSiteStrict()->sameSiteLax()->value('Strict');
         $header = 'StrictFirst=Strict; Path=/; SameSite=Strict';
         $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+    }
+
+    public function testSecureAndHostNamePrefixSetsSecureDirective()
+    {
+        $cookie = $this->cookie('__SECURE-name');
+        $cookie->value('test');
+        $header = '__SECURE-name=test; Path=/; Secure';
+        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+
+        $cookie = $this->cookie('__host-name');
+        $cookie->value('test');
+        $header = '__host-name=test; Path=/; Secure';
+        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+    }
+
+    public function testSettingPathForHostNamePrefixedCookie_ThrowsException()
+    {
+        $cookie = $this->cookie('__Host-name');
+        $this->expectException(LogicException::class);
+        $cookie->path('/test');
+    }
+
+    public function testSettingDomainForHostNamePrefixedCookie_ThrowsException()
+    {
+        $cookie = $this->cookie('__Host-name');
+        $this->expectException(LogicException::class);
+        $cookie->domain('example.com');
+    }
+
+    private function cookie(string $name, $resetHeaders = true)
+    {
+        $this->headers or $this->headers = new FakeResponseHeaders();
+        if ($resetHeaders) { $this->headers->data = []; }
+        return new CookieSetup($name, $this->headers);
     }
 }

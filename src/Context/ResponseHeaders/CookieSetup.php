@@ -12,6 +12,7 @@
 namespace Polymorphine\Http\Context\ResponseHeaders;
 
 use Polymorphine\Http\Context\ResponseHeaders;
+use LogicException;
 use DateTime;
 
 
@@ -24,15 +25,18 @@ class CookieSetup
 
     private $minutes;
     private $domain;
-    private $path     = '/';
-    private $secure   = false;
-    private $httpOnly = false;
+    private $lockDomain = false;
+    private $path       = '/';
+    private $lockPath   = false;
+    private $secure     = false;
+    private $httpOnly   = false;
     private $sameSite;
 
     public function __construct(string $name, ResponseHeaders $headers)
     {
         $this->name    = $name;
         $this->headers = $headers;
+        $this->parsePrefix($name);
     }
 
     public function value(string $value): void
@@ -60,12 +64,20 @@ class CookieSetup
 
     public function domain(string $domain): CookieSetup
     {
+        if ($this->lockDomain) {
+            throw new LogicException('Cannot set domain in cookies with `__Host-` name prefix');
+        }
+
         $this->domain = $domain;
         return $this;
     }
 
-    public function path(string $path = ''): CookieSetup
+    public function path(string $path): CookieSetup
     {
+        if ($this->lockPath) {
+            throw new LogicException('Cannot set path in cookies with `__Host-` name prefix');
+        }
+
         $this->path = $path;
         return $this;
     }
@@ -129,5 +141,18 @@ class CookieSetup
         }
 
         return $header;
+    }
+
+    private function parsePrefix(string $name): void
+    {
+        $secure = (stripos($name, '__Secure-') === 0);
+        $host   = (stripos($name, '__Host-') === 0);
+        if (!$host && !$secure) { return; }
+
+        $this->secure = true;
+        if ($secure) { return; }
+
+        $this->lockPath   = true;
+        $this->lockDomain = true;
     }
 }
