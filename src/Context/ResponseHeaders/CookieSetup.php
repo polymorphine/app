@@ -25,11 +25,10 @@ class CookieSetup
 
     private $minutes;
     private $domain;
-    private $lockDomain = false;
-    private $path       = '/';
-    private $lockPath   = false;
-    private $secure     = false;
-    private $httpOnly   = false;
+    private $path     = '/';
+    private $hostLock = false;
+    private $secure   = false;
+    private $httpOnly = false;
     private $sameSite;
 
     public function __construct(string $name, ResponseHeaders $headers)
@@ -64,7 +63,7 @@ class CookieSetup
 
     public function domain(string $domain): CookieSetup
     {
-        if ($this->lockDomain) {
+        if ($this->hostLock) {
             throw new LogicException('Cannot set domain in cookies with `__Host-` name prefix');
         }
 
@@ -74,7 +73,7 @@ class CookieSetup
 
     public function path(string $path): CookieSetup
     {
-        if ($this->lockPath) {
+        if ($this->hostLock) {
             throw new LogicException('Cannot set path in cookies with `__Host-` name prefix');
         }
 
@@ -158,7 +157,6 @@ class CookieSetup
         $this->secure = true;
         if ($secure) { return; }
 
-        $this->lockPath   = true;
-        $this->lockDomain = true;
+        $this->hostLock = true;
     }
 }
