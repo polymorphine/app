@@ -16,6 +16,8 @@ use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 use Polymorphine\Http\Tests\Doubles\FakeResponseHeaders;
 use LogicException;
 
+require_once dirname(dirname(__DIR__)) . '/Fixtures/time-functions.php';
+
 
 class CookieSetupTest extends TestCase
 {
@@ -78,6 +80,7 @@ class CookieSetupTest extends TestCase
 
     /**
      * @dataProvider sameSiteDoubleCalls
+     *
      * @param string $firstCall
      * @param string $secondCall
      */
@@ -124,7 +127,9 @@ class CookieSetupTest extends TestCase
     private function cookie(string $name, $resetHeaders = true)
     {
         $this->headers or $this->headers = new FakeResponseHeaders();
-        if ($resetHeaders) { $this->headers->data = []; }
+        if ($resetHeaders) {
+            $this->headers->data = [];
+        }
         return new CookieSetup($name, $this->headers);
     }
 }
