@@ -99,7 +99,8 @@ class NativeSessionContext implements MiddlewareInterface, Session
         $cookie = $this->headers->cookie($this->sessionName);
         $cookie->domain(ini_get('session.cookie_domain'))
                ->path(ini_get('session.cookie_path') ?: '/')
-               ->httpOnly(true)
+               ->httpOnly()
+               ->sameSiteLax()
                ->value(session_id());
     }
 

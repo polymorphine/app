@@ -49,7 +49,7 @@ class NativeSessionContextTest extends TestCase
         $context->process($this->request(), $handler);
         $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
 
-        $header = [SessionGlobalState::$name . '=DEFAULT_SESSION_ID; Path=/; HttpOnly'];
+        $header = [SessionGlobalState::$name . '=DEFAULT_SESSION_ID; Path=/; HttpOnly; SameSite=Lax'];
         $this->assertSame($header, $headers->data['Set-Cookie']);
     }
 
@@ -82,7 +82,7 @@ class NativeSessionContextTest extends TestCase
         $context->process($this->request(true), $handler);
         $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
 
-        $header = [SessionGlobalState::$name . '=REGENERATED_SESSION_ID; Path=/; HttpOnly'];
+        $header = [SessionGlobalState::$name . '=REGENERATED_SESSION_ID; Path=/; HttpOnly; SameSite=Lax'];
         $this->assertSame($header, $headers->data['Set-Cookie']);
     }
 
