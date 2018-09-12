@@ -79,4 +79,18 @@ class CookieSetupTest extends TestCase
             ]]
         ];
     }
+
+    public function testSameSiteOnceSetCannotBeChanged()
+    {
+        $cookie = new CookieSetup('LaxFirst', $this->headers);
+        $cookie->sameSiteLax()->sameSiteStrict()->value('Lax');
+        $header = 'LaxFirst=Lax; Path=/; SameSite=Lax';
+        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+
+        $this->headers->data = [];
+        $cookie = new CookieSetup('StrictFirst', $this->headers);
+        $cookie->sameSiteStrict()->sameSiteLax()->value('Strict');
+        $header = 'StrictFirst=Strict; Path=/; SameSite=Strict';
+        $this->assertSame([$header], $this->headers->data['Set-Cookie']);
+    }
 }
