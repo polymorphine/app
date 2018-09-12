@@ -69,57 +69,6 @@ class ResponseHeadersContextTest extends TestCase
         $this->assertInstanceOf(ResponseHeaders\CookieSetup::class, $this->collection()->cookie('test'));
     }
 
-    /**
-     * @dataProvider cookieData
-     *
-     * @param string $headerLine
-     * @param array  $data
-     */
-    public function testCookieHeaders(string $headerLine, array $data)
-    {
-        $collection = $this->collection();
-
-        $cookie = $collection->cookie($data['name']);
-        isset($data['time']) and $cookie = $cookie->expires($data['time']);
-        isset($data['perm']) and $cookie = $cookie->permanent();
-        isset($data['domain']) and $cookie = $cookie->domain($data['domain']);
-        isset($data['path']) and $cookie = $cookie->path($data['path']);
-        isset($data['secure']) and $cookie = $cookie->secure();
-        isset($data['http']) and $cookie = $cookie->httpOnly();
-        isset($data['site']) and $cookie = $data['site'] ? $cookie->sameSiteStrict() : $cookie->sameSiteLax();
-
-        $data['value'] ? $cookie->value($data['value']) : $cookie->remove();
-        $this->assertEquals($this->collection(['Set-Cookie' => [$headerLine]]), $collection);
-    }
-
-    public function cookieData()
-    {
-        return [
-            ['myCookie=; Path=/; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000', [
-                'name'  => 'myCookie',
-                'value' => null
-            ]],
-            ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly; SameSite=Lax', [
-                'name'   => 'fullCookie',
-                'value'  => 'foo',
-                'secure' => true,
-                'time'   => 60,
-                'http'   => true,
-                'domain' => 'example.com',
-                'path'   => '/directory/',
-                'site'   => false
-            ]],
-            ['permanentCookie=hash-3284682736487236; Expires=Sunday, 30-Apr-2023 00:00:00 UTC; MaxAge=157680000; HttpOnly; SameSite=Strict', [
-                'name'  => 'permanentCookie',
-                'value' => 'hash-3284682736487236',
-                'perm'  => true,
-                'http'  => true,
-                'path'  => '',
-                'site'  => true
-            ]]
-        ];
-    }
-
     private function collection(array $headers = [])
     {
         return new ResponseHeaders\ResponseHeadersContext($headers);
