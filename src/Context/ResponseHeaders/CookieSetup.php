@@ -19,15 +19,15 @@ class CookieSetup
 {
     private const MAX_TIME = 2628000;
 
-    protected $minutes;
-    protected $domain;
-    protected $path     = '/';
-    protected $secure   = false;
-    protected $httpOnly = false;
-
     private $headers;
     private $name;
-    private $value;
+
+    private $minutes;
+    private $domain;
+    private $path     = '/';
+    private $secure   = false;
+    private $httpOnly = false;
+    private $sameSite;
 
     public function __construct(string $name, ResponseHeaders $headers)
     {
@@ -37,17 +37,13 @@ class CookieSetup
 
     public function value(string $value): void
     {
-        $this->value = $value;
-
-        $this->headers->add('Set-Cookie', $this->header());
+        $this->headers->add('Set-Cookie', $this->header($value));
     }
 
     public function remove(): void
     {
-        $this->value   = null;
         $this->minutes = -self::MAX_TIME;
-
-        $this->headers->add('Set-Cookie', $this->header());
+        $this->headers->add('Set-Cookie', $this->header(null));
     }
 
     public function expires(int $minutes): CookieSetup
@@ -74,21 +70,35 @@ class CookieSetup
         return $this;
     }
 
-    public function httpOnly(bool $value = true): CookieSetup
+    public function httpOnly(): CookieSetup
     {
-        $this->httpOnly = $value;
+        $this->httpOnly = true;
         return $this;
     }
 
-    public function secure(bool $value = true): CookieSetup
+    public function secure(): CookieSetup
     {
-        $this->secure = $value;
+        $this->secure = true;
         return $this;
     }
 
-    private function header(): string
+    public function sameSiteStrict()
     {
-        $header = $this->name . '=' . $this->value;
+        if ($this->sameSite) { return $this; }
+        $this->sameSite = 'Strict';
+        return $this;
+    }
+
+    public function sameSiteLax()
+    {
+        if ($this->sameSite) { return $this; }
+        $this->sameSite = 'Lax';
+        return $this;
+    }
+
+    private function header($value): string
+    {
+        $header = $this->name . '=' . $value;
 
         if ($this->domain) {
             $header .= '; Domain=' . (string) $this->domain;
@@ -112,6 +122,10 @@ class CookieSetup
 
         if ($this->httpOnly) {
             $header .= '; HttpOnly';
+        }
+
+        if ($this->sameSite) {
+            $header .= '; SameSite=' . $this->sameSite;
         }
 
         return $header;

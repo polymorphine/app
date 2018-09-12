@@ -55,8 +55,9 @@ class ResponseHeadersContextTest extends TestCase
 
         $collection = $this->collection($expectedHeaders);
 
-        $expectedHeaders['Set-Cookie'][] = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
-        $collection->add('Set-Cookie', 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000');
+        $cookieValue = 'myCookie=; Expires=Thursday, 02-May-2013 00:00:00 UTC; MaxAge=-157680000';
+        $collection->add('Set-Cookie', $cookieValue);
+        $expectedHeaders['Set-Cookie'][] = $cookieValue;
 
         $handler  = new FakeRequestHandler(new FakeResponse('test'));
         $response = $this->collection($expectedHeaders)->process(new FakeServerRequest(), $handler);
@@ -72,21 +73,22 @@ class ResponseHeadersContextTest extends TestCase
      * @dataProvider cookieData
      *
      * @param string $headerLine
-     * @param array  $cookieData
+     * @param array  $data
      */
-    public function testCookieHeaders(string $headerLine, array $cookieData)
+    public function testCookieHeaders(string $headerLine, array $data)
     {
         $collection = $this->collection();
 
-        $cookie = $collection->cookie($cookieData['name']);
-        isset($cookieData['time']) and $cookie = $cookie->expires($cookieData['time']);
-        isset($cookieData['perm']) and $cookie = $cookie->permanent();
-        isset($cookieData['domain']) and $cookie = $cookie->domain($cookieData['domain']);
-        isset($cookieData['path']) and $cookie = $cookie->path($cookieData['path']);
-        isset($cookieData['secure']) and $cookie = $cookie->secure($cookieData['secure']);
-        isset($cookieData['http']) and $cookie = $cookie->httpOnly($cookieData['http']);
+        $cookie = $collection->cookie($data['name']);
+        isset($data['time']) and $cookie = $cookie->expires($data['time']);
+        isset($data['perm']) and $cookie = $cookie->permanent();
+        isset($data['domain']) and $cookie = $cookie->domain($data['domain']);
+        isset($data['path']) and $cookie = $cookie->path($data['path']);
+        isset($data['secure']) and $cookie = $cookie->secure();
+        isset($data['http']) and $cookie = $cookie->httpOnly();
+        isset($data['site']) and $cookie = $data['site'] ? $cookie->sameSiteStrict() : $cookie->sameSiteLax();
 
-        $cookieData['value'] ? $cookie->value($cookieData['value']) : $cookie->remove();
+        $data['value'] ? $cookie->value($data['value']) : $cookie->remove();
         $this->assertEquals($this->collection(['Set-Cookie' => [$headerLine]]), $collection);
     }
 
@@ -97,21 +99,23 @@ class ResponseHeadersContextTest extends TestCase
                 'name'  => 'myCookie',
                 'value' => null
             ]],
-            ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly', [
+            ['fullCookie=foo; Domain=example.com; Path=/directory/; Expires=Tuesday, 01-May-2018 01:00:00 UTC; MaxAge=3600; Secure; HttpOnly; SameSite=Lax', [
                 'name'   => 'fullCookie',
                 'value'  => 'foo',
                 'secure' => true,
                 'time'   => 60,
                 'http'   => true,
                 'domain' => 'example.com',
-                'path'   => '/directory/'
+                'path'   => '/directory/',
+                'site'   => false
             ]],
-            ['permanentCookie=hash-3284682736487236; Expires=Sunday, 30-Apr-2023 00:00:00 UTC; MaxAge=157680000; HttpOnly', [
+            ['permanentCookie=hash-3284682736487236; Expires=Sunday, 30-Apr-2023 00:00:00 UTC; MaxAge=157680000; HttpOnly; SameSite=Strict', [
                 'name'  => 'permanentCookie',
                 'value' => 'hash-3284682736487236',
                 'perm'  => true,
                 'http'  => true,
-                'path'  => ''
+                'path'  => '',
+                'site'  => true
             ]]
         ];
     }
