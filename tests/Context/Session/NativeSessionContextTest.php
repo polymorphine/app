@@ -41,7 +41,7 @@ class NativeSessionContextTest extends TestCase
 
     public function testSessionInitialization()
     {
-        $context = $this->context($headers);
+        $context = $this->context($headers, ['secure' => true]);
         $handler = $this->handler(function () use ($context) {
             $context->data()->set('foo', 'bar');
         });
@@ -49,7 +49,7 @@ class NativeSessionContextTest extends TestCase
         $context->process($this->request(), $handler);
         $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
 
-        $header = [SessionGlobalState::$name . '=DEFAULT_SESSION_ID; Path=/; HttpOnly; SameSite=Lax'];
+        $header = [SessionGlobalState::$name . '=DEFAULT_SESSION_ID; Path=/; Secure; HttpOnly; SameSite=Lax'];
         $this->assertSame($header, $headers->data['Set-Cookie']);
     }
 
@@ -73,8 +73,7 @@ class NativeSessionContextTest extends TestCase
     {
         SessionGlobalState::$data = ['foo' => 'bar'];
 
-        $headers = new FakeResponseHeaders();
-        $context = $this->context($headers);
+        $context = $this->context($headers, ['httpOnly' => false, 'sameSite' => 'Strict']);
         $handler = $this->handler(function () use ($context) {
             $context->resetContext();
         });
@@ -82,7 +81,7 @@ class NativeSessionContextTest extends TestCase
         $context->process($this->request(true), $handler);
         $this->assertSame(['foo' => 'bar'], SessionGlobalState::$data);
 
-        $header = [SessionGlobalState::$name . '=REGENERATED_SESSION_ID; Path=/; HttpOnly; SameSite=Lax'];
+        $header = [SessionGlobalState::$name . '=REGENERATED_SESSION_ID; Path=/; SameSite=Strict'];
         $this->assertSame($header, $headers->data['Set-Cookie']);
     }
 
@@ -135,9 +134,9 @@ class NativeSessionContextTest extends TestCase
         return new FakeRequestHandler(new FakeResponse(), $process);
     }
 
-    private function context(&$headersContext)
+    private function context(&$headersContext, $cookieOptions = [])
     {
         $headersContext = new FakeResponseHeaders();
-        return new Session\NativeSessionContext($headersContext);
+        return new Session\NativeSessionContext($headersContext, $cookieOptions);
     }
 }
