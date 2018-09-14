@@ -31,11 +31,12 @@ class CookieSetup
     private $httpOnly = false;
     private $sameSite;
 
-    public function __construct(string $name, ResponseHeaders $headers)
+    public function __construct(string $name, ResponseHeaders $headers, array $attributes = [])
     {
         $this->name    = $name;
         $this->headers = $headers;
         $this->parsePrefix($name);
+        $this->setAttributes($attributes);
     }
 
     public function value(string $value): void
@@ -105,6 +106,40 @@ class CookieSetup
         return $this;
     }
 
+    private function setSameSiteDirective(string $value): void
+    {
+        if ($this->sameSite) {
+            throw new LogicException('SameSite cookie directive already set and cannot be changed');
+        }
+        $this->sameSite = $value;
+    }
+
+    private function parsePrefix(string $name): void
+    {
+        $secure = (stripos($name, '__Secure-') === 0);
+        $host   = (stripos($name, '__Host-') === 0);
+        if (!$host && !$secure) { return; }
+
+        $this->secure = true;
+        if ($secure) { return; }
+
+        $this->hostLock = true;
+    }
+
+    private function setAttributes(array $attr): void
+    {
+        if (isset($attr['domain'])) { $this->domain($attr['domain']); }
+        if (isset($attr['path'])) { $this->path($attr['path']); }
+        if (isset($attr['expires'])) {
+            $attr['expires'] ? $this->expires($attr['expires']) : $this->permanent();
+        }
+        if (!empty($attr['httpOnly'])) { $this->httpOnly(); }
+        if (!empty($attr['secure'])) { $this->secure(); }
+        if (!empty($attr['sameSite'])) {
+            $this->setSameSiteDirective($attr['sameSite'] === 'Strict' ? 'Strict' : 'Lax');
+        }
+    }
+
     private function header($value): string
     {
         $header = $this->name . '=' . $value;
@@ -138,25 +173,5 @@ class CookieSetup
         }
 
         return $header;
-    }
-
-    private function setSameSiteDirective(string $value): void
-    {
-        if ($this->sameSite) {
-            throw new LogicException('SameSite cookie directive already set and cannot be changed');
-        }
-        $this->sameSite = $value;
-    }
-
-    private function parsePrefix(string $name): void
-    {
-        $secure = (stripos($name, '__Secure-') === 0);
-        $host   = (stripos($name, '__Host-') === 0);
-        if (!$host && !$secure) { return; }
-
-        $this->secure = true;
-        if ($secure) { return; }
-
-        $this->hostLock = true;
     }
 }

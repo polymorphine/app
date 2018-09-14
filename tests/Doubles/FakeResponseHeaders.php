@@ -19,9 +19,9 @@ class FakeResponseHeaders implements ResponseHeaders
 {
     public $data = [];
 
-    public function cookie(string $name): CookieSetup
+    public function cookie(string $name, array $attributes = []): CookieSetup
     {
-        return new CookieSetup($name, $this);
+        return new CookieSetup($name, $this, $attributes);
     }
 
     public function add(string $name, string $header): void

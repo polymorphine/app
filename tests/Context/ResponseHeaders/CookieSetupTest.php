@@ -97,6 +97,17 @@ class CookieSetupTest extends TestCase
         return [['Lax', 'Strict'], ['Strict', 'Lax'], ['Strict', 'Strict'], ['Lax', 'Lax']];
     }
 
+    public function testSettingAttributesThroughConstructor()
+    {
+        $this->cookie('name', ['expires' => 65, 'sameSite' => 'something'])->value('value');
+        $headerLine = 'name=value; Path=/; Expires=Tuesday, 01-May-2018 01:05:00 UTC; MaxAge=3900; SameSite=Lax';
+        $this->assertEquals([$headerLine], $this->headers->data['Set-Cookie']);
+
+        $this->cookie('name', ['domain' => 'example.com', 'sameSite' => 'Strict'])->value('value');
+        $headerLine = 'name=value; Domain=example.com; Path=/; SameSite=Strict';
+        $this->assertEquals([$headerLine], $this->headers->data['Set-Cookie']);
+    }
+
     public function testSecureAndHostNamePrefixWillSetSecureDirectiveImplicitly()
     {
         $cookie = $this->cookie('__SECURE-name');
@@ -124,12 +135,12 @@ class CookieSetupTest extends TestCase
         $cookie->domain('example.com');
     }
 
-    private function cookie(string $name, $resetHeaders = true)
+    private function cookie(string $name, array $attributes = [], $resetHeaders = true)
     {
         $this->headers or $this->headers = new FakeResponseHeaders();
         if ($resetHeaders) {
             $this->headers->data = [];
         }
-        return new CookieSetup($name, $this->headers);
+        return new CookieSetup($name, $this->headers, $attributes);
     }
 }

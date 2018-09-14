@@ -16,7 +16,7 @@ use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 interface ResponseHeaders
 {
-    public function cookie(string $name): CookieSetup;
+    public function cookie(string $name, array $attributes = []): CookieSetup;
 
     public function add(string $name, string $header): void;
 }
