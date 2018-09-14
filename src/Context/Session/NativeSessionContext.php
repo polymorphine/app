@@ -22,14 +22,6 @@ use RuntimeException;
 
 class NativeSessionContext implements MiddlewareInterface, Session
 {
-    private const DEFAULT_COOKIE = [
-        'domain'   => '',
-        'path'     => '/',
-        'httpOnly' => true,
-        'secure'   => false,
-        'sameSite' => 'Lax'
-    ];
-
     private $headers;
     private $cookieOptions;
 
@@ -42,7 +34,7 @@ class NativeSessionContext implements MiddlewareInterface, Session
     public function __construct(ResponseHeaders $headers, array $cookieOptions = [])
     {
         $this->headers       = $headers;
-        $this->cookieOptions = $cookieOptions + static::DEFAULT_COOKIE;
+        $this->cookieOptions = $cookieOptions;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -106,16 +98,8 @@ class NativeSessionContext implements MiddlewareInterface, Session
 
     protected function setSessionCookie(): void
     {
-        $cookie = $this->headers->cookie($this->sessionName);
-        $cookie->domain($this->cookieOptions['domain']);
-        $cookie->path($this->cookieOptions['path']);
-        if ($this->cookieOptions['httpOnly']) { $cookie->httpOnly(); }
-        if ($this->cookieOptions['secure']) { $cookie->secure(); }
-        if ($sameSite = $this->cookieOptions['sameSite']) {
-            $sameSite === 'Lax' ? $cookie->sameSiteLax() : $cookie->sameSiteStrict();
-        }
-
-        $cookie->value(session_id());
+        $attributes = $this->cookieOptions + ['httpOnly' => true, 'sameSite' => 'Lax'];
+        $this->headers->cookie($this->sessionName, $attributes)->value(session_id());
     }
 
     private function destroy(): void
