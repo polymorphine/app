@@ -1,5 +1,5 @@
 {
-    "name": "polymorphine/http",
+    "name": "polymorphine/app",
     "description": "PHP Front Controller for HTTP applications",
     "type": "library",
     "minimum-stability": "dev",

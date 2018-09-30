@@ -11,7 +11,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Polymorphine HTTP tests">
+        <testsuite name="Polymorphine App tests">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

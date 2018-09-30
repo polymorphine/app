@@ -1,6 +1,6 @@
-# HTTP
-[![Build Status](https://travis-ci.org/shudd3r/polymorphine-http.svg?branch=develop)](https://travis-ci.org/shudd3r/polymorphine-http)
-[![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-http/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/polymorphine-http?branch=develop)
+# Polymorphine App
+[![Build Status](https://travis-ci.org/shudd3r/polymorphine-app.svg?branch=develop)](https://travis-ci.org/shudd3r/polymorphine-app)
+[![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-app/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/polymorphine-app?branch=develop)
 ### PHP Front Controller for HTTP applications (in development)
 
 ##### Goals: Framework should be *easy to learn* when programming is *difficult to master*
@@ -17,5 +17,3 @@
 - [x] encapsulated configuration
 - [x] PSR-11 container (optional use)
 - [x] composite routing (polymorphic structure)
-- [ ] middleware in routing paths
-- [ ] PSR-7 implementations

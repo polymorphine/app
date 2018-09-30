@@ -2,4 +2,4 @@
 
 use Polymorphine\CodeStandards\FixerFactory;
 
-return FixerFactory::createFor('Polymorphine/Http', __DIR__);
+return FixerFactory::createFor('Polymorphine/App', __DIR__);
