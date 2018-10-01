@@ -17,6 +17,7 @@ use Polymorphine\Http\Message\Stream;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
+use Polymorphine\Http\Tests\Doubles\FakeStream;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +41,7 @@ class ServerTest extends TestCase
 
     public function testResponseBodyExceedingOutputBufferIsEmitted()
     {
-        $response = new FakeResponse(Stream::fromBodyString('Hello World'));
+        $response = new FakeResponse(new FakeStream('Hello World'));
         $server   = $this->server($response, 3);
         $this->assertSame('Hello World', $this->emit($server));
     }

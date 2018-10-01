@@ -16,11 +16,15 @@ use Psr\Http\Message\StreamInterface;
 
 class FakeStream implements StreamInterface
 {
+    public $seekable = true;
+
     private $body;
+    private $stream;
 
     public function __construct(string $body = '')
     {
-        $this->body = $body;
+        $this->body   = $body;
+        $this->stream = $body;
     }
 
     public function __toString()
@@ -38,6 +42,7 @@ class FakeStream implements StreamInterface
 
     public function getSize()
     {
+        return strlen($this->stream);
     }
 
     public function tell()
@@ -46,10 +51,12 @@ class FakeStream implements StreamInterface
 
     public function eof()
     {
+        return empty($this->stream);
     }
 
     public function isSeekable()
     {
+        return $this->seekable;
     }
 
     public function seek($offset, $whence = SEEK_SET)
@@ -58,6 +65,7 @@ class FakeStream implements StreamInterface
 
     public function rewind()
     {
+        $this->stream = $this->body;
     }
 
     public function isWritable()
@@ -70,10 +78,14 @@ class FakeStream implements StreamInterface
 
     public function isReadable()
     {
+        return true;
     }
 
     public function read($length)
     {
+        $send = substr($this->stream, 0, $length);
+        $this->stream = substr($this->stream, $length);
+        return $send;
     }
 
     public function getContents()
