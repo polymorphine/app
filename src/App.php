@@ -13,8 +13,8 @@ namespace Polymorphine\Http;
 
 use Polymorphine\Routing\Router;
 use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\Setup\RecordSetup;
-use Polymorphine\Container\Setup\Record;
+use Polymorphine\Container\RecordSetup;
+use Polymorphine\Container\Record;
 use Polymorphine\Container\Exception\InvalidIdException;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -38,15 +38,15 @@ abstract class App implements RequestHandlerInterface
      */
     public function __construct(array $records = [])
     {
-        $this->registerShutdown();
-        $this->setup = new ContainerSetup($records);
+        $devEnv = (bool) getenv(static::DEV_ENVIRONMENT);
+        $this->registerShutdown($devEnv);
+        $this->setup     = new ContainerSetup($records);
+        $this->container = $this->setup->container($devEnv);
         $this->environmentSetup();
     }
 
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->container or $this->container = $this->setup->container();
-
         while ($middlewareId = array_shift($this->processQueue)) {
             return $this->process($this->container->get($middlewareId), $request);
         }
@@ -78,15 +78,15 @@ abstract class App implements RequestHandlerInterface
             throw new InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
         }
 
-        $this->setup->entry(static::ROUTER_ID)->lazy(function (ContainerInterface $container) {
-            return $this->routing($container);
+        $this->setup->entry(static::ROUTER_ID)->invoke(function () {
+            return $this->routing($this->container);
         });
     }
 
-    protected function registerShutdown()
+    protected function registerShutdown(bool $devEnv)
     {
         if (!ob_get_level()) { ob_start(); }
-        if (getenv(static::DEV_ENVIRONMENT) !== false) { return; }
+        if ($devEnv) { return; }
         register_shutdown_function(function () {
             $error = error_get_last();
             if ($error === null) { return; }
