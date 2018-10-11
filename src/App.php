@@ -14,8 +14,7 @@ namespace Polymorphine\Http;
 use Polymorphine\Routing\Router;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\RecordSetup;
-use Polymorphine\Container\Record;
-use Polymorphine\Container\Exception\InvalidIdException;
+use Polymorphine\Container\Exception;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -34,14 +33,13 @@ abstract class App implements RequestHandlerInterface
     private $processQueue = [];
 
     /**
-     * @param Record[] $records
+     * @param ContainerSetup $setup
      */
-    public function __construct(array $records = [])
+    public function __construct(ContainerSetup $setup = null)
     {
-        $devEnv = (bool) getenv(static::DEV_ENVIRONMENT);
-        $this->registerShutdown($devEnv);
-        $this->setup     = new ContainerSetup($records);
-        $this->container = $this->setup->container($devEnv);
+        $this->registerShutdown(getenv(static::DEV_ENVIRONMENT));
+        $this->setup     = $setup ?? new ContainerSetup();
+        $this->container = $this->setup->container();
         $this->environmentSetup();
     }
 
@@ -75,7 +73,7 @@ abstract class App implements RequestHandlerInterface
         if ($this->setup->exists(static::ROUTER_ID)) {
             $message  = 'Reserved router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
             $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
-            throw new InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
+            throw new Exception\InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
         }
 
         $this->setup->entry(static::ROUTER_ID)->invoke(function () {

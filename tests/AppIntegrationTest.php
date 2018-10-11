@@ -100,9 +100,10 @@ class AppIntegrationTest extends TestCase
         $this->assertFalse(is_callable(ShutdownState::$callback));
     }
 
-    private function app(array $records = [])
+    private function app(array $records = [], bool $secure = false)
     {
-        return new Doubles\MockedApp($records);
+        $setup = $secure ? new Container\TrackingContainerSetup($records) : new Container\ContainerSetup($records);
+        return new Doubles\MockedApp($setup);
     }
 
     private function middlewareContextsApp()
