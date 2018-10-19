@@ -11,11 +11,10 @@
 
 namespace Polymorphine\Http;
 
-use Polymorphine\Http\Message\ServerRequestFactory;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 
 
@@ -37,9 +36,9 @@ class Server
         $this->buffer = $outputBufferSize;
     }
 
-    public function sendResponse(ServerRequestInterface $request = null): void
+    public function sendResponse(ServerRequestInterface $request): void
     {
-        $response = $this->app->handle($request ?: ServerRequestFactory::fromGlobals());
+        $response = $this->app->handle($request);
 
         $this->emit($response);
     }
