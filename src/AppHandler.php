@@ -22,7 +22,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
 
 
-abstract class App implements RequestHandlerInterface
+abstract class AppHandler implements RequestHandlerInterface
 {
     public const ROUTER_ID       = 'app.router';
     public const DEV_ENVIRONMENT = 'APP_DEV';

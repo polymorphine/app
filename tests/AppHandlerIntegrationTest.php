@@ -12,7 +12,7 @@
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\App;
+use Polymorphine\Http\AppHandler;
 use Polymorphine\Http\Tests\Doubles\FakeMiddleware;
 use Polymorphine\Http\Tests\Doubles\FakeUri;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
@@ -27,11 +27,11 @@ require_once __DIR__ . '/Fixtures/shutdown-functions.php';
 require_once __DIR__ . '/Fixtures/header-functions.php';
 
 
-class AppIntegrationTest extends TestCase
+class AppHandlerIntegrationTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(App::class, $this->app());
+        $this->assertInstanceOf(AppHandler::class, $this->app());
         $this->assertInstanceOf(RequestHandlerInterface::class, $this->app());
     }
 
@@ -62,7 +62,7 @@ class AppIntegrationTest extends TestCase
     public function testInstanceWithDefinedInternalContainerId_ThrowsException()
     {
         $this->expectException(Exception\InvalidIdException::class);
-        $this->app([App::ROUTER_ID => new Container\Record\ValueRecord('Hello World!')]);
+        $this->app([AppHandler::ROUTER_ID => new Container\Record\ValueRecord('Hello World!')]);
     }
 
     public function testFallbackNotFoundRoute()
@@ -81,7 +81,7 @@ class AppIntegrationTest extends TestCase
     {
         ShutdownState::reset();
         ShutdownState::$override = true;
-        $this->assertFalse(getenv(App::DEV_ENVIRONMENT));
+        $this->assertFalse(getenv(AppHandler::DEV_ENVIRONMENT));
         $this->app();
         $this->assertTrue(is_callable($callback = ShutdownState::$callback));
         $callback();
@@ -94,8 +94,8 @@ class AppIntegrationTest extends TestCase
     {
         ShutdownState::reset();
         ShutdownState::$override = true;
-        putenv(App::DEV_ENVIRONMENT . '=1');
-        $this->assertNotFalse(getenv(App::DEV_ENVIRONMENT));
+        putenv(AppHandler::DEV_ENVIRONMENT . '=1');
+        $this->assertNotFalse(getenv(AppHandler::DEV_ENVIRONMENT));
         $this->app();
         $this->assertFalse(is_callable(ShutdownState::$callback));
     }
@@ -103,7 +103,7 @@ class AppIntegrationTest extends TestCase
     private function app(array $records = [], bool $secure = false)
     {
         $setup = $secure ? new Container\TrackingContainerSetup($records) : new Container\ContainerSetup($records);
-        return new Doubles\MockedApp($setup);
+        return new Doubles\MockedAppHandler($setup);
     }
 
     private function middlewareContextsApp()

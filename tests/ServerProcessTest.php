@@ -12,7 +12,7 @@
 namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Server;
+use Polymorphine\Http\ServerProcess;
 use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
@@ -25,11 +25,11 @@ use RuntimeException;
 require_once __DIR__ . '/Fixtures/header-functions.php';
 
 
-class ServerTest extends TestCase
+class ServerProcessTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(Server::class, $this->server());
+        $this->assertInstanceOf(ServerProcess::class, $this->server());
     }
 
     public function testResponseBodyIsEmitted()
@@ -101,14 +101,14 @@ class ServerTest extends TestCase
     private function server(ResponseInterface $response = null, int $buffer = 0)
     {
         HeadersState::reset();
-        return new Server(new FakeRequestHandler($response ?: new FakeResponse()), $buffer);
+        return new ServerProcess(new FakeRequestHandler($response ?: new FakeResponse()), $buffer);
     }
 
-    private function emit(Server $server, ServerRequestInterface $request = null)
+    private function emit(ServerProcess $server, ServerRequestInterface $request = null)
     {
         ob_start();
         try {
-            $server->sendResponse($request ?: new FakeServerRequest());
+            $server->execute($request ?: new FakeServerRequest());
         } catch (RuntimeException $ex) {
             ob_get_clean();
             throw $ex;

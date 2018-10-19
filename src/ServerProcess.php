@@ -18,7 +18,7 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
 
-class Server
+final class ServerProcess
 {
     private $app;
     private $buffer;
@@ -36,13 +36,12 @@ class Server
         $this->buffer = $outputBufferSize;
     }
 
-    public function sendResponse(ServerRequestInterface $request): void
+    public function execute(ServerRequestInterface $request): void
     {
-        $response = $this->app->handle($request);
-        $this->emit($response);
+        $this->emitResponse($this->app->handle($request));
     }
 
-    private function emit(ResponseInterface $response)
+    private function emitResponse(ResponseInterface $response)
     {
         if (headers_sent()) {
             throw new RuntimeException('Headers already sent (application output side-effect)');
@@ -50,33 +49,33 @@ class Server
 
         header_remove();
 
-        $this->status($response);
-        $this->headers($response->getHeaders());
-        $this->body($response);
+        $this->setStatus($response);
+        $this->setHeaders($response->getHeaders());
+        $this->emitBody($response);
     }
 
-    private function status(ResponseInterface $response)
+    private function setStatus(ResponseInterface $response)
     {
         $status = 'HTTP/' . $response->getProtocolVersion() . ' ' . $response->getStatusCode();
         $reason = $response->getReasonPhrase();
         header($status . ($reason ? ' ' . $reason : ''), true);
     }
 
-    private function headers(array $headers)
+    private function setHeaders(array $headers)
     {
         foreach ($headers as $name => $headerValues) {
-            $this->sendHeaderValues($name, $headerValues);
+            $this->setHeaderValues($name, $headerValues);
         }
     }
 
-    private function sendHeaderValues($name, array $headerValues)
+    private function setHeaderValues($name, array $headerValues)
     {
         foreach ($headerValues as $value) {
             header($name . ': ' . $value, false);
         }
     }
 
-    private function body(ResponseInterface $response)
+    private function emitBody(ResponseInterface $response)
     {
         $body = $response->getBody();
 

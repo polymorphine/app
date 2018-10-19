@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Http\Tests\Doubles;
 
-use Polymorphine\Http\App;
+use Polymorphine\Http\AppHandler;
 use Polymorphine\Routing\Route;
 use Polymorphine\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
@@ -19,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
 
 
-class MockedApp extends App
+class MockedAppHandler extends AppHandler
 {
     public $routeFound = true;
 
