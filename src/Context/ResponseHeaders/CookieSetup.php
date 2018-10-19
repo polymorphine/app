@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\ResponseHeaders;
+namespace Polymorphine\App\Context\ResponseHeaders;
 
-use Polymorphine\Http\Context\ResponseHeaders;
+use Polymorphine\App\Context\ResponseHeaders;
 use LogicException;
 use DateTime;
 

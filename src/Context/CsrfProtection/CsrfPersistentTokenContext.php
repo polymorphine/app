@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\CsrfProtection;
+namespace Polymorphine\App\Context\CsrfProtection;
 
-use Polymorphine\Http\Context\CsrfProtection;
-use Polymorphine\Http\Context\Session\SessionData;
+use Polymorphine\App\Context\CsrfProtection;
+use Polymorphine\App\Context\Session\SessionData;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;

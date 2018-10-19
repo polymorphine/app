@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http;
+namespace Polymorphine\App;
 
-use Polymorphine\Http\Tests\Fixtures\HeadersState as Headers;
+use Polymorphine\App\Tests\Fixtures\HeadersState as Headers;
 
 function header($headerLine, $remove = true)
 {

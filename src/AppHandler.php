@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http;
+namespace Polymorphine\App;
 
 use Polymorphine\Routing\Router;
 use Polymorphine\Container\ContainerSetup;

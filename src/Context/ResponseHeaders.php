@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context;
+namespace Polymorphine\App\Context;
 
-use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
+use Polymorphine\App\Context\ResponseHeaders\CookieSetup;
 
 
 interface ResponseHeaders

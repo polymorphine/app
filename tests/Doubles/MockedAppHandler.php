@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Doubles;
+namespace Polymorphine\App\Tests\Doubles;
 
-use Polymorphine\Http\AppHandler;
+use Polymorphine\App\AppHandler;
 use Polymorphine\Routing\Route;
 use Polymorphine\Routing\Router;
 use Psr\Http\Message\ResponseInterface;

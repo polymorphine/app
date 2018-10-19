@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\CsrfProtection\Exception;
+namespace Polymorphine\App\Context\CsrfProtection\Exception;
 
 use RuntimeException;
 

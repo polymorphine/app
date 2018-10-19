@@ -27,12 +27,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Polymorphine\\Http\\": "src/"
+            "Polymorphine\\App\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Polymorphine\\Http\\Tests\\": "tests/"
+            "Polymorphine\\App\\Tests\\": "tests/"
         }
     },
     "scripts": {

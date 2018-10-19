@@ -9,17 +9,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Context\CsrfProtection;
+namespace Polymorphine\App\Tests\Context\CsrfProtection;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Context\CsrfProtection\CsrfPersistentTokenContext;
-use Polymorphine\Http\Context\CsrfProtection\CsrfToken;
-use Polymorphine\Http\Context\CsrfProtection\Exception;
-use Polymorphine\Http\Context\Session\SessionData;
-use Polymorphine\Http\Handler\CallbackHandler;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
-use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
-use Polymorphine\Http\Tests\Doubles\FakeSession;
+use Polymorphine\App\Context\CsrfProtection\CsrfPersistentTokenContext;
+use Polymorphine\App\Context\CsrfProtection\CsrfToken;
+use Polymorphine\App\Context\CsrfProtection\Exception;
+use Polymorphine\App\Context\Session\SessionData;
+use Polymorphine\App\Handler\CallbackHandler;
+use Polymorphine\App\Tests\Doubles\FakeResponse;
+use Polymorphine\App\Tests\Doubles\FakeServerRequest;
+use Polymorphine\App\Tests\Doubles\FakeSession;
 
 
 class CsrfPersistentTokenContextTest extends TestCase

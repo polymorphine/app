@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Doubles;
+namespace Polymorphine\App\Tests\Doubles;
 
-use Polymorphine\Http\Context\Session\SessionData;
-use Polymorphine\Http\Context\Session;
+use Polymorphine\App\Context\Session\SessionData;
+use Polymorphine\App\Context\Session;
 
 
 class FakeSession implements Session

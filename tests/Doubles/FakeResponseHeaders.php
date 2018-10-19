@@ -9,10 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Doubles;
+namespace Polymorphine\App\Tests\Doubles;
 
-use Polymorphine\Http\Context\ResponseHeaders;
-use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
+use Polymorphine\App\Context\ResponseHeaders;
+use Polymorphine\App\Context\ResponseHeaders\CookieSetup;
 
 
 class FakeResponseHeaders implements ResponseHeaders

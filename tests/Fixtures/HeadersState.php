@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Fixtures;
+namespace Polymorphine\App\Tests\Fixtures;
 
 
 class HeadersState

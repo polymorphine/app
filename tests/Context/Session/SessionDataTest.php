@@ -9,11 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Context\Session;
+namespace Polymorphine\App\Tests\Context\Session;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Context\Session\SessionData;
-use Polymorphine\Http\Tests\Doubles\FakeSession;
+use Polymorphine\App\Context\Session\SessionData;
+use Polymorphine\App\Tests\Doubles\FakeSession;
 
 
 class SessionDataTest extends TestCase

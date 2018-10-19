@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Context\Session;
+namespace Polymorphine\App\Context\Session;
 
-use Polymorphine\Http\Context\Session;
+use Polymorphine\App\Context\Session;
 
 
 class SessionData

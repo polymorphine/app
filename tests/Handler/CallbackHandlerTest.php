@@ -9,12 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests\Handler;
+namespace Polymorphine\App\Tests\Handler;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\Handler\CallbackHandler;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
-use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
+use Polymorphine\App\Handler\CallbackHandler;
+use Polymorphine\App\Tests\Doubles\FakeResponse;
+use Polymorphine\App\Tests\Doubles\FakeServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 

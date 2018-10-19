@@ -9,15 +9,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http\Tests;
+namespace Polymorphine\App\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Http\ServerProcess;
-use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
-use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
-use Polymorphine\Http\Tests\Doubles\FakeResponse;
-use Polymorphine\Http\Tests\Doubles\FakeStream;
-use Polymorphine\Http\Tests\Fixtures\HeadersState;
+use Polymorphine\App\ServerProcess;
+use Polymorphine\App\Tests\Doubles\FakeRequestHandler;
+use Polymorphine\App\Tests\Doubles\FakeServerRequest;
+use Polymorphine\App\Tests\Doubles\FakeResponse;
+use Polymorphine\App\Tests\Doubles\FakeStream;
+use Polymorphine\App\Tests\Fixtures\HeadersState;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use RuntimeException;

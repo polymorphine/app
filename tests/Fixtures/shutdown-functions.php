@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Http;
+namespace Polymorphine\App;
 
-use Polymorphine\Http\Tests\Fixtures\ShutdownState;
+use Polymorphine\App\Tests\Fixtures\ShutdownState;
 
 function register_shutdown_function(callable $callback)
 {
