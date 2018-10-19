@@ -12,8 +12,8 @@
 namespace Polymorphine\Http;
 
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
@@ -39,48 +39,39 @@ class Server
     public function sendResponse(ServerRequestInterface $request): void
     {
         $response = $this->app->handle($request);
-
         $this->emit($response);
     }
 
     private function emit(ResponseInterface $response)
     {
-        $protocol     = $response->getProtocolVersion();
-        $statusCode   = $response->getStatusCode();
-        $reasonPhrase = $response->getReasonPhrase();
-        $headers      = $response->getHeaders();
-
-        $this->status($protocol, $statusCode, $reasonPhrase);
-        $this->headers($headers);
-        $this->body($response);
-    }
-
-    private function status($protocol, $statusCode, $reasonPhrase)
-    {
         if (headers_sent()) {
             throw new RuntimeException('Headers already sent (application output side-effect)');
         }
 
-        $string = 'HTTP/' . $protocol . ' ' . $statusCode . ($reasonPhrase ? ' ' . $reasonPhrase : '');
-        header($string, true);
+        header_remove();
+
+        $this->status($response);
+        $this->headers($response->getHeaders());
+        $this->body($response);
+    }
+
+    private function status(ResponseInterface $response)
+    {
+        $status = 'HTTP/' . $response->getProtocolVersion() . ' ' . $response->getStatusCode();
+        $reason = $response->getReasonPhrase();
+        header($status . ($reason ? ' ' . $reason : ''), true);
     }
 
     private function headers(array $headers)
     {
-        foreach ($headers as $name => $values) {
-            $this->removePredefined($name);
-            $this->sendHeaderValues($name, $values);
+        foreach ($headers as $name => $headerValues) {
+            $this->sendHeaderValues($name, $headerValues);
         }
     }
 
-    private function removePredefined(string $name)
+    private function sendHeaderValues($name, array $headerValues)
     {
-        header_remove($name);
-    }
-
-    private function sendHeaderValues($name, array $values)
-    {
-        foreach ($values as $value) {
+        foreach ($headerValues as $value) {
             header($name . ': ' . $value, false);
         }
     }

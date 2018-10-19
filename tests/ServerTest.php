@@ -13,10 +13,9 @@ namespace Polymorphine\Http\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Http\Server;
-use Polymorphine\Http\Message\Stream;
+use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeServerRequest;
 use Polymorphine\Http\Tests\Doubles\FakeResponse;
-use Polymorphine\Http\Tests\Doubles\FakeRequestHandler;
 use Polymorphine\Http\Tests\Doubles\FakeStream;
 use Polymorphine\Http\Tests\Fixtures\HeadersState;
 use Psr\Http\Message\ServerRequestInterface;
@@ -78,7 +77,7 @@ class ServerTest extends TestCase
         $this->assertSame($expected, HeadersState::$headers);
     }
 
-    public function testHeadersOverwriteSetOutsideServerInstance()
+    public function testHeadersSetOutsideServerInstanceAreIgnored()
     {
         $response = new FakeResponse();
         $server   = $this->server($response);
@@ -96,7 +95,7 @@ class ServerTest extends TestCase
 
         $this->assertSame(['X-Custom-Header: only this one', 'X-Custom-Header: one more'], HeadersState::$headers['x-custom-header']);
         $this->assertSame(['Set-Cookie: my session cookie'], HeadersState::$headers['set-cookie']);
-        $this->assertSame(['X-Powered-By: PHPUnit Framework'], HeadersState::$headers['x-powered-by']);
+        $this->assertFalse(isset(HeadersState::$headers['x-powered-by']));
     }
 
     private function server(ResponseInterface $response = null, int $buffer = 0)
