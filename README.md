@@ -1,6 +1,8 @@
 # Polymorphine App
 [![Build Status](https://travis-ci.org/shudd3r/polymorphine-app.svg?branch=develop)](https://travis-ci.org/shudd3r/polymorphine-app)
 [![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-app/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/polymorphine-app?branch=develop)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/polymorphine/app/dev-develop.svg)](https://packagist.org/packages/polymorphine/app)
+[![Packagist](https://img.shields.io/packagist/l/polymorphine/app.svg)](https://packagist.org/packages/polymorphine/app)
 ### PHP Front Controller for HTTP applications (in development)
 
 ##### Goals: Framework should be *easy to learn* when programming is *difficult to master*
