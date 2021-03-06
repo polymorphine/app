@@ -1,8 +1,9 @@
 # Polymorphine App
-[![Build Status](https://travis-ci.org/shudd3r/polymorphine-app.svg?branch=develop)](https://travis-ci.org/shudd3r/polymorphine-app)
-[![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-app/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/polymorphine-app?branch=develop)
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/polymorphine/app/dev-develop.svg)](https://packagist.org/packages/polymorphine/app)
-[![Packagist](https://img.shields.io/packagist/l/polymorphine/app.svg)](https://packagist.org/packages/polymorphine/app)
+[![Latest Stable Version](https://poser.pugx.org/polymorphine/app/version)](https://packagist.org/packages/polymorphine/app)
+[![Build status](https://github.com/polymorphine/app/workflows/build/badge.svg)](https://github.com/polymorphine/app/actions)
+[![Coverage status](https://coveralls.io/repos/github/polymorphine/app/badge.svg?branch=develop)](https://coveralls.io/github/polymorphine/app?branch=develop)
+[![PHP version](https://img.shields.io/packagist/php-v/polymorphine/app.svg)](https://packagist.org/packages/polymorphine/app)
+[![LICENSE](https://img.shields.io/github/license/polymorphine/app.svg?color=blue)](LICENSE)
 ### PHP Front Controller for HTTP applications (in development)
 
 ##### Goals: Framework should be *easy to learn* when programming is *difficult to master*
