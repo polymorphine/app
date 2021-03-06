@@ -19,9 +19,9 @@ use Psr\Container\ContainerInterface;
 
 class MockedAppHandler extends AppHandler
 {
-    public $routeFound = true;
+    public bool $routeFound = true;
 
-    public $notFoundResponse;
+    public ?ResponseInterface $notFoundResponse = null;
 
     protected function routing(ContainerInterface $c): FakeRequestHandler
     {

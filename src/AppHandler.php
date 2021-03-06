@@ -26,10 +26,11 @@ abstract class AppHandler implements RequestHandlerInterface
     public const ROUTER_ID       = 'app.router';
     public const DEV_ENVIRONMENT = 'APP_DEV';
 
-    private $setup;
-    private $container;
-    private $middleware   = [];
-    private $processQueue = [];
+    private Setup              $setup;
+    private ContainerInterface $container;
+
+    private array $middleware   = [];
+    private array $processQueue = [];
 
     /**
      * @param Build|null $build
@@ -54,6 +55,7 @@ abstract class AppHandler implements RequestHandlerInterface
 
     /**
      * @param string $id
+     *
      * @return Setup\Entry
      */
     final public function config(string $id): Entry
@@ -63,6 +65,7 @@ abstract class AppHandler implements RequestHandlerInterface
 
     /**
      * @param string $id
+     *
      * @return Entry
      */
     final public function middleware(string $id): Entry

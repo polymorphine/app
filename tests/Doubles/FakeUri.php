@@ -16,20 +16,20 @@ use Psr\Http\Message\UriInterface;
 
 class FakeUri implements UriInterface
 {
-    protected $supportedSchemes = [
+    protected array $supportedSchemes = [
         'http'  => ['port' => 80],
         'https' => ['port' => 443]
     ];
 
-    private $uri;
+    private string $uri;
 
-    private $scheme   = '';
-    private $userInfo = '';
-    private $host     = '';
-    private $port;
-    private $path     = '';
-    private $query    = '';
-    private $fragment = '';
+    private string $scheme   = '';
+    private string $userInfo = '';
+    private string $host     = '';
+    private ?int   $port = null;
+    private string $path     = '';
+    private string $query    = '';
+    private string $fragment = '';
 
     public function __construct(array $segments = [])
     {
@@ -75,7 +75,7 @@ class FakeUri implements UriInterface
         return $this->host;
     }
 
-    public function getPort()
+    public function getPort(): ?int
     {
         $default = $this->port && $this->scheme && $this->supportedSchemes[$this->scheme]['port'] === $this->port;
 
@@ -172,7 +172,7 @@ class FakeUri implements UriInterface
         return $uri ?: '/';
     }
 
-    private function authorityPath()
+    private function authorityPath(): string
     {
         $authority = '//' . $this->getAuthority();
         if (!$this->path) { return $authority; }
@@ -180,7 +180,7 @@ class FakeUri implements UriInterface
         return ($this->path[0] === '/') ? $authority . $this->path : $authority . '/' . $this->path;
     }
 
-    private function filteredPath()
+    private function filteredPath(): string
     {
         if (empty($this->path)) { return ''; }
 

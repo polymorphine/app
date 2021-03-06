@@ -13,22 +13,22 @@ namespace Polymorphine\App;
 
 use Polymorphine\App\Tests\Fixtures\ShutdownState;
 
-function register_shutdown_function(callable $callback)
+function register_shutdown_function(callable $callback): void
 {
     ShutdownState::$override ? ShutdownState::$callback = $callback : \register_shutdown_function($callback);
 }
 
-function http_response_code(int $code = null)
+function http_response_code(int $code = null): void
 {
     ShutdownState::$override ? ShutdownState::$status = $code : \http_response_code($code);
 }
 
-function error_get_last()
+function error_get_last(): ?array
 {
-    return ShutdownState::$override ? true : \error_get_last();
+    return ShutdownState::$override ? [] : \error_get_last();
 }
 
-function ob_end_clean()
+function ob_end_clean(): bool
 {
-    ShutdownState::$override ? ShutdownState::$outputBufferCleared = true : \ob_end_clean();
+    return ShutdownState::$override ? ShutdownState::$outputBufferCleared = true : \ob_end_clean();
 }

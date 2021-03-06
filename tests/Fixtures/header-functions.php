@@ -13,17 +13,17 @@ namespace Polymorphine\App;
 
 use Polymorphine\App\Tests\Fixtures\HeadersState as Headers;
 
-function header($headerLine, $remove = true)
+function header($headerLine, $remove = true): void
 {
     Headers::set($headerLine, $remove);
 }
 
-function headers_sent()
+function headers_sent(): bool
 {
     return Headers::$outputSent;
 }
 
-function header_remove($name = null)
+function header_remove($name = null): void
 {
     Headers::remove($name);
 }

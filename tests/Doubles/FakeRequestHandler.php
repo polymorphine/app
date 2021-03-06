@@ -20,7 +20,10 @@ class FakeRequestHandler implements RequestHandlerInterface
 {
     private $handleRequest;
 
-    public function __construct(callable $handleRequest = null)
+    /**
+     * @param callable $handleRequest fn(ServerRequestInterface) => ResponseInterface
+     */
+    public function __construct(callable $handleRequest)
     {
         $this->handleRequest = $handleRequest;
     }

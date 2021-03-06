@@ -13,14 +13,7 @@ namespace Polymorphine\App\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\App\AppHandler;
-use Polymorphine\App\Tests\Doubles\FakeMiddleware;
-use Polymorphine\App\Tests\Doubles\FakeUri;
-use Polymorphine\App\Tests\Fixtures\HeadersState;
-use Polymorphine\App\Tests\Fixtures\ShutdownState;
 use Polymorphine\Container;
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/Fixtures/shutdown-functions.php';
 require_once __DIR__ . '/Fixtures/header-functions.php';
@@ -31,7 +24,6 @@ class AppHandlerIntegrationTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(AppHandler::class, $this->app());
-        $this->assertInstanceOf(RequestHandlerInterface::class, $this->app());
     }
 
     public function testConfig_ReturnsSetupEntry()
@@ -44,13 +36,13 @@ class AppHandlerIntegrationTest extends TestCase
     {
         $app      = $this->app(['test' => new Container\Records\Record\ValueRecord('Hello World!')]);
         $response = $app->handle(new Doubles\FakeServerRequest());
-        $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
+        $this->assertSame('//example.com/foo/bar: Hello World!', (string) $response->getBody());
     }
 
     public function testRepeatedHandleCallsWithMiddlewareProcessing_ReturnsEqualResponse()
     {
         $app      = $this->middlewareContextsApp();
-        $request  = new Doubles\FakeServerRequest('GET', FakeUri::fromString('/test'));
+        $request  = new Doubles\FakeServerRequest('GET', Doubles\FakeUri::fromString('/test'));
         $response = $app->handle($request);
 
         $expectedBody = 'outerContext innerContext /test: MAIN innerContext outerContext';
@@ -71,32 +63,31 @@ class AppHandlerIntegrationTest extends TestCase
         $app->notFoundResponse = new Doubles\FakeResponse();
 
         $response = $app->handle(new Doubles\FakeServerRequest());
-        $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(Doubles\FakeResponse::class, $response);
         $this->assertSame($app->notFoundResponse, $response);
     }
 
     public function testShutdownRegisteredOnProduction()
     {
-        ShutdownState::reset();
-        ShutdownState::$override = true;
+        Fixtures\ShutdownState::reset();
+        Fixtures\ShutdownState::$override = true;
         $this->assertFalse(getenv(AppHandler::DEV_ENVIRONMENT));
         $this->app();
-        $this->assertTrue(is_callable($callback = ShutdownState::$callback));
+        $this->assertTrue(is_callable($callback = Fixtures\ShutdownState::$callback));
         $callback();
-        $this->assertSame(503, ShutdownState::$status);
-        $this->assertSame([], HeadersState::$headers);
-        $this->assertTrue(ShutdownState::$outputBufferCleared);
+        $this->assertSame(503, Fixtures\ShutdownState::$status);
+        $this->assertSame([], Fixtures\HeadersState::$headers);
+        $this->assertTrue(Fixtures\ShutdownState::$outputBufferCleared);
     }
 
     public function testShutdownNotRegisteredOnDevelopment()
     {
-        ShutdownState::reset();
-        ShutdownState::$override = true;
+        Fixtures\ShutdownState::reset();
+        Fixtures\ShutdownState::$override = true;
         putenv(AppHandler::DEV_ENVIRONMENT . '=1');
         $this->assertNotFalse(getenv(AppHandler::DEV_ENVIRONMENT));
         $this->app();
-        $this->assertFalse(is_callable(ShutdownState::$callback));
+        $this->assertFalse(is_callable(Fixtures\ShutdownState::$callback));
     }
 
     private function app(array $records = [], bool $secure = false): Doubles\MockedAppHandler
@@ -105,13 +96,13 @@ class AppHandlerIntegrationTest extends TestCase
         return new Doubles\MockedAppHandler($setup);
     }
 
-    private function middlewareContextsApp()
+    private function middlewareContextsApp(): Doubles\MockedAppHandler
     {
         $app = $this->app();
         $app->config('test')->value('MAIN');
-        $app->middleware('one')->value(new FakeMiddleware('outerContext'));
-        $app->middleware('two')->callback(function (ContainerInterface $c) {
-            return new FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---');
+        $app->middleware('one')->value(new Doubles\FakeMiddleware('outerContext'));
+        $app->middleware('two')->callback(function ($c) {
+            return new Doubles\FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---');
         });
 
         return $app;
