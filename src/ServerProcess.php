@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -20,25 +20,30 @@ use RuntimeException;
 
 final class ServerProcess
 {
-    private $app;
-    private $buffer;
+    private RequestHandlerInterface $requestHandler;
+    private int                     $outputBufferSize;
 
     /**
      * When large handler's responses are not expected
      * buffer size parameter might be omitted.
      *
-     * @param RequestHandlerInterface $app
+     * @param RequestHandlerInterface $requestHandler
      * @param int                     $outputBufferSize (bytes)
      */
-    public function __construct(RequestHandlerInterface $app, int $outputBufferSize = 0)
+    public function __construct(RequestHandlerInterface $requestHandler, int $outputBufferSize = 0)
     {
-        $this->app    = $app;
-        $this->buffer = $outputBufferSize;
+        $this->requestHandler   = $requestHandler;
+        $this->outputBufferSize = $outputBufferSize;
     }
 
+    /**
+     * Emits response for given request.
+     *
+     * @param ServerRequestInterface $request
+     */
     public function execute(ServerRequestInterface $request): void
     {
-        $this->emitResponse($this->app->handle($request));
+        $this->emitResponse($this->requestHandler->handle($request));
     }
 
     private function emitResponse(ResponseInterface $response)
@@ -87,12 +92,12 @@ final class ServerProcess
         if ($body->isSeekable()) { $body->rewind(); }
 
         while (!$body->eof()) {
-            echo $body->read($this->buffer);
+            echo $body->read($this->outputBufferSize);
         }
     }
 
-    private function chunksRequired(StreamInterface $body)
+    private function chunksRequired(StreamInterface $body): bool
     {
-        return $this->buffer && $body->isReadable() && $body->getSize() > $this->buffer;
+        return $this->outputBufferSize && $body->isReadable() && $body->getSize() > $this->outputBufferSize;
     }
 }

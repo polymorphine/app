@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -18,18 +18,18 @@ use Psr\Http\Message\ResponseInterface;
 
 class FakeRequestHandler implements RequestHandlerInterface
 {
-    private $response;
-    private $sideEffect;
+    private $handleRequest;
 
-    public function __construct(ResponseInterface $response, callable $sideEffect = null)
+    /**
+     * @param callable $handleRequest fn(ServerRequestInterface) => ResponseInterface
+     */
+    public function __construct(callable $handleRequest)
     {
-        $this->response   = $response;
-        $this->sideEffect = $sideEffect;
+        $this->handleRequest = $handleRequest;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        if ($this->sideEffect) { ($this->sideEffect)(); }
-        return $this->response;
+        return ($this->handleRequest)($request);
     }
 }

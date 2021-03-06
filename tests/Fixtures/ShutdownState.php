@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -11,13 +11,15 @@
 
 namespace Polymorphine\App\Tests\Fixtures;
 
+use Closure;
+
 
 class ShutdownState
 {
-    public static $override = false;
-    public static $callback;
-    public static $status;
-    public static $outputBufferCleared = false;
+    public static bool     $override = false;
+    public static ?Closure $callback;
+    public static ?int     $status;
+    public static bool     $outputBufferCleared = false;
 
     public static function reset()
     {

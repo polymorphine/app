@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -14,16 +14,16 @@ namespace Polymorphine\App\Tests\Fixtures;
 
 class HeadersState
 {
-    public static $headers    = [];
-    public static $outputSent = false;
+    public static array $headers = [];
+    public static bool  $outputSent = false;
 
-    public static function reset()
+    public static function reset(): void
     {
         self::$headers    = [];
         self::$outputSent = false;
     }
 
-    public static function set(string $headerLine, $remove = true)
+    public static function set(string $headerLine, $remove = true): void
     {
         [$name, $type] = explode(':', $headerLine, 2) + [false, 'STATUS'];
         if ($type === 'STATUS') {
@@ -34,11 +34,11 @@ class HeadersState
         self::$headers[strtolower($name)][] = $headerLine;
     }
 
-    public static function remove(string $name = null)
+    public static function remove(string $name = null): void
     {
         if ($name === null) {
             self::$headers = [];
         }
-        unset(self::$headers[strtolower($name)]);
+        unset(self::$headers[strtolower($name ?? '')]);
     }
 }

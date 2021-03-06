@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -11,15 +11,14 @@
 
 namespace Polymorphine\App;
 
-use Polymorphine\Routing\Router;
-use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\RecordSetup;
-use Polymorphine\Container\Exception;
+use Polymorphine\Container\Setup;
+use Polymorphine\Container\Setup\Build;
+use Polymorphine\Container\Setup\Entry;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Container\ContainerInterface;
 
 
 abstract class AppHandler implements RequestHandlerInterface
@@ -27,25 +26,25 @@ abstract class AppHandler implements RequestHandlerInterface
     public const ROUTER_ID       = 'app.router';
     public const DEV_ENVIRONMENT = 'APP_DEV';
 
-    private $setup;
-    private $container;
-    private $middleware   = [];
-    private $processQueue = [];
+    private Setup              $setup;
+    private ContainerInterface $container;
+
+    private array $middleware   = [];
+    private array $processQueue = [];
 
     /**
-     * @param ContainerSetup $setup
+     * @param Build|null $build
      */
-    public function __construct(ContainerSetup $setup = null)
+    public function __construct(Build $build = null)
     {
-        $this->registerShutdown(getenv(static::DEV_ENVIRONMENT));
-        $this->setup     = $setup ?? new ContainerSetup();
-        $this->container = $this->setup->container();
-        $this->environmentSetup();
+        $this->registerShutdown((bool) getenv(static::DEV_ENVIRONMENT));
+        $this->setup = $this->environmentSetup($build ?? new Build());
     }
 
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        while ($middlewareId = array_shift($this->processQueue)) {
+        $this->container ??= $this->setup->container();
+        if ($middlewareId = array_shift($this->processQueue)) {
             return $this->process($this->container->get($middlewareId), $request);
         }
 
@@ -54,31 +53,44 @@ abstract class AppHandler implements RequestHandlerInterface
         return $this->container->get(static::ROUTER_ID)->handle($request);
     }
 
-    final public function config(string $id): RecordSetup
+    /**
+     * @param string $id
+     *
+     * @return Setup\Entry
+     */
+    final public function config(string $id): Entry
     {
-        return $this->setup->entry($id);
+        return $this->setup->set($id);
     }
 
-    final public function middleware(string $id): RecordSetup
+    /**
+     * @param string $id
+     *
+     * @return Entry
+     */
+    final public function middleware(string $id): Entry
     {
         $this->middleware[]   = $id;
         $this->processQueue[] = $id;
-        return $this->setup->entry($id);
+        return $this->setup->set($id);
     }
 
-    abstract protected function routing(ContainerInterface $c): Router;
+    abstract protected function routing(ContainerInterface $c): RequestHandlerInterface;
 
-    protected function environmentSetup()
+    protected function environmentSetup(Build $build): Setup
     {
-        if ($this->setup->exists(static::ROUTER_ID)) {
+        if ($build->has(static::ROUTER_ID)) {
             $message  = 'Reserved router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
             $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
-            throw new Exception\InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
+            throw new Setup\Exception\OverwriteRuleException(sprintf($message, static::ROUTER_ID, $override));
         }
 
-        $this->setup->entry(static::ROUTER_ID)->invoke(function () {
+        $setup = new Setup($build);
+        $setup->set(self::ROUTER_ID)->callback(function () {
             return $this->routing($this->container);
         });
+
+        return $setup;
     }
 
     protected function registerShutdown(bool $devEnv)
@@ -94,7 +106,7 @@ abstract class AppHandler implements RequestHandlerInterface
         });
     }
 
-    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request)
+    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request): ResponseInterface
     {
         return $middleware->process($request, $this);
     }

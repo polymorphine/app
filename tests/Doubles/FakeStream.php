@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -16,10 +16,10 @@ use Psr\Http\Message\StreamInterface;
 
 class FakeStream implements StreamInterface
 {
-    public $seekable = true;
+    public bool $seekable = true;
 
-    private $body;
-    private $stream;
+    private string $body;
+    private string $stream;
 
     public function __construct(string $body = '')
     {
@@ -27,56 +27,59 @@ class FakeStream implements StreamInterface
         $this->stream = $body;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->body;
     }
 
-    public function close()
+    public function close(): void
     {
     }
 
-    public function detach()
+    public function detach(): void
     {
     }
 
-    public function getSize()
+    public function getSize(): int
     {
         return strlen($this->stream);
     }
 
-    public function tell()
+    public function tell(): int
     {
+        return strlen($this->body) - strlen($this->stream);
     }
 
-    public function eof()
+    public function eof(): bool
     {
         return empty($this->stream);
     }
 
-    public function isSeekable()
+    public function isSeekable(): bool
     {
         return $this->seekable;
     }
 
-    public function seek($offset, $whence = SEEK_SET)
+    public function seek($offset, $whence = SEEK_SET): void
     {
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->stream = $this->body;
     }
 
-    public function isWritable()
+    public function isWritable(): bool
     {
+        return true;
     }
 
-    public function write($string)
+    public function write($string): void
     {
+        $this->body = $string;
     }
 
-    public function isReadable()
+    public function isReadable(): bool
     {
         return true;
     }
@@ -84,15 +87,17 @@ class FakeStream implements StreamInterface
     public function read($length)
     {
         $send = substr($this->stream, 0, $length);
-        $this->stream = substr($this->stream, $length);
+        $this->stream = substr($this->stream, $length) ?: '';
         return $send;
     }
 
-    public function getContents()
+    public function getContents(): string
     {
+        return $this->body;
     }
 
-    public function getMetadata($key = null)
+    public function getMetadata($key = null): array
     {
+        return [];
     }
 }
