@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -36,7 +36,7 @@ abstract class AppHandler implements RequestHandlerInterface
      */
     public function __construct(Build $build = null)
     {
-        $this->registerShutdown(getenv(static::DEV_ENVIRONMENT));
+        $this->registerShutdown((bool) getenv(static::DEV_ENVIRONMENT));
         $this->setup = $this->environmentSetup($build ?? new Build());
     }
 

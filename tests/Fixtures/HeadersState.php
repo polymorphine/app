@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/App package.
@@ -39,6 +39,6 @@ class HeadersState
         if ($name === null) {
             self::$headers = [];
         }
-        unset(self::$headers[strtolower($name)]);
+        unset(self::$headers[strtolower($name ?? '')]);
     }
 }
