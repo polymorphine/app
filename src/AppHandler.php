@@ -13,12 +13,12 @@ namespace Polymorphine\App;
 
 use Polymorphine\Container\Setup;
 use Polymorphine\Container\Setup\Build;
-use Polymorphine\Container\Setup\Exception;
+use Polymorphine\Container\Setup\Entry;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Container\ContainerInterface;
 
 
 abstract class AppHandler implements RequestHandlerInterface
@@ -52,12 +52,20 @@ abstract class AppHandler implements RequestHandlerInterface
         return $this->container->get(static::ROUTER_ID)->handle($request);
     }
 
-    final public function config(string $id): Setup\Entry
+    /**
+     * @param string $id
+     * @return Setup\Entry
+     */
+    final public function config(string $id): Entry
     {
         return $this->setup->set($id);
     }
 
-    final public function middleware(string $id): Setup\Entry
+    /**
+     * @param string $id
+     * @return Entry
+     */
+    final public function middleware(string $id): Entry
     {
         $this->middleware[]   = $id;
         $this->processQueue[] = $id;
@@ -71,7 +79,7 @@ abstract class AppHandler implements RequestHandlerInterface
         if ($build->has(static::ROUTER_ID)) {
             $message  = 'Reserved router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
             $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
-            throw new Exception\OverwriteRuleException(sprintf($message, static::ROUTER_ID, $override));
+            throw new Setup\Exception\OverwriteRuleException(sprintf($message, static::ROUTER_ID, $override));
         }
 
         $setup = new Setup($build);

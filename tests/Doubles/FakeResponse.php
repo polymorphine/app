@@ -11,7 +11,6 @@
 
 namespace Polymorphine\App\Tests\Doubles;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -23,11 +22,6 @@ class FakeResponse implements ResponseInterface
     public $protocol = '1.1';
     public $status   = 200;
     public $reason   = 'OK';
-
-    /**
-     * @var ServerRequestInterface
-     */
-    public $fromRequest;
 
     public function __construct($body = '')
     {

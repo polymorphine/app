@@ -101,7 +101,7 @@ class ServerProcessTest extends TestCase
     private function server(ResponseInterface $response = null, int $buffer = 0)
     {
         HeadersState::reset();
-        $requestHandler = new FakeRequestHandler(function (ServerRequestInterface $request) use ($response) {
+        $requestHandler = new FakeRequestHandler(function () use ($response) {
             return $response ?: new FakeResponse();
         });
         return new ServerProcess($requestHandler, $buffer);

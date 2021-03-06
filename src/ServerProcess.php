@@ -36,6 +36,11 @@ final class ServerProcess
         $this->buffer = $outputBufferSize;
     }
 
+    /**
+     * Emits response for given request.
+     *
+     * @param ServerRequestInterface $request
+     */
     public function execute(ServerRequestInterface $request): void
     {
         $this->emitResponse($this->app->handle($request));
@@ -91,7 +96,7 @@ final class ServerProcess
         }
     }
 
-    private function chunksRequired(StreamInterface $body)
+    private function chunksRequired(StreamInterface $body): bool
     {
         return $this->buffer && $body->isReadable() && $body->getSize() > $this->buffer;
     }
