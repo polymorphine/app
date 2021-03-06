@@ -18,7 +18,6 @@ use Polymorphine\App\Tests\Doubles\FakeUri;
 use Polymorphine\App\Tests\Fixtures\HeadersState;
 use Polymorphine\App\Tests\Fixtures\ShutdownState;
 use Polymorphine\Container;
-use Polymorphine\Container\Exception;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
@@ -35,15 +34,15 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertInstanceOf(RequestHandlerInterface::class, $this->app());
     }
 
-    public function testConfig_ReturnsRegistryInput()
+    public function testConfig_ReturnsSetupEntry()
     {
         $app = $this->app();
-        $this->assertInstanceOf(Container\RecordSetup::class, $app->config('test'));
+        $this->assertInstanceOf(Container\Setup\Entry::class, $app->config('test'));
     }
 
     public function testRoutingContainerIntegration()
     {
-        $app      = $this->app(['test' => new Container\Record\ValueRecord('Hello World!')]);
+        $app      = $this->app(['test' => new Container\Records\Record\ValueRecord('Hello World!')]);
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', $response->body);
     }
@@ -61,8 +60,8 @@ class AppHandlerIntegrationTest extends TestCase
 
     public function testInstanceWithDefinedInternalContainerId_ThrowsException()
     {
-        $this->expectException(Exception\InvalidIdException::class);
-        $this->app([AppHandler::ROUTER_ID => new Container\Record\ValueRecord('Hello World!')]);
+        $this->expectException(Container\Setup\Exception\OverwriteRuleException::class);
+        $this->app([AppHandler::ROUTER_ID => new Container\Records\Record\ValueRecord('Hello World!')]);
     }
 
     public function testFallbackNotFoundRoute()
@@ -100,18 +99,18 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertFalse(is_callable(ShutdownState::$callback));
     }
 
-    private function app(array $records = [], bool $secure = false)
+    private function app(array $records = [], bool $secure = false): Doubles\MockedAppHandler
     {
-        $setup = $secure ? new Container\TrackingContainerSetup($records) : new Container\ContainerSetup($records);
+        $setup = $secure ? new Container\Setup\Build\ValidatedBuild($records) : new Container\Setup\Build($records);
         return new Doubles\MockedAppHandler($setup);
     }
 
     private function middlewareContextsApp()
     {
         $app = $this->app();
-        $app->config('test')->set('MAIN');
-        $app->middleware('one')->set(new FakeMiddleware('outerContext'));
-        $app->middleware('two')->invoke(function (ContainerInterface $c) {
+        $app->config('test')->value('MAIN');
+        $app->middleware('one')->value(new FakeMiddleware('outerContext'));
+        $app->middleware('two')->callback(function (ContainerInterface $c) {
             return new FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---');
         });
 

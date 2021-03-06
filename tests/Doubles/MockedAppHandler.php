@@ -12,8 +12,6 @@
 namespace Polymorphine\App\Tests\Doubles;
 
 use Polymorphine\App\AppHandler;
-use Polymorphine\Routing\Route;
-use Polymorphine\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
@@ -25,16 +23,12 @@ class MockedAppHandler extends AppHandler
 
     public $notFoundResponse;
 
-    protected function routing(ContainerInterface $c): Router
+    protected function routing(ContainerInterface $c): FakeRequestHandler
     {
-        $route = new Route\Endpoint\CallbackEndpoint(function (ServerRequestInterface $request) use ($c) {
+        return new FakeRequestHandler(function (ServerRequestInterface $request) use ($c) {
             if (!$this->routeFound) { return $this->notFoundResponse(); }
-
-            $body = $request->getUri() . ': ' . $c->get('test');
-            return new FakeResponse($body);
+            return new FakeResponse($request->getUri() . ': ' . $c->get('test'));
         });
-
-        return new Router($route, new FakeUri(), new FakeResponse());
     }
 
     private function notFoundResponse(): ResponseInterface

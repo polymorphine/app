@@ -11,10 +11,9 @@
 
 namespace Polymorphine\App;
 
-use Polymorphine\Routing\Router;
-use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\RecordSetup;
-use Polymorphine\Container\Exception;
+use Polymorphine\Container\Setup;
+use Polymorphine\Container\Setup\Build;
+use Polymorphine\Container\Setup\Exception;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -33,19 +32,18 @@ abstract class AppHandler implements RequestHandlerInterface
     private $processQueue = [];
 
     /**
-     * @param ContainerSetup $setup
+     * @param Build|null $build
      */
-    public function __construct(ContainerSetup $setup = null)
+    public function __construct(Build $build = null)
     {
         $this->registerShutdown(getenv(static::DEV_ENVIRONMENT));
-        $this->setup     = $setup ?? new ContainerSetup();
-        $this->container = $this->setup->container();
-        $this->environmentSetup();
+        $this->setup = $this->environmentSetup($build ?? new Build());
     }
 
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        while ($middlewareId = array_shift($this->processQueue)) {
+        $this->container ??= $this->setup->container();
+        if ($middlewareId = array_shift($this->processQueue)) {
             return $this->process($this->container->get($middlewareId), $request);
         }
 
@@ -54,31 +52,34 @@ abstract class AppHandler implements RequestHandlerInterface
         return $this->container->get(static::ROUTER_ID)->handle($request);
     }
 
-    final public function config(string $id): RecordSetup
+    final public function config(string $id): Setup\Entry
     {
-        return $this->setup->entry($id);
+        return $this->setup->set($id);
     }
 
-    final public function middleware(string $id): RecordSetup
+    final public function middleware(string $id): Setup\Entry
     {
         $this->middleware[]   = $id;
         $this->processQueue[] = $id;
-        return $this->setup->entry($id);
+        return $this->setup->set($id);
     }
 
-    abstract protected function routing(ContainerInterface $c): Router;
+    abstract protected function routing(ContainerInterface $c): RequestHandlerInterface;
 
-    protected function environmentSetup()
+    protected function environmentSetup(Build $build): Setup
     {
-        if ($this->setup->exists(static::ROUTER_ID)) {
+        if ($build->has(static::ROUTER_ID)) {
             $message  = 'Reserved router key `%s` used as container entry (rename entry or %s ROUTER_ID constant)';
             $override = static::ROUTER_ID === self::ROUTER_ID ? 'override' : 'change';
-            throw new Exception\InvalidIdException(sprintf($message, static::ROUTER_ID, $override));
+            throw new Exception\OverwriteRuleException(sprintf($message, static::ROUTER_ID, $override));
         }
 
-        $this->setup->entry(static::ROUTER_ID)->invoke(function () {
+        $setup = new Setup($build);
+        $setup->set(self::ROUTER_ID)->callback(function () {
             return $this->routing($this->container);
         });
+
+        return $setup;
     }
 
     protected function registerShutdown(bool $devEnv)
@@ -94,7 +95,7 @@ abstract class AppHandler implements RequestHandlerInterface
         });
     }
 
-    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request)
+    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request): ResponseInterface
     {
         return $middleware->process($request, $this);
     }
