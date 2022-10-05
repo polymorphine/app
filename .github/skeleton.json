@@ -1,0 +1,8 @@
+{
+    "package.name": "Polymorphine/App",
+    "repository.name": "polymorphine/app",
+    "package.description": "PHP Front Controller for HTTP applications",
+    "namespace.src": "Polymorphine\\App",
+    "author.name": "Shudd3r",
+    "author.email": "q3.shudder@gmail.com"
+}

@@ -1,10 +1,10 @@
-# Polymorphine App
-[![Latest Stable Version](https://poser.pugx.org/polymorphine/app/version)](https://packagist.org/packages/polymorphine/app)
+# Polymorphine/App
+[![Latest stable release](https://poser.pugx.org/polymorphine/app/version)](https://packagist.org/packages/polymorphine/app)
 [![Build status](https://github.com/polymorphine/app/workflows/build/badge.svg)](https://github.com/polymorphine/app/actions)
 [![Coverage status](https://coveralls.io/repos/github/polymorphine/app/badge.svg?branch=develop)](https://coveralls.io/github/polymorphine/app?branch=develop)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/app.svg)](https://packagist.org/packages/polymorphine/app)
 [![LICENSE](https://img.shields.io/github/license/polymorphine/app.svg?color=blue)](LICENSE)
-### PHP Front Controller for HTTP applications (in development)
+### PHP Front Controller for HTTP applications
 
 ##### Goals: Framework should be *easy to learn* when programming is *difficult to master*
 - minimum conventions, simple API
@@ -20,3 +20,11 @@
 - [x] encapsulated configuration
 - [x] PSR-11 container (optional use)
 - [x] composite routing (polymorphic structure)
+
+### Installation with [Composer](https://getcomposer.org/)
+```bash
+composer require polymorphine/app
+```
+
+...
+
