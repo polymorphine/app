@@ -35,7 +35,7 @@ abstract class AppHandler implements RequestHandlerInterface
     /**
      * @param Build|null $build
      */
-    public function __construct(Build $build = null)
+    public function __construct(?Build $build = null)
     {
         $this->registerShutdown((bool) getenv(static::DEV_ENVIRONMENT));
         $this->setup = $this->environmentSetup($build ?? new Build());
@@ -56,7 +56,7 @@ abstract class AppHandler implements RequestHandlerInterface
     /**
      * @param string $id
      *
-     * @return Setup\Entry
+     * @return Entry
      */
     final public function config(string $id): Entry
     {

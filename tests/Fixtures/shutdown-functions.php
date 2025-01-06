@@ -18,7 +18,7 @@ function register_shutdown_function(callable $callback): void
     ShutdownState::$override ? ShutdownState::$callback = $callback : \register_shutdown_function($callback);
 }
 
-function http_response_code(int $code = null): void
+function http_response_code(?int $code = null): void
 {
     ShutdownState::$override ? ShutdownState::$status = $code : \http_response_code($code);
 }
