@@ -91,7 +91,7 @@ class ServerProcessTest extends TestCase
         $this->assertFalse(isset(Fixtures\HeadersState::$headers['x-powered-by']));
     }
 
-    private function server(Doubles\FakeResponse $response = null, int $buffer = 0): ServerProcess
+    private function server(?Doubles\FakeResponse $response = null, int $buffer = 0): ServerProcess
     {
         Fixtures\HeadersState::reset();
         $requestHandler = new Doubles\FakeRequestHandler(function () use ($response) {
@@ -100,11 +100,11 @@ class ServerProcessTest extends TestCase
         return new ServerProcess($requestHandler, $buffer);
     }
 
-    private function emit(ServerProcess $server, Doubles\FakeServerRequest $request = null): string
+    private function emit(ServerProcess $server): string
     {
         ob_start();
         try {
-            $server->execute($request ?: new Doubles\FakeServerRequest());
+            $server->execute(new Doubles\FakeServerRequest());
         } catch (RuntimeException $ex) {
             ob_get_clean();
             throw $ex;

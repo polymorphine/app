@@ -34,7 +34,7 @@ class HeadersState
         self::$headers[strtolower($name)][] = $headerLine;
     }
 
-    public static function remove(string $name = null): void
+    public static function remove(?string $name = null): void
     {
         if ($name === null) {
             self::$headers = [];
