@@ -90,10 +90,9 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertFalse(is_callable(Fixtures\ShutdownState::$callback));
     }
 
-    private function app(array $records = [], bool $secure = false): Doubles\MockedAppHandler
+    private function app(array $records = []): Doubles\MockedAppHandler
     {
-        $setup = $secure ? new Container\Setup\Build\ValidatedBuild($records) : new Container\Setup\Build($records);
-        return new Doubles\MockedAppHandler($setup);
+        return new Doubles\MockedAppHandler(new Container\Setup\Build($records));
     }
 
     private function middlewareContextsApp(): Doubles\MockedAppHandler
