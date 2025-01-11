@@ -21,19 +21,19 @@ use RuntimeException;
 final class ServerProcess
 {
     private Handler $requestHandler;
-    private int     $outputBufferSize;
+    private int     $outputBufferBytes;
 
     /**
      * When large handler's responses are not expected
      * buffer size parameter might be omitted.
      *
      * @param Handler $requestHandler
-     * @param int     $outputBufferSize (bytes)
+     * @param int     $outputBufferBytes
      */
-    public function __construct(Handler $requestHandler, int $outputBufferSize = 0)
+    public function __construct(Handler $requestHandler, int $outputBufferBytes = 0)
     {
-        $this->requestHandler   = $requestHandler;
-        $this->outputBufferSize = $outputBufferSize;
+        $this->requestHandler    = $requestHandler;
+        $this->outputBufferBytes = $outputBufferBytes;
     }
 
     /**
@@ -92,12 +92,12 @@ final class ServerProcess
         if ($body->isSeekable()) { $body->rewind(); }
 
         while (!$body->eof()) {
-            echo $body->read($this->outputBufferSize);
+            echo $body->read($this->outputBufferBytes);
         }
     }
 
     private function chunksRequired(StreamInterface $body): bool
     {
-        return $this->outputBufferSize && $body->isReadable() && $body->getSize() > $this->outputBufferSize;
+        return $this->outputBufferBytes && $body->isReadable() && $body->getSize() > $this->outputBufferBytes;
     }
 }
