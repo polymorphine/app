@@ -74,9 +74,10 @@ class FakeStream implements StreamInterface
         return true;
     }
 
-    public function write($string): void
+    public function write($string): int
     {
         $this->body = $string;
+        return strlen($string);
     }
 
     public function isReadable(): bool
@@ -84,7 +85,7 @@ class FakeStream implements StreamInterface
         return true;
     }
 
-    public function read($length)
+    public function read($length): string
     {
         $send = substr($this->stream, 0, $length);
         $this->stream = substr($this->stream, $length) ?: '';
