@@ -94,9 +94,7 @@ class ServerProcessTest extends TestCase
     private function server(?Doubles\FakeResponse $response = null, int $buffer = 0): ServerProcess
     {
         Fixtures\HeadersState::reset();
-        $requestHandler = new Doubles\FakeRequestHandler(function () use ($response) {
-            return $response ?: new Doubles\FakeResponse();
-        });
+        $requestHandler = new Doubles\FakeRequestHandler(fn () => $response ?: new Doubles\FakeResponse());
         return new ServerProcess($requestHandler, $buffer);
     }
 

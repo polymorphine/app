@@ -100,9 +100,9 @@ class AppHandlerIntegrationTest extends TestCase
         $app = $this->app();
         $app->config('test')->value('MAIN');
         $app->middleware('one')->value(new Doubles\FakeMiddleware('outerContext'));
-        $app->middleware('two')->callback(function ($c) {
-            return new Doubles\FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---');
-        });
+        $app->middleware('two')->callback(
+            fn ($c) => new Doubles\FakeMiddleware($c->get('one')->inContext ? 'innerContext' : '--- error ---')
+        );
 
         return $app;
     }
