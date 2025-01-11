@@ -86,9 +86,7 @@ abstract class AppHandler implements Handler
         }
 
         $setup = new Setup($build);
-        $setup->set(self::ROUTER_ID)->callback(function () {
-            return $this->routing($this->container);
-        });
+        $setup->set(self::ROUTER_ID)->callback(fn () => $this->routing($this->container));
 
         return $setup;
     }
@@ -97,17 +95,20 @@ abstract class AppHandler implements Handler
     {
         if (!ob_get_level()) { ob_start(); }
         if ($devEnv) { return; }
-        register_shutdown_function(function () {
-            $error = error_get_last();
-            if ($error === null) { return; }
-            header_remove();
-            http_response_code(503);
-            ob_end_clean();
-        });
+        register_shutdown_function(fn () => $this->defaultShutdown());
     }
 
     private function process(Middleware $middleware, Request $request): Response
     {
         return $middleware->process($request, $this);
+    }
+
+    private function defaultShutdown(): void
+    {
+        $error = error_get_last();
+        if ($error === null) { return; }
+        header_remove();
+        http_response_code(503);
+        ob_end_clean();
     }
 }

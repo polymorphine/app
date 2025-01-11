@@ -68,16 +68,12 @@ final class ServerProcess
 
     private function setHeaders(array $headers)
     {
-        foreach ($headers as $name => $headerValues) {
-            $this->setHeaderValues($name, $headerValues);
-        }
+        array_walk($headers, fn (array $values, string $header) => $this->setHeaderValues($header, $values));
     }
 
-    private function setHeaderValues($name, array $headerValues)
+    private function setHeaderValues(string $name, array $headerValues)
     {
-        foreach ($headerValues as $value) {
-            header($name . ': ' . $value, false);
-        }
+        array_walk($headerValues, fn (string $value) => header($name . ': ' . $value, false));
     }
 
     private function emitBody(Response $response)
