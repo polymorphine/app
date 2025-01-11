@@ -20,25 +20,25 @@ require_once __DIR__ . '/Fixtures/header-functions.php';
 
 class ServerProcessTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(ServerProcess::class, $this->server());
     }
 
-    public function testResponseBodyIsEmitted()
+    public function test_ResponseBody_IsEmitted()
     {
         $server = $this->server(new Doubles\FakeResponse('Hello World!'));
         $this->assertSame('Hello World!', $this->emit($server));
     }
 
-    public function testResponseBodyExceedingOutputBufferIsEmitted()
+    public function test_ResponseBodyExceedingOutputBuffer_IsEmitted()
     {
         $response = new Doubles\FakeResponse('Hello World');
         $server   = $this->server($response, 3);
         $this->assertSame('Hello World', $this->emit($server));
     }
 
-    public function testSendResponseWhenHeadersAlreadySent_ThrowsException()
+    public function test_SendResponse_WhenHeadersAlreadySent_ThrowsException()
     {
         $server = $this->server();
 
@@ -47,7 +47,7 @@ class ServerProcessTest extends TestCase
         $this->emit($server);
     }
 
-    public function testHeadersAreEmitted()
+    public function test_Headers_AreEmitted()
     {
         $response = new Doubles\FakeResponse();
 
@@ -70,7 +70,7 @@ class ServerProcessTest extends TestCase
         $this->assertSame($expected, Fixtures\HeadersState::$headers);
     }
 
-    public function testHeadersSetOutsideServerInstanceAreIgnored()
+    public function test_HeadersSetOutsideServerInstance_AreIgnored()
     {
         $response = new Doubles\FakeResponse();
         $server   = $this->server($response);

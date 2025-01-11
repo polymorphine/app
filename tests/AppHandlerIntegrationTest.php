@@ -21,25 +21,25 @@ require_once __DIR__ . '/Fixtures/header-functions.php';
 
 class AppHandlerIntegrationTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(AppHandler::class, $this->app());
     }
 
-    public function testConfig_ReturnsSetupEntry()
+    public function test_Config_ReturnsSetupEntry()
     {
         $app = $this->app();
         $this->assertInstanceOf(Container\Setup\Entry::class, $app->config('test'));
     }
 
-    public function testRoutingContainerIntegration()
+    public function test_RoutingContainerIntegration()
     {
         $app      = $this->app(['test' => new Container\Records\Record\ValueRecord('Hello World!')]);
         $response = $app->handle(new Doubles\FakeServerRequest());
         $this->assertSame('//example.com/foo/bar: Hello World!', (string) $response->getBody());
     }
 
-    public function testRepeatedHandleCallsWithMiddlewareProcessing_ReturnsEqualResponse()
+    public function test_RepeatedHandleCalls_WithMiddlewareProcessing_ReturnEqualResponse()
     {
         $app      = $this->middlewareContextsApp();
         $request  = new Doubles\FakeServerRequest('GET', Doubles\FakeUri::fromString('/test'));
@@ -50,13 +50,13 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertEquals($response, $app->handle($request));
     }
 
-    public function testInstanceWithDefinedInternalContainerId_ThrowsException()
+    public function test_InstanceWithDefinedInternalContainerId_ThrowsException()
     {
         $this->expectException(Container\Setup\Exception\OverwriteRuleException::class);
         $this->app([AppHandler::ROUTER_ID => new Container\Records\Record\ValueRecord('Hello World!')]);
     }
 
-    public function testFallbackNotFoundRoute()
+    public function test_FallbackNotFoundRoute()
     {
         $app = $this->app();
         $app->routeFound       = false;
@@ -67,7 +67,7 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertSame($app->notFoundResponse, $response);
     }
 
-    public function testShutdownRegisteredOnProduction()
+    public function test_ShutdownRegistered_OnProduction()
     {
         Fixtures\ShutdownState::reset();
         Fixtures\ShutdownState::$override = true;
@@ -80,7 +80,7 @@ class AppHandlerIntegrationTest extends TestCase
         $this->assertTrue(Fixtures\ShutdownState::$outputBufferCleared);
     }
 
-    public function testShutdownNotRegisteredOnDevelopment()
+    public function test_ShutdownNotRegistered_OnDevelopment()
     {
         Fixtures\ShutdownState::reset();
         Fixtures\ShutdownState::$override = true;
