@@ -11,26 +11,26 @@
 
 namespace Polymorphine\App;
 
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
 
 final class ServerProcess
 {
-    private RequestHandlerInterface $requestHandler;
-    private int                     $outputBufferSize;
+    private Handler $requestHandler;
+    private int     $outputBufferSize;
 
     /**
      * When large handler's responses are not expected
      * buffer size parameter might be omitted.
      *
-     * @param RequestHandlerInterface $requestHandler
-     * @param int                     $outputBufferSize (bytes)
+     * @param Handler $requestHandler
+     * @param int     $outputBufferSize (bytes)
      */
-    public function __construct(RequestHandlerInterface $requestHandler, int $outputBufferSize = 0)
+    public function __construct(Handler $requestHandler, int $outputBufferSize = 0)
     {
         $this->requestHandler   = $requestHandler;
         $this->outputBufferSize = $outputBufferSize;
@@ -39,14 +39,14 @@ final class ServerProcess
     /**
      * Emits response for given request.
      *
-     * @param ServerRequestInterface $request
+     * @param Request $request
      */
-    public function execute(ServerRequestInterface $request): void
+    public function execute(Request $request): void
     {
         $this->emitResponse($this->requestHandler->handle($request));
     }
 
-    private function emitResponse(ResponseInterface $response)
+    private function emitResponse(Response $response)
     {
         if (headers_sent()) {
             throw new RuntimeException('Headers already sent (application output side-effect)');
@@ -59,7 +59,7 @@ final class ServerProcess
         $this->emitBody($response);
     }
 
-    private function setStatus(ResponseInterface $response)
+    private function setStatus(Response $response)
     {
         $status = 'HTTP/' . $response->getProtocolVersion() . ' ' . $response->getStatusCode();
         $reason = $response->getReasonPhrase();
@@ -80,7 +80,7 @@ final class ServerProcess
         }
     }
 
-    private function emitBody(ResponseInterface $response)
+    private function emitBody(Response $response)
     {
         $body = $response->getBody();
 

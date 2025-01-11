@@ -14,20 +14,20 @@ namespace Polymorphine\App;
 use Polymorphine\Container\Setup;
 use Polymorphine\Container\Setup\Build;
 use Polymorphine\Container\Setup\Entry;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Container\ContainerInterface as Container;
+use Psr\Http\Server\MiddlewareInterface as Middleware;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 
-abstract class AppHandler implements RequestHandlerInterface
+abstract class AppHandler implements Handler
 {
     public const ROUTER_ID       = 'app.router';
     public const DEV_ENVIRONMENT = 'APP_DEV';
 
-    private Setup              $setup;
-    private ContainerInterface $container;
+    private Setup     $setup;
+    private Container $container;
 
     private array $middleware   = [];
     private array $processQueue = [];
@@ -41,7 +41,7 @@ abstract class AppHandler implements RequestHandlerInterface
         $this->setup = $this->environmentSetup($build ?? new Build());
     }
 
-    final public function handle(ServerRequestInterface $request): ResponseInterface
+    final public function handle(Request $request): Response
     {
         $this->container ??= $this->setup->container();
         if ($middlewareId = array_shift($this->processQueue)) {
@@ -75,7 +75,7 @@ abstract class AppHandler implements RequestHandlerInterface
         return $this->setup->set($id);
     }
 
-    abstract protected function routing(ContainerInterface $c): RequestHandlerInterface;
+    abstract protected function routing(Container $c): Handler;
 
     protected function environmentSetup(Build $build): Setup
     {
@@ -106,7 +106,7 @@ abstract class AppHandler implements RequestHandlerInterface
         });
     }
 
-    private function process(MiddlewareInterface $middleware, ServerRequestInterface $request): ResponseInterface
+    private function process(Middleware $middleware, Request $request): Response
     {
         return $middleware->process($request, $this);
     }
